@@ -1292,6 +1292,8 @@ void MainWindow::previewScrollBottom() {
   }
 }
 bool MainWindow::checkInterface() {
+  for (auto file : {":/LICENSE", ":/NOTICE", ":/docs/licenses/LGPL-3.0.txt", ":/docs/licenses/GPL-3.0.txt"})
+    if (!QFileInfo::exists(file)) return false;
   if (!offline || pages->count() != 10 || navigation.size() != 10 || gpuTabs->count() != 2 || benchmarkTabs->count() != 4) return false;
   resize(980, 700); pages->setCurrentIndex(2); QApplication::processEvents();
   auto *scroll = qobject_cast<QScrollArea *>(pages->currentWidget());

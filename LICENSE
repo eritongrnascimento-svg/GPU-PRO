@@ -42,6 +42,12 @@ de direitos sobre contribuições consta em CONTRIBUTING.md e deve ser aceita
 pelo contribuinte ao enviar sua proposta.
 
 4. Componentes de terceiros
+As restrições da seção 2 se aplicam exclusivamente ao material original do
+GPU-PRO. Não impedem copiar, modificar ou redistribuir componentes de terceiros
+nos termos de suas respectivas licenças, nem limitam os direitos de modificar
+as partes cobertas por LGPL e executar o aplicativo com bibliotecas modificadas
+compatíveis. Em caso de conflito, prevalecem os direitos concedidos pela licença
+do componente de terceiros sobre esse componente.
 Cada dependência e material de terceiros mantém sua própria licença. Esta
 licença não restringe direitos concedidos por essas licenças, inclusive os
 relativos à substituição de bibliotecas e à engenharia reversa necessária para

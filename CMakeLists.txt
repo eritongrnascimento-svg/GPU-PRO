@@ -32,7 +32,7 @@ target_link_libraries(gpu-core PUBLIC Qt6::Core ${SQLITE_TARGET} ${CMAKE_DL_LIBS
 add_executable(linux-gpu-control src/main.cpp src/window.cpp src/window.h src/service.cpp src/service.h src/overlay.cpp src/benchmark.cpp src/benchmark.h src/codec.cpp src/codec.h src/codec_suite.cpp src/codec_suite.h src/window_tests.cpp src/window_specs.cpp src/window_feedback.cpp src/neon_card.cpp src/neon_card.h src/window_updates.cpp src/update_manager.cpp src/update_manager.h)
 qt_add_resources(linux-gpu-control bench-shaders PREFIX /shaders BASE ${CMAKE_CURRENT_BINARY_DIR}
   FILES ${CMAKE_CURRENT_BINARY_DIR}/city.vert.spv ${CMAKE_CURRENT_BINARY_DIR}/city.frag.spv ${COMPUTE_SPV})
-qt_add_resources(linux-gpu-control branding PREFIX / FILES assets/gpu.png)
+qt_add_resources(linux-gpu-control branding PREFIX / FILES assets/gpu.png LICENSE NOTICE docs/licenses/LGPL-3.0.txt docs/licenses/GPL-3.0.txt docs/licenses/LGPL-2.1.txt)
 add_dependencies(linux-gpu-control shaders)
 target_link_libraries(linux-gpu-control PRIVATE gpu-core Qt6::Widgets Qt6::Network Vulkan::Vulkan PkgConfig::ARCHIVE PkgConfig::GTK3 X11::X11)
 add_executable(gpu-bench-worker src/render_worker.cpp)

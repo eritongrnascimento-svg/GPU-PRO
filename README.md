@@ -122,7 +122,7 @@ Esses comandos usam um banco em memória e não modificam o histórico principal
 - [Validação executada](docs/VERIFICACAO.md)
 - [Roteiro para outras GPUs](docs/VALIDACAO.md)
 
-A instalação do helper foi autorizada e concluída nesta máquina durante a validação da entrega. Isso não instala o helper automaticamente nos computadores dos amigos. O teste completo pelo painel registrou o candidato curto local e o restaurou; não há overclock ativo como resultado dessa validação.
+Na máquina de validação, a instalação do helper foi autorizada e concluída durante os testes. Isso não instala o helper automaticamente nos computadores dos amigos. O teste completo pelo painel registrou o candidato curto local e o restaurou; não há overclock ativo como resultado dessa validação.
 
 Verificação assistida para desenvolvimento (abre autenticação do sistema e executa o teste curto; não é apenas uma prévia):
 
@@ -137,4 +137,4 @@ Essa opção usa o mesmo fluxo do botão, incluindo baseline, espera de ociosida
 
 Código disponível sob [GPU-PRO Source Available License 1.0](LICENSE), com forks no GitHub para auditoria/contribuição e restrições de redistribuição. Não é uma licença open source da OSI. O mantenedor decide quais PRs e releases são oficiais; dependências mantêm suas próprias licenças em [NOTICE](NOTICE).
 
-Consulte [Instalação](docs/INSTALACAO.md), [Publicação](docs/PUBLICACAO.md), [Changelog](CHANGELOG.md) e [Segurança](SECURITY.md).
+Consulte a [revisão de compatibilidade das licenças](docs/LICENCAS.md), [Instalação](docs/INSTALACAO.md), [Publicação](docs/PUBLICACAO.md), [Changelog](CHANGELOG.md) e [Segurança](SECURITY.md).

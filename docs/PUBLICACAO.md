@@ -5,6 +5,7 @@ Conta/repositório: **eritongrnascimento-svg/GPU-PRO**. Titular: **Ériton do Na
 ## Antes da primeira publicação
 
 - Revisar LICENSE e CONTRIBUTING.md: código disponível, forks para contribuições e auditoria permitidos, redistribuição fora das permissões exige autorização. Esta licença não é MIT/GPL/Apache nem aprovada pela OSI. Termos próprios merecem revisão jurídica antes de serem usados como instrumento de proteção.
+- Preservar NOTICE e docs/licenses/ e revisar [LICENCAS.md](LICENCAS.md) ao adicionar dependências ou empacotar bibliotecas.
 - Conferir direitos sobre recursos originais, avisos de terceiros e marca. Não anunciar homologação NVIDIA/AMD/Intel.
 - Não enviar diretórios locais `build/`, bancos, logs, credenciais ou resultados brutos. `bin/` não pertence ao histórico Git; binários pertencem às releases.
 - Ativar revisão de PRs/proteção da branch principal e relato privado de vulnerabilidades, quando essas opções estiverem disponíveis no plano da conta. Somente o mantenedor deve aprovar e publicar releases.

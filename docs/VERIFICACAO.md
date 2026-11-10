@@ -2,6 +2,8 @@
 
 ## Atualização 0.3.0 — 10/11/2026
 
+CI inicial no Ubuntu 24.04: compilação e testes offline aprovados no [GitHub Actions](https://github.com/eritongrnascimento-svg/GPU-PRO/actions/runs/42824679190). Essa execução antecede o acréscimo dos avisos/licenças na interface; a revisão final deve ser verificada novamente.
+
 Ambiente local: CachyOS x86_64, Qt 6.12, KDE Wayland/XWayland, RTX 3060 Ti, driver 620.70.06.
 
 - Compilação concluída e **5/5 testes CTest aprovados**: núcleo/sensores/histórico, rejeição de tensão, rejeição de potência, atualização/backup/restauração e layout/rolagem.

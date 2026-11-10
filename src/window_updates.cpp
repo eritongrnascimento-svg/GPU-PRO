@@ -25,7 +25,30 @@ QWidget *MainWindow::updatesPage() {
       "Atualização pelo painel: pacote portátil x86_64 em diretório gravável pelo usuário. "
       "Instalações por gerenciador de pacotes ou compiladas em build/ devem ser atualizadas pelo mesmo método. "
       "Dados de testes ficam preservados no diretório de configuração. O helper root não é atualizado automaticamente.");
-  details->setWordWrap(true); layout->addWidget(details); layout->addStretch();
+  details->setWordWrap(true); layout->addWidget(details);
+  auto *licenses = new QPushButton("Licenças e componentes de terceiros"); layout->addWidget(licenses);
+  connect(licenses, &QPushButton::clicked, this, [this] {
+    QDialog dialog(this); dialog.setWindowTitle("GPU-PRO · Licenças"); dialog.resize(850, 640);
+    auto *body = new QVBoxLayout(&dialog);
+    auto *notice = new QLabel("GPU-PRO utiliza Qt sob LGPLv3 e outras bibliotecas de terceiros. "
+        "As restrições do código original não limitam os direitos dessas bibliotecas.");
+    notice->setWordWrap(true); body->addWidget(notice);
+    auto *tabs = new QTabWidget; body->addWidget(tabs, 1);
+    for (auto item : QList<QPair<QString, QString>>{{"GPU-PRO", ":/LICENSE"}, {"Avisos", ":/NOTICE"},
+        {"LGPLv3", ":/docs/licenses/LGPL-3.0.txt"}, {"GPLv3", ":/docs/licenses/GPL-3.0.txt"},
+        {"LGPLv2.1", ":/docs/licenses/LGPL-2.1.txt"}}) {
+      auto *text = new QPlainTextEdit; text->setReadOnly(true);
+      QFile file(item.second);
+      text->setPlainText(file.open(QIODevice::ReadOnly) ? QString::fromUtf8(file.readAll()) : "Texto não encontrado no pacote");
+      tabs->addTab(text, item.first);
+    }
+    auto *aboutQt = new QPushButton("Sobre Qt"); body->addWidget(aboutQt);
+    connect(aboutQt, &QPushButton::clicked, &dialog, [&dialog] { QMessageBox::aboutQt(&dialog); });
+    auto *close = new QDialogButtonBox(QDialogButtonBox::Close); body->addWidget(close);
+    connect(close, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+    dialog.exec();
+  });
+  layout->addStretch();
   auto *manager = new UpdateManager(QFileInfo(QCoreApplication::applicationDirPath()).dir().absolutePath(), configRoot() + "/updates", this);
   auto allowed = [this, manager] {
     if (offline || testActive || codecSuite.busy() || clockProcess.state() != QProcess::NotRunning || displayBusy || manager->busy()) {
