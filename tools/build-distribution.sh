@@ -56,7 +56,9 @@ args=(); for binary in "$appdir"/usr/bin/*; do args+=(--executable "$binary"); d
 # Include notices and retrieve exact corresponding source packages for bundled libraries.
 python3 "$project_dir/tools/dependency-sources.py" "$appdir" "$output_dir" "$version" "$stage/tools"
 export ARCH=x86_64 OUTPUT="$output_dir/GPU-PRO-$version-x86_64.AppImage"
-"$stage/tools/appimagetool-x86_64.AppImage" --runtime-file "$stage/tools/runtime-x86_64" "$appdir"
+cp "$project_dir/assets/gpu.png" "$appdir/gpu-pro.png"
+ln -sfn gpu-pro.png "$appdir/.DirIcon"
+"$stage/tools/appimagetool-x86_64.AppImage" --runtime-file "$stage/tools/runtime-x86_64" "$appdir" "$OUTPUT"
 chmod +x "$OUTPUT"
 QT_QPA_PLATFORM=offscreen "$OUTPUT" --appimage-extract-and-run --ui-check
 (cd "$output_dir" && sha256sum "GPU-PRO-$version-linux-x86_64.tar.gz" "GPU-PRO-$version-source.tar.gz" "GPU-PRO-$version-linux-x86_64.run" "GPU-PRO-$version-x86_64.AppImage" "gpu-pro_${version}_ubuntu24.04_amd64.deb" "GPU-PRO-$version-dependency-sources.tar.gz" > SHA256SUMS.txt)
