@@ -7,13 +7,16 @@ QString number(const QJsonObject &o, QString key, QString unit = {}, double scal
 }
 } // namespace
 QWidget *MainWindow::specs() {
-  auto *root = page("Especificações da GPU · ficha técnica");
+  auto *root = specContent = page("Especificações da GPU · ficha técnica");
   auto *l = qobject_cast<QVBoxLayout *>(root->layout());
   auto *refresh = new QPushButton("Atualizar ficha e consultar Vulkan");
   l->addWidget(refresh);
-  specGrid = new QGridLayout;
-  specGrid->setSpacing(14);
-  l->addLayout(specGrid);
+  specHost = new QWidget;
+  specHost->setObjectName("specCards");
+  specGrid = new QGridLayout(specHost);
+  specGrid->setContentsMargins(0, 0, 0, 0);
+  specGrid->setSpacing(8);
+  l->addWidget(specHost);
   l->addStretch();
   auto *info = new QLabel(
       "Clocks e sensores vêm do driver; características não expostas não são adivinhadas. FLOPS e "
@@ -40,14 +43,21 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
       valueLabel->setWordWrap(true);
       valueLabel->setTextFormat(Qt::PlainText);
       valueLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
-      valueLabel->setMinimumHeight(40);
+      valueLabel->setMinimumHeight(0);
+      card->setCompact(true);
       card->body()->addWidget(valueLabel);
+      specOrder << key;
       int row = specValues.size();
       specGrid->addWidget(card, row / 3, row % 3);
       specValues[key] = valueLabel;
     }
     auto *valueLabel = specValues[key];
-    valueLabel->setText(value.isEmpty() ? "Não informado pelo driver" : value);
+    QString full = value.isEmpty() ? "Não informado pelo driver" : value;
+    valueLabel->setToolTip(full);
+    QString visible = full.startsWith("Não informado") ? "N/D"
+        : full.startsWith("Não exposto") || full.startsWith("Não exposta") ? "Não exposto pelo driver"
+        : full.startsWith("Ainda não testado") ? "Não testado" : full;
+    valueLabel->setText(visible);
     valueLabel->parentWidget()->show();
     QString metric = key.contains("Hotspot") ? "hotspot" : key.contains("memória", Qt::CaseInsensitive) && key.contains("Temperatura") ? "memoryTemp"
       : key.contains("Temperatura") ? "temp" : key.contains("Clock memória") ? "memClock"
@@ -63,7 +73,7 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
                               ? number(latest, "vramTotal", "GiB", 1073741824.)
                               : number(s, "memoryBytes", "GiB", 1073741824.));
   add("Barramento de memória", number(s, "memoryBusWidthBits", "bits"));
-  add("Tipo de memória", "Não exposto pela API utilizada; sem inferência pelo nome do modelo");
+  add("Tipo de memória", "Não informado pelo driver; sem inferência pelo nome do modelo");
   add("Clock GPU atual", displayMetric(latest, "clock"));
   add("Clock memória atual", displayMetric(latest, "memClock"));
   add("Clock máximo GPU reportado", number(s, "maxGraphicsMHz", "MHz"));
@@ -117,5 +127,61 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
             ? "Exposta; codecs específicos dependem das capabilities"
             : "Não exposta nesta consulta");
   }
+  queueSpecAdapt();
+}
 
+void MainWindow::queueSpecAdapt() {
+  if (specAdaptPending) return;
+  specAdaptPending = true;
+  QTimer::singleShot(0, this, [this] { specAdaptPending = false; adaptSpecs(); });
+}
+bool MainWindow::eventFilter(QObject *object, QEvent *event) {
+  if (object == specViewport && (event->type() == QEvent::Resize || event->type() == QEvent::Show)) queueSpecAdapt();
+  return QMainWindow::eventFilter(object, event);
+}
+void MainWindow::adaptSpecs() {
+  if (!specViewport || !specHost || !specContent) return;
+  QStringList keys;
+  for (const auto &key : specOrder) if (!specValues[key]->parentWidget()->isHidden()) keys << key;
+  if (keys.isEmpty()) return;
+  auto *layout = specContent->layout();
+  const auto margins = layout->contentsMargins();
+  int width = qMax(180, specViewport->width() - margins.left() - margins.right());
+  int reserved = margins.top() + margins.bottom(), widgets = 0;
+  for (int i = 0; i < layout->count(); ++i) {
+    auto *widget = layout->itemAt(i)->widget();
+    if (!widget || widget->isHidden()) continue;
+    ++widgets;
+    if (widget != specHost) reserved += widget->hasHeightForWidth() ? widget->heightForWidth(width) : widget->sizeHint().height();
+  }
+  reserved += qMax(0, widgets - 1) * layout->spacing();
+  int available = qMax(100, specViewport->height() - reserved - 2);
+  int maxCols = qBound(1, (width + 8) / 178, 8), columns = maxCols, minimum = 70;
+  auto minimumFor = [&](int cols) {
+    int cardWidth = (width - (cols - 1) * 8) / cols, height = 64;
+    for (const auto &key : keys) {
+      auto *card = static_cast<NeonCard *>(specValues[key]->parentWidget());
+      auto *head = qobject_cast<QLabel *>(card->body()->itemAt(0)->widget());
+      auto measure = [&](QLabel *label) { return label->fontMetrics().boundingRect(QRect(0,0,qMax(40,cardWidth-20),2000),Qt::TextWordWrap,label->text()).height(); };
+      height = qMax(height, measure(head) + measure(specValues[key]) + 22);
+    }
+    return height;
+  };
+  bool fits = false;
+  for (int cols = 1; cols <= maxCols; ++cols) {
+    int rows = (keys.size() + cols - 1) / cols, minHeight = minimumFor(cols);
+    if (rows * minHeight + (rows - 1) * 8 <= available) { columns = cols; minimum = minHeight; fits = true; break; }
+  }
+  if (!fits) minimum = minimumFor(columns);
+  int rows = (keys.size() + columns - 1) / columns;
+  int cardHeight = fits ? qMax(minimum, (available - (rows - 1) * 8) / rows) : minimum;
+  if (columns != specColumns || arrangedSpecs != keys) {
+    while (auto *item = specGrid->takeAt(0)) delete item;
+    for (int c = 0; c < 8; ++c) specGrid->setColumnStretch(c, c < columns ? 1 : 0);
+    for (int row = 0; row < specOrder.size(); ++row) { specGrid->setRowMinimumHeight(row, 0); specGrid->setRowStretch(row, 0); }
+    for (int i = 0; i < keys.size(); ++i) specGrid->addWidget(specValues[keys[i]]->parentWidget(), i / columns, i % columns);
+    specColumns = columns; arrangedSpecs = keys;
+  }
+  for (const auto &key : keys) specValues[key]->parentWidget()->setMinimumHeight(cardHeight);
+  specHost->setMinimumHeight(rows * cardHeight + (rows - 1) * 8);
 }

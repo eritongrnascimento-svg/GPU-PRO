@@ -1,4 +1,4 @@
-# GPU-PRO — 0.3.0
+# GPU-PRO — 0.4.0
 
 **Titular: Ériton do Nascimento** · [Instalação](docs/INSTALACAO.md) · [Contribuir](CONTRIBUTING.md) · [Licença source available](LICENSE)
 
@@ -138,3 +138,15 @@ Essa opção usa o mesmo fluxo do botão, incluindo baseline, espera de ociosida
 Código disponível sob [GPU-PRO Source Available License 1.0](LICENSE), com forks no GitHub para auditoria/contribuição e restrições de redistribuição. Não é uma licença open source da OSI. O mantenedor decide quais PRs e releases são oficiais; dependências mantêm suas próprias licenças em [NOTICE](NOTICE).
 
 Consulte a [revisão de compatibilidade das licenças](docs/LICENCAS.md), [Instalação](docs/INSTALACAO.md), [Publicação](docs/PUBLICACAO.md), [Changelog](CHANGELOG.md) e [Segurança](SECURITY.md).
+
+
+## Novidades da versão 0.4
+
+A pasta do projeto passa a se chamar **GPU-PRO**, preservando históricos e configurações no diretório anterior de dados do usuário. Nenhum teste ou perfil antigo é apagado.
+
+- Especificações ajustam colunas e alturas dos cards à janela; janelas pequenas mantêm rolagem para preservar a legibilidade.
+- Gargalo aceita 720p, 1080p, 1440p, 4K e 8K como resolução alvo, com referência 720p e resumo. Os percentuais estimam o limite CPU/GPU na carga sintética com sobreposição ideal; não são perda real medida de FPS em jogos.
+- Atualizações inclui a opção de fechar para a bandeja e gerenciamento de drivers por APT, pacman e DNF, com consulta de versões, simulação e confirmação no gerenciador nativo. Não adiciona repositórios externos ou instala automaticamente. Em Arch/CachyOS usa atualização completa do sistema e versão explícita.
+- Novos formatos: `.deb` para Ubuntu 24.04 amd64, AppImage x86_64 e executável portátil `.run`. O `.run` inclui os workers, não exige root e utiliza bibliotecas do sistema. AppImage tem base Ubuntu 24.04/glibc 2.39 ou posterior; não é universal para distribuições antigas. Consulte as fontes correspondentes das dependências incluídas no AppImage, fornecidas junto da release.
+
+AppImage e .deb consultam versões pelo painel e abrem o download oficial correspondente; a substituição desses formatos usa o instalador/arquivo original, após fechar o aplicativo. O atualizador com backup automático da pasta permanece disponível na edição portátil `.tar.gz`/`.run`.

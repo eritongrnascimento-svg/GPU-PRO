@@ -13,7 +13,7 @@ mkdir -p "$stage/GPU-PRO/bin"
 for file in README.md LICENSE NOTICE CONTRIBUTING.md CHANGELOG.md SECURITY.md CMakeLists.txt .gitignore release.json run.sh build.sh; do
  cp "$project_dir/$file" "$stage/GPU-PRO/"
 done
-for directory in src shaders assets docs examples tools .github; do
+for directory in src shaders assets docs examples tools packaging .github; do
  cp -R "$project_dir/$directory" "$stage/GPU-PRO/"
 done
 # Source package never includes platform-specific binaries or local configuration.

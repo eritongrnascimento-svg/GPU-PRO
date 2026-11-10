@@ -32,7 +32,9 @@ o GPU-PRO utiliza esses módulos através de bibliotecas compartilhadas do siste
 sob LGPLv3. A LGPL cobre essas bibliotecas e seu uso; não a licença do código
 original do GPU-PRO. Textos integrais: docs/licenses/LGPL-3.0.txt e GPL-3.0.txt.
 GTK/GLib/Pango/Cairo e demais bibliotecas mantêm seus avisos de autoria e termos.
-O pacote não contém cópias dessas bibliotecas compartilhadas. A opção Licenças
+Os formatos .tar.gz, .run e .deb usam bibliotecas compartilhadas do sistema.
+O AppImage inclui bibliotecas; seus avisos ficam em usr/share/doc/gpu-pro/thirdparty
+e as fontes correspondentes estão no arquivo dependency-sources da mesma release. A opção Licenças
 na interface apresenta os avisos e os textos GNU aplicáveis.
 
 Consulte docs/LICENCAS.md para o escopo da revisão, substituição das bibliotecas,

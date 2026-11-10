@@ -3,6 +3,7 @@
 QWidget *MainWindow::updatesPage() {
   auto *root = page("GPU-PRO · Atualizações e backup");
   auto *layout = qobject_cast<QVBoxLayout *>(root->layout());
+  bool managed = !qEnvironmentVariable("APPIMAGE").isEmpty() || QCoreApplication::applicationDirPath().startsWith("/usr/lib/gpu-pro/");
   auto *info = new QLabel("Versão instalada: " + QCoreApplication::applicationVersion() +
       "\nCanal estável: eritongrnascimento-svg/GPU-PRO · GitHub Releases\n"
       "A consulta só acontece ao clicar. Nada é enviado sobre sua GPU ou seus testes.");
@@ -12,7 +13,9 @@ QWidget *MainWindow::updatesPage() {
   auto *row = new QHBoxLayout;
   auto *check = new QPushButton("Verificar atualizações"); row->addWidget(check);
   auto *install = new QPushButton("Baixar, salvar backup e atualizar"); row->addWidget(install);
-  install->setEnabled(false); layout->addLayout(row);
+  install->setEnabled(false);
+  if (managed) install->setText("Baixar atualização no formato instalado");
+  layout->addLayout(row);
   auto *backup = new QPushButton("Salvar backup da versão atual"); layout->addWidget(backup);
   auto *restore = new QPushButton("Restaurar último backup"); layout->addWidget(restore);
   auto *releases = new QPushButton("Abrir notas e releases oficiais"); layout->addWidget(releases);
@@ -25,7 +28,9 @@ QWidget *MainWindow::updatesPage() {
       "Atualização pelo painel: pacote portátil x86_64 em diretório gravável pelo usuário. "
       "Instalações por gerenciador de pacotes ou compiladas em build/ devem ser atualizadas pelo mesmo método. "
       "Dados de testes ficam preservados no diretório de configuração. O helper root não é atualizado automaticamente.");
+  if (managed) details->setText("Este formato é atualizado pela release oficial ou pelo gerenciador de pacotes. Use o .deb para instalações Debian/Ubuntu e substitua o AppImage após fechar o aplicativo. A atualização com backup automático continua disponível na edição portátil .tar.gz/.run. Seus testes ficam preservados na configuração do usuário.");
   details->setWordWrap(true); layout->addWidget(details);
+  layout->addWidget(driversControls());
   auto *licenses = new QPushButton("Licenças e componentes de terceiros"); layout->addWidget(licenses);
   connect(licenses, &QPushButton::clicked, this, [this] {
     QDialog dialog(this); dialog.setWindowTitle("GPU-PRO · Licenças"); dialog.resize(850, 640);
@@ -48,10 +53,20 @@ QWidget *MainWindow::updatesPage() {
     connect(close, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
     dialog.exec();
   });
+  auto *behavior = new QGroupBox("Comportamento do aplicativo");
+  auto *behaviorLayout = new QVBoxLayout(behavior);
+  keepInTray = new QCheckBox("Manter aberto na bandeja ao fechar o painel");
+  keepInTray->setChecked(!offline && QSettings().value("ui/keepInTray",false).toBool());
+  keepInTray->setEnabled(!offline && QSystemTrayIcon::isSystemTrayAvailable());
+  behaviorLayout->addWidget(keepInTray);
+  auto *trayNote = new QLabel(QSystemTrayIcon::isSystemTrayAvailable() ? "Clique no ícone da bandeja para reabrir; use Sair para encerrar." : "O ambiente atual não oferece bandeja do sistema; fechar continuará encerrando o painel.");
+  trayNote->setWordWrap(true); behaviorLayout->addWidget(trayNote);
+  connect(keepInTray,&QCheckBox::toggled,this,[this](bool checked){if(!offline)QSettings().setValue("ui/keepInTray",checked);});
+  layout->addWidget(behavior);
   layout->addStretch();
   auto *manager = new UpdateManager(QFileInfo(QCoreApplication::applicationDirPath()).dir().absolutePath(), configRoot() + "/updates", this);
   auto allowed = [this, manager] {
-    if (offline || testActive || codecSuite.busy() || clockProcess.state() != QProcess::NotRunning || displayBusy || manager->busy()) {
+    if (offline || driverBusy || testActive || codecSuite.busy() || clockProcess.state() != QProcess::NotRunning || displayBusy || manager->busy()) {
       notify("Aguarde as operações em andamento antes de atualizar"); return false;
     }
     if (QFileInfo(QCoreApplication::applicationDirPath()).fileName() != "bin") {
@@ -65,7 +80,8 @@ QWidget *MainWindow::updatesPage() {
   });
   connect(manager, &UpdateManager::message, this, [state](QString message) { state->setText(message); });
   connect(manager, &UpdateManager::checked, this, [install, this](QString, bool available) { install->setEnabled(available && !offline); });
-  connect(install, &QPushButton::clicked, this, [this, manager, allowed, install] {
+  connect(install, &QPushButton::clicked, this, [this, manager, allowed, install, managed] {
+    if (managed) { QDesktopServices::openUrl(QUrl("https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest")); return; }
     if (!allowed()) return;
     if (QMessageBox::question(this, "Atualizar GPU-PRO", "Baixar a release oficial, salvar backup da instalação atual e substituir os arquivos do aplicativo?") != QMessageBox::Yes) return;
     install->setEnabled(false); manager->downloadAndInstall();
@@ -88,6 +104,7 @@ QWidget *MainWindow::updatesPage() {
     if (QProcess::startDetached(QCoreApplication::applicationFilePath(), {})) close();
     else notify("Não foi possível reiniciar; feche e abra pelo run.sh");
   });
+  if (managed) { backup->setEnabled(false); restore->setEnabled(false); }
   if (offline) for (auto *button : {check, install, backup, restore, releases}) button->setEnabled(false);
   return root;
 }

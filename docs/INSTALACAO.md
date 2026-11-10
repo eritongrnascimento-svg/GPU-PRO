@@ -92,3 +92,12 @@ QT_QPA_PLATFORM=offscreen build/linux-gpu-control --ui-check
 ```
 
 Consulte [VALIDACAO.md](VALIDACAO.md) para testar GPUs de amigos e [VERIFICACAO.md](VERIFICACAO.md) para os testes realmente executados nesta entrega.
+
+
+## Formatos da versão 0.4
+
+- Ubuntu 24.04 amd64: `sudo apt install ./gpu-pro_0.4.0_ubuntu24.04_amd64.deb`; iniciar com `gpu-pro` ou pelo menu. O helper instalado em `/usr/libexec/gpu-pro/` continua exigindo autenticação para cada ajuste.
+- AppImage x86_64: `chmod +x GPU-PRO-0.4.0-x86_64.AppImage` e executar o arquivo. Precisa de glibc 2.39 ou posterior e driver instalado; se FUSE não estiver disponível, use `--appimage-extract-and-run`. Bibliotecas/avisos podem ser inspecionados com `--appimage-extract`.
+- Executável portátil: `chmod +x GPU-PRO-0.4.0-linux-x86_64.run` e executar. Extrai a pasta GPU-PRO com todos os workers e abre o painel; não exige administrador. Usa bibliotecas do sistema, como o tar.gz.
+
+Em Atualizações, consulte drivers, escolha pacote/versão e simule. A instalação abre o gerenciador nativo em terminal, solicita autenticação do sistema e exige confirmação da transação. No Arch/CachyOS também atualiza os demais pacotes para evitar atualização parcial. O GPU-PRO não garante rollback de drivers; reinicie quando o gerenciador indicar.

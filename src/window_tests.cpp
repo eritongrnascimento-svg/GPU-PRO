@@ -14,16 +14,8 @@ QPushButton *action(QString s, QBoxLayout *layout) {
   layout->addWidget(b);
   return b;
 }
-QString helperPath() { return "/usr/local/libexec/linux-gpu-control/gpu-clock-helper"; }
-bool helperReady() {
-  for (QString path = helperPath(); path != "/"; path = QFileInfo(path).absolutePath()) {
-    struct stat st{};
-    if (lstat(QFile::encodeName(path).constData(), &st) || st.st_uid ||
-        st.st_mode & (S_IWGRP | S_IWOTH) || S_ISLNK(st.st_mode))
-      return false;
-  }
-  return QFileInfo(helperPath()).isExecutable();
-}
+QString helperPath() { return installedClockHelper(); }
+bool helperReady() { return rootHelperTrusted(helperPath()); }
 double meanScene(const QJsonObject &r, QString key) {
   auto a = r["sceneResults"].toArray();
   if (a.isEmpty())
@@ -199,17 +191,23 @@ QWidget *MainWindow::bottleneckPage() {
   auto p = makeTestPanel("Teste de gargalo · estimativa da carga sintética", "bottleneck");
   auto *l = qobject_cast<QVBoxLayout *>(p.root->layout());
   auto *controls = new QHBoxLayout;
-  p.start = action("Comparar 720p × 1440p", controls);
+  bottleneckResolution = new QComboBox;
+  for (auto size : QList<QSize>{{1280,720},{1920,1080},{2560,1440},{3840,2160},{7680,4320}})
+    bottleneckResolution->addItem(QString("%1 × %2").arg(size.width()).arg(size.height()),size);
+  bottleneckResolution->setCurrentIndex(2);
+  controls->addWidget(text("Resolução alvo")); controls->addWidget(bottleneckResolution);
+  p.start = action("Aferir gargalo", controls);
   p.cancel = action("Cancelar", controls);
   p.cancel->setEnabled(false);
   l->insertLayout(1, controls);
   l->addWidget(text("Vulkan: mesma cena e 150 mil transformações CPU por quadro, em duas "
-                    "resoluções. Compara tempo GPU, trabalho CPU medido e sensibilidade à "
-                    "resolução. Indica predominância nesta carga; não calcula um percentual "
-                    "universal nem prevê todos os jogos ou desempenho multicore."));
+                    "resoluções: referência 720p e alvo escolhido. Estima o limite de CPU em relação à capacidade "
+                    "da GPU e o limite de GPU em relação à CPU. Modelo: tempo de quadro = máximo(CPU, GPU), "
+                    "com sobreposição ideal. Os percentuais não são perda real medida em jogos; a carga CPU usa uma thread."));
   connect(p.start, &QPushButton::clicked, this, [this] {
     if (testActive || offline || selected >= gpus.size())
       return;
+    bottleneckTarget = bottleneckResolution->currentData().toSize();
     bottleneckStage = 0;
     bottleneckStages = {};
     startGraphics("bottleneck", "Vulkan", 1280, 720, 12, 150000);
@@ -223,6 +221,7 @@ QWidget *MainWindow::bottleneckPage() {
 void MainWindow::setTesting(bool active) {
   testActive = active;
   gpuSelect->setEnabled(!active);
+  if (bottleneckResolution) bottleneckResolution->setEnabled(!active);
   if (graphicsApi) {
     graphicsApi->setEnabled(!active);
     graphicsResolution->setEnabled(!active);
@@ -369,26 +368,10 @@ void MainWindow::handleGraphics(QJsonObject r) {
   if (activeKind == "bottleneck" && r["valid"].toBool()) {
     bottleneckStages.append(r);
     if (bottleneckStage++ == 0) {
-      startGraphics("bottleneck", "Vulkan", 2560, 1440, 12, 150000);
+      startGraphics("bottleneck", "Vulkan", bottleneckTarget.width(), bottleneckTarget.height(), 12, 150000);
       return;
     }
-    auto low = bottleneckStages[0].toObject(), high = bottleneckStages[1].toObject();
-    double gpu = meanScene(high, "gpuMeanMs"), cpu = meanScene(high, "cpuWorkMs"),
-           lowGpu = meanScene(low, "gpuMeanMs"), lowCpu = meanScene(low, "cpuWorkMs");
-    QString classification = gpu > cpu * 1.5   ? "GPU predominante"
-                             : cpu > gpu * 1.5 ? "CPU sintética predominante"
-                                               : "Carga mista";
-    r = {{"kind", "bottleneck"},
-         {"valid", true},
-         {"method", "resolution-cpu-transform-v2"},
-         {"classification", classification},
-         {"confidence", "limited-synthetic"},
-         {"highGpuMs", gpu},
-         {"lowGpuMs", lowGpu},
-         {"highCpuMs", cpu},
-         {"lowCpuMs", lowCpu},
-         {"resolutionGain", lowGpu > 0 ? gpu / lowGpu : 0},
-         {"comparison", bottleneckStages}};
+    r = estimateBottleneck(bottleneckStages[0].toObject(), bottleneckStages[1].toObject());
   }
   finishTest(r);
 }
@@ -461,13 +444,17 @@ void MainWindow::presentRecord(QString kind, const QJsonObject &r) {
   panel.progress->setValue(r["valid"].toBool() ? 100 : 0);
   if (!r["valid"].toBool())
     lines << "Sem pontuação válida · " + r["error"].toString("teste incompleto");
-  else if (kind == "bottleneck")
-    lines << r["classification"].toString()
-          << QString("GPU 720p / 1440p: %1 / %2 ms · CPU sintética: %3 ms · relação GPU: %4×")
-                 .arg(r["lowGpuMs"].toDouble(), 0, 'f', 2)
-                 .arg(r["highGpuMs"].toDouble(), 0, 'f', 2)
-                 .arg(r["highCpuMs"].toDouble(), 0, 'f', 2)
-                 .arg(r["resolutionGain"].toDouble(), 0, 'f', 2);
+  else if (kind == "bottleneck") {
+    if (r.contains("cpuLossPct")) {
+      lines << r["summary"].toString()
+        << QString("CPU: %1 ms · GPU: %2 ms · limite CPU: %3% da capacidade GPU; limite GPU: %4% da capacidade CPU.")
+          .arg(r["highCpuMs"].toDouble(),0,'f',2).arg(r["highGpuMs"].toDouble(),0,'f',2)
+          .arg(r["cpuLossPct"].toDouble(),0,'f',1).arg(r["gpuLossPct"].toDouble(),0,'f',1)
+        << "Estimativa com sobreposição ideal; não representa perda real de FPS em um jogo.";
+    } else lines << r["classification"].toString()
+        << QString("Registro anterior: GPU 720p / 1440p %1 / %2 ms · CPU %3 ms")
+          .arg(r["lowGpuMs"].toDouble(),0,'f',2).arg(r["highGpuMs"].toDouble(),0,'f',2).arg(r["highCpuMs"].toDouble(),0,'f',2);
+  }
   else if (kind != "compute")
     lines << QString("%1 pontos · MPix/s geométrico%2")
                  .arg(r["score"].toDouble(), 0, 'f', 1)
@@ -619,12 +606,9 @@ QImage MainWindow::renderReport(QString kind, const QJsonObject &r) {
     y += 36;
   }
   if (kind == "bottleneck") {
-    p.drawText(45, y,
-               QString("GPU 720p / 1440p: %1 / %2 ms; CPU sintética: %3 ms")
-                   .arg(r["lowGpuMs"].toDouble())
-                   .arg(r["highGpuMs"].toDouble())
-                   .arg(r["highCpuMs"].toDouble()));
-    y += 45;
+    QString summary = r.contains("cpuLossPct") ? r["summary"].toString() + "\nEstimativa sintética, não perda real em jogos."
+      : QString("Registro anterior · GPU 720p / 1440p: %1 / %2 ms; CPU: %3 ms").arg(r["lowGpuMs"].toDouble()).arg(r["highGpuMs"].toDouble()).arg(r["highCpuMs"].toDouble());
+    p.drawText(QRect(45,y,1510,110),Qt::TextWordWrap,summary); y += 120;
   }
   if (kind == "video") {
     auto codecs = r["codecResults"].toArray();

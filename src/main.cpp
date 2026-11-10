@@ -7,7 +7,7 @@ int main(int argc, char **argv) {
   QApplication app(argc, argv);
   QCoreApplication::setOrganizationName("LinuxGPUControl");
   QCoreApplication::setApplicationName("LinuxGPUControl");
-  QCoreApplication::setApplicationVersion("0.3.0");
+  QCoreApplication::setApplicationVersion("0.4.0");
   QCommandLineParser parser;
   parser.setApplicationDescription(
       "GPU-PRO — painel MultiGPU Linux");

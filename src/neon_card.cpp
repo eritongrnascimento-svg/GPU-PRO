@@ -5,7 +5,7 @@ NeonCard::NeonCard(QString title, QWidget *parent) : QFrame(parent) {
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   content = new QVBoxLayout(this);
   content->setContentsMargins(17, 14, 17, 15);
-  auto *heading = new QLabel(title);
+  heading = new QLabel(title);
   heading->setWordWrap(true);
   heading->setStyleSheet("color:#aeb4c4;font-size:12px;background:transparent;");
   content->addWidget(heading);
@@ -51,4 +51,12 @@ void NeonCard::paintEvent(QPaintEvent *) {
   }
   p.setOpacity(1); p.setPen(QPen(QBrush(glow), 1.8));
   p.drawRoundedRect(box, 11, 11);
+}
+
+void NeonCard::setCompact(bool compact) {
+  content->setContentsMargins(compact ? 10 : 17, compact ? 8 : 14,
+                              compact ? 10 : 17, compact ? 8 : 15);
+  content->setSpacing(compact ? 4 : 6);
+  heading->setStyleSheet(QString("color:#aeb4c4;font-size:%1px;background:transparent;").arg(compact ? 11 : 12));
+  setMinimumHeight(compact ? 64 : 112);
 }

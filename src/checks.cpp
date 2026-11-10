@@ -1,4 +1,5 @@
 #include "gpu.h"
+#include "driver_packages.h"
 #include "repository.h"
 #include <cmath>
 #include <cstdio>
@@ -13,6 +14,21 @@ int main(int argc, char **argv) {
   };
   check(displayMetric({}, "temp") == "N/D", "missing sensor must not be zero");
   check(displayMetric({{"temp", 0}}, "temp") == "0 °C", "zero is a valid reading");
+  auto stage = [](double cpu, double gpu) {return QJsonObject{{"valid",true},{"width",1920},{"height",1080},{"sceneResults",QJsonArray{QJsonObject{{"cpuWorkMs",cpu},{"gpuMeanMs",gpu}}}}};};
+  auto cpuBound = estimateBottleneck(stage(10,5),stage(10,5));
+  check(cpuBound["cpuLossPct"].toDouble()==50 && cpuBound["gpuLossPct"].toDouble()==0,"CPU estimate references GPU potential");
+  auto gpuBound = estimateBottleneck(stage(5,10),stage(5,10));
+  check(gpuBound["gpuLossPct"].toDouble()==50 && gpuBound["cpuLossPct"].toDouble()==0,"GPU estimate references CPU potential");
+  check(estimateBottleneck(stage(5,5),stage(5,5))["cpuLossPct"].toDouble()==0,"balanced synthetic stage");
+  check(!estimateBottleneck(stage(0,5),stage(5,5))["valid"].toBool(),"missing CPU time must not produce percentage");
+  auto arch = parseDriverPackages("pacman","extra nvidia-utils 615.78.08-2 [installed: 620.70.06-2]\ncustom nvidia-utils 620.70.06-2 [installed]\nextra bash 5.2\n", "NVIDIA");
+  check(arch.size()==2 && arch[0].toObject()["installed"]=="620.70.06-2","read available versions without inventing repository history");
+  auto command = driverTransaction(arch[0].toObject(),false);
+  check(command.contains("-Syu") && command.last()=="extra/nvidia-utils=615.78.08-2" && !command.contains("--noconfirm"),"Arch driver update pins version and preserves full upgrade/native confirmation");
+  check(driverTransaction({{"manager","apt"},{"name","bash"},{"version","5.2"}},false).isEmpty(),"driver actions cannot target arbitrary package");
+  check(driverTransaction({{"manager","apt"},{"name","nvidia-driver-580"},{"version","580;touch /tmp/file"}},false).isEmpty(),"reject malformed package version");
+  auto apt=parseDriverPackages("apt","nvidia-driver-580 | 580.1-0ubuntu1 | http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages\n","NVIDIA");
+  check(apt.size()==1 && driverTransaction(apt[0].toObject(),true).contains("--simulate"),"APT versions and simulation");
   auto c = OverlayConfig::fromJson({{"font", 999},
                                     {"width", 0},
                                     {"opacity", -1},

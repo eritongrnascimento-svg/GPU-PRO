@@ -41,6 +41,10 @@ class MainWindow : public QMainWindow {
   QLabel *status;
   QMap<QString, QLabel *> values;
   QGridLayout *specGrid = nullptr;
+  QWidget *specHost = nullptr, *specContent = nullptr, *specViewport = nullptr;
+  QStringList specOrder, arrangedSpecs;
+  int specColumns = 0;
+  bool specAdaptPending = false;
   QMap<QString, QLabel *> specValues;
   QJsonObject cachedVulkan;
   QTabWidget *gpuTabs = nullptr, *benchmarkTabs = nullptr;
@@ -70,6 +74,8 @@ class MainWindow : public QMainWindow {
   };
   QMap<QString, TestPanel> panels;
   QComboBox *graphicsApi, *graphicsResolution, *graphicsDuration;
+  QComboBox *bottleneckResolution = nullptr;
+  QSize bottleneckTarget{2560, 1440};
   QProcess graphicsProcess;
   QByteArray graphicsOutput;
   std::unique_ptr<QTemporaryDir> graphicsFiles;
@@ -98,6 +104,9 @@ class MainWindow : public QMainWindow {
   QJsonObject lastResult;
   QString savedProfile;
   QProcess clockProcess;
+  QProcess driverTerminal;
+  bool driverBusy = false;
+  QWidget *driversControls();
   QSlider *coreOffset, *memOffset;
   QLineEdit *coreEntry, *memEntry;
   QPushButton *applyCore, *applyMem;
@@ -108,6 +117,13 @@ class MainWindow : public QMainWindow {
   QLabel *displayInfo;
   QJsonArray displayOutputs;
   bool displayBusy = false;
+  QSystemTrayIcon *tray = nullptr;
+  QCheckBox *keepInTray = nullptr;
+  bool explicitQuit = false;
+  void setupTray();
+  void showFromTray();
+  void adaptSpecs();
+  void queueSpecAdapt();
   QWidget *page(QString title);
   QWidget *dashboard();
   QWidget *scrollPage(QWidget *content);
@@ -188,4 +204,5 @@ signals:
 
 protected:
   void closeEvent(QCloseEvent *) override;
+  bool eventFilter(QObject *, QEvent *) override;
 };

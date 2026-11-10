@@ -1,4 +1,5 @@
 #include "window.h"
+#include "driver_packages.h"
 #include <cmath>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -36,16 +37,8 @@ bool writeFile(QString p, QByteArray b, QString &error) {
   }
   return true;
 }
-bool trustedHelper() {
-  QString p = "/usr/local/libexec/linux-gpu-control/gpu-clock-helper";
-  for (QString path = p; path != "/"; path = QFileInfo(path).absolutePath()) {
-    struct stat s{};
-    if (lstat(QFile::encodeName(path).constData(), &s) || s.st_uid != 0 ||
-        (s.st_mode & (S_IWGRP | S_IWOTH)) || S_ISLNK(s.st_mode))
-      return false;
-  }
-  return QFileInfo(p).isExecutable();
-}
+bool trustedHelper() { return rootHelperTrusted(installedClockHelper()); }
+
 } // namespace
 void HistoryPlot::paintEvent(QPaintEvent *) {
   QPainter p(this);
@@ -95,7 +88,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   resize(1240, 900);
   setWindowIcon(QIcon(":/assets/gpu.png"));
   setMinimumSize(980, 700);
-  setWindowTitle("GPU-PRO · 0.3.0");
+  setWindowTitle("GPU-PRO · 0.4.0");
   if (!offline)
     overlayConfig = OverlayConfig::fromJson(
         QJsonDocument::fromJson(readText(configRoot() + "/overlay.json").toUtf8()).object());
@@ -148,7 +141,10 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   logs->document()->setMaximumBlockCount(2000);
   gpuTabs = new QTabWidget;
   gpuTabs->addTab(scrollPage(dashboard()), "Monitor de recursos");
-  gpuTabs->addTab(scrollPage(specs()), "Especificações");
+  auto *specScroll = qobject_cast<QScrollArea *>(scrollPage(specs()));
+  specViewport = specScroll->viewport();
+  specViewport->installEventFilter(this);
+  gpuTabs->addTab(specScroll, "Especificações");
   pages->addWidget(gpuTabs);
   pages->addWidget(scrollPage(profiles()));
   pages->addWidget(scrollPage(monitor()));
@@ -188,7 +184,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
     connect(b, &QPushButton::clicked, this, [this, i] { pages->setCurrentIndex(i); });
   }
   sb->addStretch();
-  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.3 · "
+  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.4 · "
                       "validação comunitária"));
   main->addWidget(sidebar);
   main->addLayout(right, 1);
@@ -397,6 +393,8 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
       if (card->isVisible()) card->update();
   });
   neonTimer->start();
+  clockProcess.setProcessEnvironment(nativeEnvironment());
+  setupTray();
   applyTheme();
   navigation[0]->setProperty("active", true);
 }
@@ -418,6 +416,7 @@ MainWindow::~MainWindow() {
   graphicsProcess.waitForFinished(1500);
 }
 void MainWindow::closeEvent(QCloseEvent *e) {
+  if (driverBusy) { notify("Aguarde o gerenciador de pacotes terminar antes de encerrar"); e->ignore(); return; }
   if (clockProcess.state() != QProcess::NotRunning) {
     notify("Aguarde a operação de energia terminar");
     e->ignore();
@@ -427,6 +426,9 @@ void MainWindow::closeEvent(QCloseEvent *e) {
     notify("Aguarde a operação de tela terminar");
     e->ignore();
     return;
+  }
+  if (!explicitQuit && keepInTray && keepInTray->isChecked() && tray && tray->isVisible() && QSystemTrayIcon::isSystemTrayAvailable()) {
+    hide(); e->ignore(); return;
   }
   closing = true;
   if (graphicsProcess.state() != QProcess::NotRunning)
@@ -808,6 +810,7 @@ void MainWindow::saveProfile() {
   notify("Perfil gravado", dir);
 }
 void MainWindow::launchProfile() {
+  if (driverBusy) { notify("Aguarde a atualização de drivers terminar"); return; }
   if (offline)
     return;
   saveProfile();
@@ -845,6 +848,7 @@ void MainWindow::launchProfile() {
     args << arg.toString();
   args.prepend(exe);
   QProcess game;
+  game.setProcessEnvironment(nativeEnvironment());
   game.setProgram(savedProfile + "/launch.sh");
   game.setArguments(args);
   game.setWorkingDirectory(info.absolutePath());
@@ -1306,6 +1310,10 @@ bool MainWindow::checkInterface() {
     pages->setCurrentIndex(5); benchmarkTabs->setCurrentIndex(i); QApplication::processEvents();
     if (!qobject_cast<QScrollArea *>(benchmarkTabs->currentWidget())) return false;
   }
+  resize(1240,900); pages->setCurrentIndex(0); gpuTabs->setCurrentIndex(1);
+  QApplication::processEvents(); adaptSpecs(); QApplication::processEvents();
+  auto *specScroll = qobject_cast<QScrollArea *>(gpuTabs->currentWidget());
+  if (!specScroll || specScroll->verticalScrollBar()->maximum()>1) return false;
   return true;
 }
 
@@ -1320,4 +1328,22 @@ void MainWindow::benchmarkCheck(QString path) {
     ready->stop(); ready->deleteLater(); pages->setCurrentIndex(5); benchmarkTabs->setCurrentIndex(0);
     startGraphics("graphics", "Vulkan", 1280, 720, 6);
   }); ready->start();
+}
+
+void MainWindow::showFromTray() { showNormal(); raise(); activateWindow(); }
+void MainWindow::setupTray() {
+  tray = new QSystemTrayIcon(QIcon(":/assets/gpu.png"), this);
+  tray->setToolTip("GPU-PRO · Monitoramento MultiGPU");
+  auto *menu = new QMenu(this);
+  auto *open = menu->addAction("Mostrar GPU-PRO");
+  connect(open, &QAction::triggered, this, &MainWindow::showFromTray);
+  auto *hideAction = menu->addAction("Ocultar na bandeja");
+  connect(hideAction, &QAction::triggered, this, [this] { if (QSystemTrayIcon::isSystemTrayAvailable()) hide(); });
+  menu->addSeparator(); auto *quit = menu->addAction("Sair do GPU-PRO");
+  connect(quit, &QAction::triggered, this, [this] { explicitQuit = true; close(); explicitQuit = false; });
+  tray->setContextMenu(menu);
+  connect(tray, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
+    if (reason == QSystemTrayIcon::Trigger || reason == QSystemTrayIcon::DoubleClick) showFromTray();
+  });
+  if (!offline && QSystemTrayIcon::isSystemTrayAvailable()) tray->show();
 }

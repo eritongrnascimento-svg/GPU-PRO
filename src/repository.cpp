@@ -51,6 +51,7 @@ const QSet<QString> fields = {"id",
                               "cpuScores",
                               "comparison",
                               "classification",
+                              "summary", "lossModel", "cpuLossPct", "gpuLossPct", "gpuPotentialFps", "cpuPotentialFps", "modelFps",
                               "resolutionGain",
                               "highGpuMs",
                               "lowGpuMs",
@@ -188,6 +189,10 @@ bool validFeedback(const QJsonObject &o, QString &error) {
         (!r["height"].isDouble() || r["height"].toInt() < 240 || r["height"].toInt() > 4320)) {
       error = "Resolução inválida";
       return false;
+    }
+    for (auto key : {"cpuLossPct", "gpuLossPct"}) if (r.contains(key) &&
+        (!r[key].isDouble() || !std::isfinite(r[key].toDouble()) || r[key].toDouble() < 0 || r[key].toDouble() > 100)) {
+      error = "Percentual fora da faixa"; return false;
     }
     if (r.contains("score") &&
         (!r["score"].isDouble() || r["score"].toDouble() < 0 || r["score"].toDouble() > 1e12)) {

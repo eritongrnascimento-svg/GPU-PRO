@@ -37,3 +37,7 @@ bool saveJson(const QString &, const QJsonObject &, QString *error = nullptr);
 QString configRoot();
 QString readText(const QString &path);
 std::optional<double> readNumber(const QString &path);
+// Synthetic frame-time model; percentages are not measured game FPS loss.
+QJsonObject estimateBottleneck(const QJsonObject &baseline, const QJsonObject &target);
+QString installedClockHelper();
+bool rootHelperTrusted(const QString &path);

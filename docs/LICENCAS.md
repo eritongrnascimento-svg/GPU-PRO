@@ -26,7 +26,7 @@ A restrição de redistribuição do GPU-PRO não se aplica às bibliotecas de t
 
 ### Evidência local
 
-`readelf -d` e `ldd` confirmaram ligação dinâmica para Qt, GTK, Cairo, SQLite, libarchive e demais bibliotecas do sistema. A biblioteca estática `gpu-core` contém apenas código do próprio projeto. O tar.gz não contém `.so`, FFmpeg, drivers ou bindings Python.
+`readelf -d` e `ldd` confirmaram ligação dinâmica para Qt, GTK, Cairo, SQLite, libarchive e demais bibliotecas do sistema. A biblioteca estática `gpu-core` contém apenas código do próprio projeto. O tar.gz/.run/.deb não contêm `.so`, FFmpeg, drivers ou bindings Python. O AppImage contém bibliotecas identificadas em seu manifesto de terceiros e na fonte correspondente fornecida na mesma release.
 
 Esta revisão não substitui uma análise nova se forem adicionados componentes, copiado código de terceiros ou alterada a maneira de empacotar.
 
@@ -64,3 +64,10 @@ O pacote atual usa o mecanismo de bibliotecas compartilhadas presentes no sistem
 - [SQLite copyright](https://www.sqlite.org/copyright.html), [libarchive COPYING](https://github.com/libarchive/libarchive/blob/master/COPYING).
 - [FFmpeg: condições de licença](https://ffmpeg.org/legal.html), [GNU: programas separados/agregação](https://www.gnu.org/licenses/gpl-faq.html#MereAggregation).
 - [GCC Runtime Library Exception](https://www.gnu.org/licenses/gcc-exception-3.1.html).
+
+
+## Distribuição 0.4 — AppImage
+
+O AppImage muda o modo de distribuição: inclui bibliotecas e mantém seus avisos em `usr/share/doc/gpu-pro/thirdparty`. A release fornece `GPU-PRO-0.4.0-dependency-sources.tar.gz` com fontes Ubuntu nas versões exatas mapeadas dos arquivos embarcados, mais os arquivos de copyright e licenças comuns. O build falha se não conseguir mapear uma biblioteca ou obter sua fonte correspondente. Esses componentes continuam redistribuíveis nos termos de suas próprias licenças; nossa restrição não se aplica a eles.
+
+É possível extrair o AppImage com `--appimage-extract` e substituir bibliotecas compatíveis no AppDir, sem assinatura/DRM que impeça essa operação. A edição .deb não agrupa bibliotecas e usa dependências calculadas por `dpkg-shlibdeps`.

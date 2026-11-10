@@ -14,7 +14,7 @@ bool allowed(QString p) {
     p == ".gitignore" || p == "NOTICE" || p == "CONTRIBUTING.md" || p == "CHANGELOG.md" || p == "SECURITY.md" ||
     p == "CMakeLists.txt" || p == "release.json" || p.startsWith("bin/") ||
     p.startsWith("src/") || p.startsWith("docs/") || p.startsWith("shaders/") ||
-    p.startsWith("tools/") || p.startsWith("assets/") || p.startsWith("examples/") || p.startsWith(".github/");
+    p.startsWith("packaging/") || p.startsWith("tools/") || p.startsWith("assets/") || p.startsWith("examples/") || p.startsWith(".github/");
 }
 bool copyAtomic(QString from, QString to, QString &error) {
   if (QFileInfo(from).isSymLink() || QFileInfo(to).isSymLink()) { error = "Links simbólicos não são aceitos na atualização"; return false; }
@@ -63,7 +63,7 @@ bool UpdateManager::officialUrl(const QUrl &url) {
 void UpdateManager::fetch(QUrl url, qint64 maximum, std::function<void(QByteArray, QString)> done) {
   if (!officialUrl(url)) { done({}, "Endereço fora do repositório oficial"); return; }
   QNetworkRequest request(url);
-  request.setHeader(QNetworkRequest::UserAgentHeader, "GPU-PRO/0.3.0");
+  request.setHeader(QNetworkRequest::UserAgentHeader, "GPU-PRO/0.4.0");
   request.setRawHeader("Accept", "application/vnd.github+json");
   request.setTransferTimeout(30000);
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);

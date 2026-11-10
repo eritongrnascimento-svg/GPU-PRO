@@ -1,5 +1,14 @@
 # Alterações
 
+## 0.4.0
+
+- Cards de especificações adaptáveis à janela, com fallback de rolagem.
+- Resolução alvo e percentuais estimados CPU/GPU no teste de gargalo, preservando registros anteriores.
+- Opção de manter o painel na bandeja, com mostrar e sair.
+- Consulta/simulação de versões de drivers e execução pelo gerenciador da distro na aba Atualizações.
+- Pacotes .deb, AppImage e executável .run; diretório principal renomeado para GPU-PRO.
+
+
 ## 0.3.0 — GPU-PRO
 
 - Novo nome e identificação do titular: Ériton do Nascimento.

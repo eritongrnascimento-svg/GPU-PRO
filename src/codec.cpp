@@ -1,4 +1,5 @@
 #include "codec.h"
+#include "driver_packages.h"
 namespace {
 int cudaOrdinal(const QString &pci) {
   QLibrary cuda("libcuda.so.1");
@@ -52,6 +53,7 @@ CodecRunner::~CodecRunner() {
   process.waitForFinished(2000);
 }
 void CodecRunner::run(QStringList args, QString phase) {
+  process.setProcessEnvironment(nativeEnvironment());
   stage = phase;
   frames = 0;
   stdoutBuffer.clear();

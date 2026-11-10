@@ -1,0 +1,8 @@
+[Desktop Entry]
+Type=Application
+Name=GPU-PRO
+Comment=Monitoramento e benchmarks MultiGPU Linux
+Exec=gpu-pro
+Icon=gpu-pro
+Terminal=false
+Categories=System;Monitor;Utility;
