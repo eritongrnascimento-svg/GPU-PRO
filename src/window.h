@@ -120,6 +120,11 @@ class MainWindow : public QMainWindow {
   QSystemTrayIcon *tray = nullptr;
   QCheckBox *keepInTray = nullptr;
   bool explicitQuit = false;
+  bool overclockAccepted = false;
+  bool confirmOverclock();
+  QTimer hudEditTimer;
+  QCheckBox *hudFrametime = nullptr;
+  QLineEdit *hudLogFile = nullptr;
   void setupTray();
   void showFromTray();
   void adaptSpecs();
@@ -177,6 +182,7 @@ public:
   void clockCheck(QString path);
   void benchmarkCheck(QString path);
   bool checkInterface();
+  bool checkInteractions();
   void previewScrollBottom();
   bool viewReport(QString path);
   bool exportViewedImage(QString path);

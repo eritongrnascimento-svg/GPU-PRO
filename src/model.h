@@ -19,10 +19,11 @@ struct Metric {
 const QList<Metric> &metricDefinitions();
 QString displayMetric(const QJsonObject &, const QString &key);
 struct OverlayConfig {
-  bool enabled = false, onlyGame = false;
+  bool enabled = false, onlyGame = false, frametimeGraph = false;
   int monitor = 0, x = 24, y = 24, font = 14, width = 360, opacity = 78;
+  QString frametimeLog;
   QString anchor = "top-left", layout = "list";
-  QStringList fields = {"usage", "temp", "vram", "power", "clock"};
+  QStringList fields = {"usage", "temp", "vram", "power", "clock", "cpuUsage", "cpuTemp"};
   QJsonObject json() const;
   static OverlayConfig fromJson(const QJsonObject &);
 };

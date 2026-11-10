@@ -4,14 +4,37 @@ int main(int argc, char **argv) {
   for (int i = 1; i < argc; ++i)
     if (std::strcmp(argv[i], "--overlay-child") == 0)
       return overlayChild(argc, argv);
+  // Keep rendering independent of Qt/Kvantum platform theme plugins.
+  const auto originalStyle=qgetenv("QT_STYLE_OVERRIDE"), originalTheme=qgetenv("QT_QPA_PLATFORMTHEME");
+  const bool hadStyle=qEnvironmentVariableIsSet("QT_STYLE_OVERRIDE"),hadTheme=qEnvironmentVariableIsSet("QT_QPA_PLATFORMTHEME");
+  qputenv("QT_STYLE_OVERRIDE", "Fusion");
+  qunsetenv("QT_QPA_PLATFORMTHEME");
+  QApplication::setDesktopSettingsAware(false);
   QApplication app(argc, argv);
+  app.setStyle(QStyleFactory::create("Fusion"));
+  QPalette fixed;
+  fixed.setColor(QPalette::Window,QColor("#101014"));
+  fixed.setColor(QPalette::WindowText,QColor("#eeeeee"));
+  fixed.setColor(QPalette::Base,QColor("#17171d"));
+  fixed.setColor(QPalette::AlternateBase,QColor("#202027"));
+  fixed.setColor(QPalette::Text,QColor("#eeeeee"));
+  fixed.setColor(QPalette::Button,QColor("#24242b"));
+  fixed.setColor(QPalette::ButtonText,QColor("#eeeeee"));
+  fixed.setColor(QPalette::Highlight,QColor("#76b900"));
+  fixed.setColor(QPalette::HighlightedText,Qt::black);
+  app.setPalette(fixed);
+  // Child games/tools retain the user's theme environment.
+  if(hadStyle)qputenv("QT_STYLE_OVERRIDE",originalStyle);else qunsetenv("QT_STYLE_OVERRIDE");
+  if(hadTheme)qputenv("QT_QPA_PLATFORMTHEME",originalTheme);else qunsetenv("QT_QPA_PLATFORMTHEME");
   QCoreApplication::setOrganizationName("LinuxGPUControl");
   QCoreApplication::setApplicationName("LinuxGPUControl");
-  QCoreApplication::setApplicationVersion("0.4.0");
+  QCoreApplication::setApplicationVersion("0.5.0");
   QCommandLineParser parser;
   parser.setApplicationDescription(
       "GPU-PRO — painel MultiGPU Linux");
+  parser.addOption({"interaction-check", "Verificar HUD ao vivo, estilo fixo e aceite sem acessar GPU"});
   parser.addOption({"ui-check", "Verificar abas e alcance da rolagem sem acessar GPU"});
+  parser.addOption({"tray-exit-check", "Verificar saída pela bandeja com janela oculta, sem acessar GPU"});
   parser.addOption({"preview-scroll-bottom", "Rolar a página da prévia até o final"});
   parser.addHelpOption();
   parser.addVersionOption();
@@ -36,7 +59,7 @@ int main(int argc, char **argv) {
                     "path"});
   parser.process(app);
   bool preview =
-      parser.isSet("preview-offline") || parser.isSet("ui-check") || parser.isSet("ui-smoke") || parser.isSet("view-report");
+      parser.isSet("interaction-check") || parser.isSet("preview-offline") || parser.isSet("ui-check") || parser.isSet("tray-exit-check") || parser.isSet("ui-smoke") || parser.isSet("view-report");
   if (parser.isSet("render-hud-preview"))
     return renderOverlayPreview(parser.value("render-hud-preview"), parser.value("hud-layout")) ? 0
                                                                                                 : 1;
@@ -63,6 +86,14 @@ int main(int argc, char **argv) {
     window.previewSubtab(parser.value("preview-subtab").toInt());
   }
   window.show();
+  if (parser.isSet("tray-exit-check")) {
+    window.hide();
+    auto *quit = window.findChild<QAction *>("quitFromTray");
+    if (!quit) return 6;
+    QTimer::singleShot(0, quit, &QAction::trigger);
+    QTimer::singleShot(2000, &app, [&app] { app.exit(6); });
+  }
+  if (parser.isSet("interaction-check")) return window.checkInteractions() ? 0 : 7;
   if (parser.isSet("ui-check")) return window.checkInterface() ? 0 : 5;
   if (parser.isSet("benchmark-check")) window.benchmarkCheck(parser.value("benchmark-check"));
   if (parser.isSet("clock-check"))

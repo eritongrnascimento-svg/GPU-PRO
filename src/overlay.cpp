@@ -94,6 +94,24 @@ gboolean draw(GtkWidget *, cairo_t *cr, gpointer data) {
     label(cr, name + ": " + value, x, y, f, .92, .92, .92, (w - 28) / columns);
     ++i;
   }
+  if(c.frametimeGraph) {
+    const int graphTop=top+((i+columns-1)/columns)*row+6;
+    auto samples=h.stale ? QJsonArray{} : h.state["frameTimes"].toArray();
+    label(cr,samples.isEmpty()?"Frametime · aguardando CSV ativo":QString("Frametime · %1 ms").arg(samples.last().toDouble(),0,'f',2),14,graphTop,qMax(9,f-2),.7,.8,.7,w-28);
+    double left=14,right=w-14,bottom=hh-12,height=48,maximum=33.34;
+    for(auto v:samples)maximum=qMax(maximum,v.toDouble());
+    cairo_set_source_rgba(cr,.5,.5,.5,.35);cairo_set_line_width(cr,1);
+    cairo_move_to(cr,left,bottom);cairo_line_to(cr,right,bottom);
+    cairo_move_to(cr,left,bottom-height);cairo_line_to(cr,right,bottom-height);cairo_stroke(cr);
+    if(samples.size()>1) {
+      cairo_set_source_rgb(cr,accent.red,accent.green,accent.blue);cairo_set_line_width(cr,1.5);
+      for(int n=0;n<samples.size();++n) {
+        double x=left+(right-left)*n/(samples.size()-1),y=bottom-height*samples[n].toDouble()/maximum;
+        if(n==0)cairo_move_to(cr,x,y);else cairo_line_to(cr,x,y);
+      }
+      cairo_stroke(cr);
+    }
+  }
   return FALSE;
 }
 void reposition(Hud &h) {
@@ -147,6 +165,7 @@ gboolean tick(gpointer data) {
     h.received = g_get_monotonic_time();
     if (b != h.last) {
       h.last = b;
+      h.state = o;
       h.metrics = o["metrics"].toObject();
       auto cfg = o["config"].toObject();
       bool changed = cfg != h.config.json();
@@ -272,14 +291,16 @@ bool renderOverlayPreview(const QString &path, const QString &layout) {
                                                 : layout == "columns" ? 650
                                                                       : 380},
                                       {"font", 16},
-                                      {"opacity", 88}});
+                                      {"opacity", 88}, {"frametimeGraph",true}});
   h.metrics = {{"name", "NVIDIA · PRÉVIA FICTÍCIA"},
                {"accent", "#76b900"},
                {"usage", 42},
-               {"temp", 58},
+               {"temp", 58}, {"cpuUsage",32}, {"cpuTemp",54},
                {"vram", 4294967296.},
                {"power", 125.4},
                {"clock", 1800}};
+  QJsonArray times;for(int n=0;n<100;++n)times.append(12.+(n%17)*.3);
+  h.state["frameTimes"]=times;
   auto rect = overlayRect(h.config, {0, 0, 1920, 1080});
   h.width = rect.width();
   h.height = rect.height();

@@ -1,4 +1,19 @@
-# Atualização 0.4 — verificações
+# Registro de validação do GPU-PRO
+
+## Versão 0.5.0
+
+- Sete verificações locais: núcleo/CPU/CSV, rejeição de escrita de tensão/potência, atualização/backup/restauração, layout, saída de janela oculta e interações de HUD/estilo/aceite.
+- Reproduzido o caso Qt em que `close()` de janela oculta retorna aceito, mas não encerra o event loop; saída explícita corrige esse comportamento.
+- Testes de CPU usam contadores controlados e sensores fictícios, sem contar guest duas vezes. Uma coleta real no ambiente CachyOS também retornou uso global e temperatura CPU por hwmon.
+- CSV: descoberta de cabeçalho, anexação, linhas incompletas, valores inválidos, truncamento e ausência de duplicação. O gráfico é validado com dados de teste identificados como prévia fictícia, sem fingir medição de jogo.
+- Teste da interface com `QT_STYLE_OVERRIDE=kvantum` confirma estilo Fusion, debounce/configuração ao vivo e confirmação de risco inicialmente desabilitada. Recusar não concede acesso; marcar a caixa habilita o aceite.
+- Nenhum overclock ou instalação de driver foi executado nesta atualização. Artefatos específicos de OBS/compositor em uma sessão real e frametime em jogos ainda exigem validação física; os testes de estilo não certificam ausência de toda falha de captura.
+
+## Versão 0.4.0 — pacotes publicados
+
+Compilação, testes e geração dos formatos concluídos no [workflow de pacotes](https://github.com/eritongrnascimento-svg/GPU-PRO/actions/runs/42852585433). Os oito arquivos publicados tiveram tamanho e SHA-256 conferidos; AppImage e DEB extraído passaram na verificação local de interface, e RUN passou na verificação de integridade. O DEB não foi instalado durante esse protocolo.
+
+### Verificações de recursos 0.4
 
 - Cinco verificações locais aprovadas, incluindo percentuais CPU/GPU, validação de versões de drivers e alcance da rolagem.
 - Layout adaptável das especificações verificado em 1240×900, com fallback de rolagem em janela menor.
@@ -7,11 +22,11 @@
 - Nenhuma escrita de tensão, power limit ou clocks nesta etapa; helper root existente preservado.
 - Compilação/testes Ubuntu e instaladores são produzidos pelo workflow Pacotes Linux; consulte as execuções e os arquivos finais da release.
 
-# Registro de validação — GPU-PRO 0.3.0
+## Histórico — GPU-PRO 0.3.0
 
 ## Atualização 0.3.0 — 10/11/2026
 
-CI inicial no Ubuntu 24.04: compilação e testes offline aprovados no [GitHub Actions](https://github.com/eritongrnascimento-svg/GPU-PRO/actions/runs/42824679190). Essa execução antecede o acréscimo dos avisos/licenças na interface; a revisão final deve ser verificada novamente.
+CI inicial no Ubuntu 24.04: compilação e testes offline aprovados no [GitHub Actions](https://github.com/eritongrnascimento-svg/GPU-PRO/actions/runs/42824679190). Essa execução antecede o acréscimo dos avisos/licenças na interface; a execução de empacotamento da versão 0.4, vinculada abaixo, cobre uma revisão posterior.
 
 Ambiente local: CachyOS x86_64, Qt 6.12, KDE Wayland/XWayland, RTX 3060 Ti, driver 620.70.06.
 
@@ -22,7 +37,7 @@ Ambiente local: CachyOS x86_64, Qt 6.12, KDE Wayland/XWayland, RTX 3060 Ti, driv
 - OpenGL 720p: ensaio curto de 3 s + aquecimento com novo shader/prévia, resultado válido. Não foi um ensaio completo de 30/60 s.
 - Ferramentas Python opcionais instaladas no usuário, sem virtualenv: gpustat 1.1.1, nvidia-ml-py 13.615.71; psutil 7.2.2 já disponível. NVML field 82 retornou NOT_SUPPORTED nesta RTX 3060 Ti. Não foi localizada leitura pública de hotspot neste driver.
 - Fixture hwmon verificou edge=46 °C, hotspot/junction=67 °C e memory junction=78 °C sem confundir memória com hotspot; remover o canal junction mantém hotspot indisponível.
-- Atualizador: instalação/backup/restauração do pacote completo final (tar.gz) em diretórios temporários, além das fixtures; rejeição de checksum incorreto, versão incompatível, links, travessia de caminhos e atualização durante testes. O download/upgrade a partir de uma release posterior real ainda depende dessa publicação futura.
+- Atualizador: instalação/backup/restauração do pacote completo final (tar.gz) em diretórios temporários, além das fixtures; rejeição de checksum incorreto, versão incompatível, links, travessia de caminhos e atualização durante testes. Naquele protocolo, a atualização por download de uma versão posterior ainda não foi exercitada; isso permanece distinto dos testes locais de instalação e restauração.
 
 Nesta atualização não foi executado novo overclock nem alterado o helper root já instalado. Não foram escritos tensão, limite de potência ou clocks durante os ensaios 0.3.0. A nova carga 3D não é comparável à versão 0.2.0. Os resultados de 8K, codecs e computação abaixo pertencem à validação anterior, não foram repetidos com a nova cena.
 
@@ -48,7 +63,7 @@ O fluxo completo da interface mediu uma execução original, aguardou resfriamen
 
 Offset de memória: 0 antes e depois. Limite de potência: 225000 mW (225 W) antes e depois. Não houve comando de alteração de tensão ou potência. O helper possui watchdog independente e restauração ao término, cancelamento ou perda da interface.
 
-O auxiliar aprovado foi instalado em `/usr/local/libexec/linux-gpu-control/gpu-clock-helper`, propriedade root, modo 0755, sem setuid, serviço ou início automático. Novos ajustes continuam exigindo autenticação do sistema.
+No ambiente de validação, o auxiliar foi instalado em `/usr/local/libexec/linux-gpu-control/gpu-clock-helper`, propriedade root, modo 0755, sem setuid, serviço ou início automático. Novos ajustes continuam exigindo autenticação do sistema.
 
 Esse ensaio curto não comprova estabilidade prolongada nem ganho significativo de desempenho. Não gera recomendação para outras placas.
 

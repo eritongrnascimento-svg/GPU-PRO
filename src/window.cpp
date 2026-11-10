@@ -88,7 +88,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   resize(1240, 900);
   setWindowIcon(QIcon(":/assets/gpu.png"));
   setMinimumSize(980, 700);
-  setWindowTitle("GPU-PRO · 0.4.0");
+  setWindowTitle("GPU-PRO · 0.5.0");
   if (!offline)
     overlayConfig = OverlayConfig::fromJson(
         QJsonDocument::fromJson(readText(configRoot() + "/overlay.json").toUtf8()).object());
@@ -181,10 +181,13 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
     auto *b = button(names[i], sb);
     b->setObjectName("nav");
     navigation << b;
-    connect(b, &QPushButton::clicked, this, [this, i] { pages->setCurrentIndex(i); });
+    connect(b, &QPushButton::clicked, this, [this, i] {
+      if(i==4 && !confirmOverclock()) return;
+      pages->setCurrentIndex(i);
+    });
   }
   sb->addStretch();
-  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.4 · "
+  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.5 · "
                       "validação comunitária"));
   main->addWidget(sidebar);
   main->addLayout(right, 1);
@@ -390,7 +393,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   neonTimer->setInterval(40);
   connect(neonTimer, &QTimer::timeout, this, [this] {
     for (auto *card : findChildren<NeonCard *>())
-      if (card->isVisible()) card->update();
+      if (isVisible() && qApp->property("gpuProNeonMotion").toBool() && card->isVisible()) card->update();
   });
   neonTimer->start();
   clockProcess.setProcessEnvironment(nativeEnvironment());
@@ -948,8 +951,21 @@ QWidget *MainWindow::monitor() {
     ++i;
   }
   form->addLayout(fieldGrid, 6, 0, 1, 4);
+  hudFrametime = new QCheckBox("Linha de frametime (ms, fonte CSV real)");
+  hudFrametime->setChecked(overlayConfig.frametimeGraph);
+  hudLogFile = new QLineEdit(overlayConfig.frametimeLog);
+  hudLogFile->setPlaceholderText("Log CSV ativo do jogo, com coluna frametime");
+  auto *browseLog = new QPushButton("Selecionar CSV");
+  form->addWidget(hudFrametime,7,0,1,4);
+  form->addWidget(hudLogFile,8,0,1,3);
+  form->addWidget(browseLog,8,3);
+  connect(browseLog,&QPushButton::clicked,this,[this] {
+    auto path=QFileDialog::getOpenFileName(this,"Log de frametime do jogo",QDir::homePath(),"CSV (*.csv)");
+    if(!path.isEmpty())hudLogFile->setText(path);
+  });
+  form->addWidget(label("Mudanças são aplicadas em tempo real. Frametime: selecione um CSV em gravação (MangoHud: log_interval=100). Sem fonte ativa, o gráfico aguarda dados."),9,0,1,4);
   auto *apply = new QPushButton("Aplicar formato e posição");
-  form->addWidget(apply, 7, 0, 1, 4);
+  form->addWidget(apply, 10, 0, 1, 4);
   l->addWidget(config);
   l->addWidget(label("X/Y são margens para cantos e deslocamentos para o centro. O HUD não "
                      "captura cliques. Alt+Q alterna sua visibilidade (X11). X11/XWayland é "
@@ -962,6 +978,18 @@ QWidget *MainWindow::monitor() {
   l->addWidget(processTable, 1);
   connect(apply, &QPushButton::clicked, this, &MainWindow::saveOverlay);
   connect(hudEnabled, &QCheckBox::toggled, this, [this] { saveOverlay(); });
+  hudEditTimer.setSingleShot(true);
+  hudEditTimer.setInterval(120);
+  connect(&hudEditTimer,&QTimer::timeout,this,&MainWindow::saveOverlay);
+  auto schedule=[this] { hudEditTimer.start(); };
+  for(auto *combo:{layoutChoice,anchorChoice,monitorChoice})
+    connect(combo,qOverload<int>(&QComboBox::currentIndexChanged),this,schedule);
+  for(auto *spin:{hudX,hudY,hudWidth,hudFont,hudOpacity})
+    connect(spin,qOverload<int>(&QSpinBox::valueChanged),this,schedule);
+  connect(onlyGame,&QCheckBox::toggled,this,schedule);
+  connect(hudFrametime,&QCheckBox::toggled,this,schedule);
+  connect(hudLogFile,&QLineEdit::textChanged,this,schedule);
+  for(auto *field:hudFields)connect(field,&QCheckBox::toggled,this,schedule);
   if (offline) {
     apply->setEnabled(false);
     hudEnabled->setEnabled(false);
@@ -971,8 +999,6 @@ QWidget *MainWindow::monitor() {
   return p;
 }
 void MainWindow::saveOverlay() {
-  if (offline)
-    return;
   if (!overlayConfig.enabled && hudEnabled->isChecked())
     hudFailures = 0;
   overlayConfig.enabled = hudEnabled->isChecked();
@@ -985,12 +1011,14 @@ void MainWindow::saveOverlay() {
   overlayConfig.width = hudWidth->value();
   overlayConfig.font = hudFont->value();
   overlayConfig.opacity = hudOpacity->value();
+  overlayConfig.frametimeGraph = hudFrametime->isChecked();
+  overlayConfig.frametimeLog = hudLogFile->text().trimmed();
   overlayConfig.fields.clear();
   for (const auto &m : metricDefinitions())
     if (hudFields[m.key]->isChecked())
       overlayConfig.fields << m.key;
   QString error;
-  if (!saveJson(configRoot() + "/overlay.json", overlayConfig.json(), &error))
+  if (!offline && !saveJson(configRoot() + "/overlay.json", overlayConfig.json(), &error))
     notify("Configuração não salva", error);
   emit configureOverlay(overlayConfig.json());
   if (overlayConfig.enabled && hud.state() == QProcess::NotRunning)
@@ -1340,10 +1368,52 @@ void MainWindow::setupTray() {
   auto *hideAction = menu->addAction("Ocultar na bandeja");
   connect(hideAction, &QAction::triggered, this, [this] { if (QSystemTrayIcon::isSystemTrayAvailable()) hide(); });
   menu->addSeparator(); auto *quit = menu->addAction("Sair do GPU-PRO");
-  connect(quit, &QAction::triggered, this, [this] { explicitQuit = true; close(); explicitQuit = false; });
+  quit->setObjectName("quitFromTray");
+  connect(quit, &QAction::triggered, this, [this] {
+    explicitQuit = true;
+    const bool accepted = close();
+    explicitQuit = false;
+    // Closing an already hidden window need not emit lastWindowClosed.
+    // Respect closeEvent guards, then explicitly stop the application loop.
+    if (accepted) QCoreApplication::quit();
+    else showFromTray();
+  });
   tray->setContextMenu(menu);
   connect(tray, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
     if (reason == QSystemTrayIcon::Trigger || reason == QSystemTrayIcon::DoubleClick) showFromTray();
   });
   if (!offline && QSystemTrayIcon::isSystemTrayAvailable()) tray->show();
+}
+
+
+bool MainWindow::checkInteractions() {
+  if(!offline || QApplication::style()->objectName().toLower()!="fusion") return false;
+  int packets=0;QJsonObject packet;
+  auto connection=connect(this,&MainWindow::configureOverlay,this,[&](QJsonObject p){++packets;packet=p;});
+  const int width=hudWidth->value()+20;
+  hudWidth->setValue(width);
+  hudFrametime->setChecked(true);
+  hudFields["cpuUsage"]->setChecked(true);
+  hudFields["cpuTemp"]->setChecked(true);
+  QEventLoop loop;QTimer::singleShot(250,&loop,&QEventLoop::quit);loop.exec();
+  disconnect(connection);
+  if(packets!=1 || packet["width"].toInt()!=width || !packet["frametimeGraph"].toBool() || !packet["fields"].toArray().contains("cpuTemp")) return false;
+  bool initiallyDisabled=false;
+  QTimer::singleShot(0,this,[&]{
+    auto *d=findChild<QDialog *>("overclockDisclaimer");
+    if(!d)return;
+    auto *b=d->findChild<QDialogButtonBox *>();
+    initiallyDisabled=b && !b->button(QDialogButtonBox::Ok)->isEnabled();
+    d->reject();
+  });
+  if(confirmOverclock() || !initiallyDisabled || overclockAccepted) return false;
+  bool explicitlyEnabled=false;
+  QTimer::singleShot(0,this,[&]{
+    auto *d=findChild<QDialog *>("overclockDisclaimer");if(!d)return;
+    auto *check=d->findChild<QCheckBox *>("acceptOverclockRisk");
+    auto *buttons=d->findChild<QDialogButtonBox *>();
+    if(check && buttons) {check->setChecked(true);explicitlyEnabled=buttons->button(QDialogButtonBox::Ok)->isEnabled();buttons->button(QDialogButtonBox::Ok)->click();}
+    else d->reject();
+  });
+  return confirmOverclock() && explicitlyEnabled;
 }

@@ -1,6 +1,7 @@
 #include "neon_card.h"
 #include <cmath>
 NeonCard::NeonCard(QString title, QWidget *parent) : QFrame(parent) {
+  setAttribute(Qt::WA_OpaquePaintEvent);
   setMinimumHeight(112);
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
   content = new QVBoxLayout(this);
@@ -14,12 +15,12 @@ NeonCard::NeonCard(QString title, QWidget *parent) : QFrame(parent) {
 void NeonCard::setReading(const QJsonObject &data, QString key, QColor base) {
   available = data[key].isDouble();
   double x = data[key].toDouble(), ratio = -1;
-  if (key == "temp") ratio = (x - 40) / 40;
+  if (key == "temp" || key == "cpuTemp") ratio = (x - 40) / 40;
   else if (key == "hotspot" || key == "memoryTemp") ratio = (x - 50) / 45;
   else if (key == "clock") ratio = x / 2400;
   else if (key == "memClock") ratio = x / 12000;
   else if (key == "fanRpm") ratio = x / 3500;
-  else if (key == "fan" || key == "usage" || key == "encoder" || key == "decoder") ratio = x / 100;
+  else if (key == "fan" || key == "usage" || key == "cpuUsage" || key == "encoder" || key == "decoder") ratio = x / 100;
   if (!available) accent = QColor("#596174");
   else if (ratio > .85) accent = QColor("#ff496c");
   else if (ratio > .65) accent = QColor("#ffad42");
@@ -31,12 +32,13 @@ void NeonCard::setReading(const QJsonObject &data, QString key, QColor base) {
 }
 void NeonCard::paintEvent(QPaintEvent *) {
   QPainter p(this);
+  p.fillRect(rect(), QColor("#101014"));
   p.setRenderHint(QPainter::Antialiasing);
   QRectF box = QRectF(rect()).adjusted(3, 3, -3, -3);
   p.setPen(QPen(QColor("#2b3040"), 1));
   p.setBrush(QColor("#13161e"));
   p.drawRoundedRect(box, 11, 11);
-  double angle = std::fmod(animation.elapsed() * .035, 360.);
+  double angle = qApp->property("gpuProNeonMotion").toBool() ? std::fmod(animation.elapsed() * .035, 360.) : 0.;
   QConicalGradient glow(box.center(), angle);
   QColor dark = accent; dark.setAlpha(22);
   QColor light = accent; light.setAlpha(available ? 230 : 90);

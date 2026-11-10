@@ -59,6 +59,15 @@ QWidget *MainWindow::updatesPage() {
   keepInTray->setChecked(!offline && QSettings().value("ui/keepInTray",false).toBool());
   keepInTray->setEnabled(!offline && QSystemTrayIcon::isSystemTrayAvailable());
   behaviorLayout->addWidget(keepInTray);
+  auto *neonMotion=new QCheckBox("Animar luzes neon dos cards (desative para gravações, se necessário)");
+  neonMotion->setChecked(offline || QSettings().value("ui/neonMotion",true).toBool());
+  qApp->setProperty("gpuProNeonMotion",neonMotion->isChecked());
+  behaviorLayout->addWidget(neonMotion);
+  connect(neonMotion,&QCheckBox::toggled,this,[this](bool checked){
+    qApp->setProperty("gpuProNeonMotion",checked);
+    if(!offline)QSettings().setValue("ui/neonMotion",checked);
+    for(auto *card:findChildren<NeonCard *>())card->update();
+  });
   auto *trayNote = new QLabel(QSystemTrayIcon::isSystemTrayAvailable() ? "Clique no ícone da bandeja para reabrir; use Sair para encerrar." : "O ambiente atual não oferece bandeja do sistema; fechar continuará encerrando o painel.");
   trayNote->setWordWrap(true); behaviorLayout->addWidget(trayNote);
   connect(keepInTray,&QCheckBox::toggled,this,[this](bool checked){if(!offline)QSettings().setValue("ui/keepInTray",checked);});

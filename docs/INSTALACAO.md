@@ -1,5 +1,7 @@
 # Instalar e executar o GPU-PRO
 
+Leia primeiro o [aviso de riscos e responsabilidade](AVISO-DE-RESPONSABILIDADE.md). O aceite na aba Overclock não aplica ajustes automaticamente.
+
 Repositório oficial: https://github.com/eritongrnascimento-svg/GPU-PRO
 
 Linux x86_64, driver do fabricante, Vulkan e/ou OpenGL funcionais. A interface não exige root. O helper é opcional para ajustes de clocks; benchmarks, sensores e feedback não precisam dele.
@@ -13,7 +15,7 @@ sh build.sh
 sh run.sh
 ```
 
-As etapas acima ficam disponíveis após a publicação do repositório. `build.sh` verifica dependências e não instala pacotes automaticamente. O build em `build/` tem preferência sobre `bin/` no launcher.
+`build.sh` verifica dependências e não instala pacotes automaticamente. O build em `build/` tem preferência sobre `bin/` no launcher.
 
 ### Arch / CachyOS
 
@@ -28,7 +30,7 @@ sudo apt update
 sudo apt install build-essential cmake pkg-config qt6-base-dev libqt6opengl6-dev libgtk-3-dev libx11-dev libvulkan-dev glslang-tools libsqlite3-dev libarchive-dev
 ```
 
-O projeto inclui CI para Ubuntu 24.04; o resultado de uma execução no GitHub só pode ser confirmado após a publicação. A compilação e validação de hardware desta entrega foram feitas no CachyOS.
+Os workflows públicos do [GitHub Actions](https://github.com/eritongrnascimento-svg/GPU-PRO/actions) registram compilação e verificações no Ubuntu 24.04. A validação física registrada foi realizada no CachyOS; consulte [VERIFICACAO.md](VERIFICACAO.md) para distinguir testes automatizados de testes em hardware.
 
 O driver/ICD da GPU deve ser instalado pelos métodos da distribuição/fabricante. Não copie bibliotecas NVIDIA para computadores AMD/Intel. Em computadores híbridos, selecione a GPU no painel e confira a verificação do dispositivo no resultado do teste.
 
@@ -42,16 +44,16 @@ MangoHud, vkBasalt e Gamescope só são necessários para os perfis que os utili
 
 ## Pacote binário portátil
 
-Após existir uma release, obtenha nela `GPU-PRO-<versão>-linux-x86_64.tar.gz` e `SHA256SUMS.txt`. Na mesma pasta:
+Na [última release](https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest), obtenha `GPU-PRO-<versão>-linux-x86_64.tar.gz` e `SHA256SUMS.txt`. Na mesma pasta:
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS.txt
-tar -xzf GPU-PRO-0.3.0-linux-x86_64.tar.gz
+tar -xzf GPU-PRO-0.5.0-linux-x86_64.tar.gz
 cd GPU-PRO
 sh run.sh
 ```
 
-O binário desta entrega foi compilado no CachyOS, com as bibliotecas desse ambiente. Não é AppImage universal. Se houver incompatibilidade de Qt/glibc ou biblioteca ausente, compile pelo código-fonte. Instale o pacote em uma pasta gravável pelo usuário para usar atualizações pelo painel.
+Os pacotes oficiais atuais são produzidos no Ubuntu 24.04; a versão 0.3 teve binários locais gerados no CachyOS. TAR/RUN dependem das bibliotecas do sistema e não são AppImages universais. Se houver incompatibilidade de Qt/glibc ou biblioteca ausente, compile pelo código-fonte. Extraia o pacote portátil em uma pasta gravável pelo seu usuário para usar atualizações com backup pelo painel.
 
 ## Helper opcional de clocks
 
@@ -76,9 +78,9 @@ Dados são preservados em `~/.config/LinuxGPUControl/LinuxGPUControl/` (ou equiv
 
 ## Atualizar e restaurar
 
-**Atualizações → Verificar atualizações** consulta releases estáveis do repositório oficial. A primeira publicação pode ainda não ter uma versão posterior; nesse caso, o painel informa isso.
+**Atualizações → Verificar atualizações** consulta releases estáveis do repositório oficial. Se você já estiver na versão estável mais recente, o painel informa que não há atualização disponível.
 
-Ao atualizar pelo painel, o pacote é verificado e preparado, um backup é salvo em `updates/backups/` no diretório de configuração, e os arquivos são substituídos. Reinicie o aplicativo. O helper instalado em `/usr/local/libexec` não é alterado por esse fluxo.
+Ao atualizar uma instalação portátil TAR/RUN pelo painel, o pacote é verificado e preparado, um backup é salvo em `updates/backups/` no diretório de configuração, e os arquivos são substituídos. Reinicie o aplicativo. O helper instalado em `/usr/local/libexec` não é alterado por esse fluxo.
 
 Use **Restaurar último backup** se necessário. Caso a interface não abra após uma atualização, localize o backup indicado em `updates/last-backup.txt` e copie o conteúdo de `files/` de volta para a pasta original do aplicativo. `backup.json` informa a instalação correspondente e os arquivos introduzidos pela atualização. Não restaure dados de outra instalação.
 
@@ -91,13 +93,13 @@ ctest --test-dir build --output-on-failure
 QT_QPA_PLATFORM=offscreen build/linux-gpu-control --ui-check
 ```
 
-Consulte [VALIDACAO.md](VALIDACAO.md) para testar GPUs de amigos e [VERIFICACAO.md](VERIFICACAO.md) para os testes realmente executados nesta entrega.
+Consulte [VALIDACAO.md](VALIDACAO.md) para participar da validação em outras GPUs e [VERIFICACAO.md](VERIFICACAO.md) para consultar os testes registrados por versão.
 
 
-## Formatos da versão 0.4
+## Formatos de instalação
 
-- Ubuntu 24.04 amd64: `sudo apt install ./gpu-pro_0.4.0_ubuntu24.04_amd64.deb`; iniciar com `gpu-pro` ou pelo menu. O helper instalado em `/usr/libexec/gpu-pro/` continua exigindo autenticação para cada ajuste.
-- AppImage x86_64: `chmod +x GPU-PRO-0.4.0-x86_64.AppImage` e executar o arquivo. Precisa de glibc 2.39 ou posterior e driver instalado; se FUSE não estiver disponível, use `--appimage-extract-and-run`. Bibliotecas/avisos podem ser inspecionados com `--appimage-extract`.
-- Executável portátil: `chmod +x GPU-PRO-0.4.0-linux-x86_64.run` e executar. Extrai a pasta GPU-PRO com todos os workers e abre o painel; não exige administrador. Usa bibliotecas do sistema, como o tar.gz.
+- Ubuntu 24.04 amd64: `sudo apt install ./gpu-pro_0.5.0_ubuntu24.04_amd64.deb`; iniciar com `gpu-pro` ou pelo menu. O helper instalado em `/usr/libexec/gpu-pro/` continua exigindo autenticação para cada ajuste.
+- AppImage x86_64: `chmod +x GPU-PRO-0.5.0-x86_64.AppImage` e executar o arquivo. Precisa de glibc 2.39 ou posterior e driver instalado; se FUSE não estiver disponível, use `--appimage-extract-and-run`. Bibliotecas/avisos podem ser inspecionados com `--appimage-extract`.
+- Executável portátil: `chmod +x GPU-PRO-0.5.0-linux-x86_64.run` e executar. Extrai a pasta GPU-PRO com todos os workers e abre o painel; não exige administrador. Usa bibliotecas do sistema, como o tar.gz.
 
 Em Atualizações, consulte drivers, escolha pacote/versão e simule. A instalação abre o gerenciador nativo em terminal, solicita autenticação do sistema e exige confirmação da transação. No Arch/CachyOS também atualiza os demais pacotes para evitar atualização parcial. O GPU-PRO não garante rollback de drivers; reinicie quando o gerenciador indicar.

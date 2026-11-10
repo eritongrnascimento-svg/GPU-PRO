@@ -1,5 +1,7 @@
 #pragma once
 #include "gpu.h"
+#include "cpu_telemetry.h"
+#include "frame_log.h"
 #include <QtNetwork>
 Q_DECLARE_METATYPE(Gpu)
 Q_DECLARE_METATYPE(QList<Gpu>)
@@ -13,6 +15,10 @@ class TelemetryService : public QObject {
   QUdpSocket *udp = nullptr;
   QTimer *timer = nullptr;
   QJsonObject current;
+  CpuTelemetry cpu;
+  FrameLog frameLog;
+  QJsonArray frameTimes;
+  QElapsedTimer lastFrame;
   int tick = 0;
   quint64 lastCpu = 0;
   QElapsedTimer cpuTime;
@@ -33,7 +39,12 @@ public slots:
     current = {};
     tick = 0;
   }
-  void overlay(QJsonObject c) { config = OverlayConfig::fromJson(c); }
+  void overlay(QJsonObject c) {
+    auto next=OverlayConfig::fromJson(c);
+    if(next.frametimeLog!=config.frametimeLog || !next.frametimeGraph) {frameTimes={};lastFrame.invalidate();}
+    config=next;
+    publish();
+  }
   void endpoint(int p, QString t) {
     port = p;
     token = t;

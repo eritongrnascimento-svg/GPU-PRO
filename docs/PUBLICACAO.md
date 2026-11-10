@@ -1,24 +1,21 @@
-# Publicação oficial — GPU-PRO
+# Como são preparadas as releases oficiais
 
-Conta/repositório: **eritongrnascimento-svg/GPU-PRO**. Titular: **Ériton do Nascimento**. Visibilidade pretendida: pública.
+Publico o GPU-PRO no repositório público **eritongrnascimento-svg/GPU-PRO**, sob titularidade de **Ériton do Nascimento**. Esta página descreve o processo de construção e distribuição para quem deseja auditar, contribuir ou reproduzir os pacotes.
 
-## Antes da primeira publicação
+## Revisão e segurança
 
-- Revisar LICENSE e CONTRIBUTING.md: código disponível, forks para contribuições e auditoria permitidos, redistribuição fora das permissões exige autorização. Esta licença não é MIT/GPL/Apache nem aprovada pela OSI. Termos próprios merecem revisão jurídica antes de serem usados como instrumento de proteção.
-- Preservar NOTICE e docs/licenses/ e revisar [LICENCAS.md](LICENCAS.md) ao adicionar dependências ou empacotar bibliotecas.
-- Conferir direitos sobre recursos originais, avisos de terceiros e marca. Não anunciar homologação NVIDIA/AMD/Intel.
-- Não enviar diretórios locais `build/`, bancos, logs, credenciais ou resultados brutos. `bin/` não pertence ao histórico Git; binários pertencem às releases.
-- Ativar revisão de PRs/proteção da branch principal e relato privado de vulnerabilidades, quando essas opções estiverem disponíveis no plano da conta. Somente o mantenedor deve aprovar e publicar releases.
+- LICENSE e CONTRIBUTING.md definem código disponível, forks de auditoria/contribuição e restrições de redistribuição. A licença própria não é MIT/GPL/Apache nem aprovada pela OSI; sua adequação jurídica exige análise especializada.
+- NOTICE, docs/licenses/ e [LICENCAS.md](LICENCAS.md) acompanham a revisão de dependências e bibliotecas empacotadas. Recursos e marcas exigem direitos de uso próprios; o projeto não anuncia homologação NVIDIA/AMD/Intel.
+- Fontes, scripts, configurações e documentação ficam em `main`. Diretórios `build/`, bancos, logs, credenciais e resultados brutos não pertencem ao histórico público; `bin/` também é excluído do Git. Os binários oficiais ficam nas releases.
+- Revisão de PRs, proteção de branch e relatos privados de vulnerabilidades são medidas previstas para a manutenção, conforme as opções disponíveis na conta. Esta página não afirma que todas essas configurações estejam ativadas. A aprovação de contribuições e publicação oficial cabem ao mantenedor.
 
-## Código e CI
+## Integração contínua
 
-Enviar fontes, scripts, arquivos de configuração e documentação para a branch `main`. O workflow `.github/workflows/build.yml` compila e roda verificações offline. Ele tem apenas leitura de conteúdo; PRs não publicam releases e não executam testes de overclock.
+O workflow `.github/workflows/build.yml` compila e executa verificações offline. O workflow `.github/workflows/packages.yml`, acionado manualmente, gera os formatos de instalação no Ubuntu 24.04. Ambos têm permissão de leitura do conteúdo; PRs não publicam releases nem executam overclock. Consulte as [execuções públicas](https://github.com/eritongrnascimento-svg/GPU-PRO/actions) para verificar cada commit. Aprovação no CI não substitui testes em GPUs reais.
 
-O primeiro resultado no GitHub Actions ainda precisa ser observado após o envio. Ele não substitui validação em GPUs reais.
+## Reproduzir o empacotamento
 
-## Criar os pacotes
-
-No checkout compilado:
+Em um checkout com as dependências de desenvolvimento instaladas:
 
 ```sh
 sh build.sh
@@ -26,24 +23,36 @@ ctest --test-dir build --output-on-failure
 sh tools/package.sh build dist
 ```
 
-O script gera:
+`package.sh` gera o pacote portátil TAR, o código-fonte e `SHA256SUMS.txt`. Para reproduzir também DEB, RUN e AppImage, use o ambiente Ubuntu 24.04 descrito no workflow e execute:
 
-- `GPU-PRO-0.3.0-linux-x86_64.tar.gz`
-- `GPU-PRO-0.3.0-source.tar.gz`
+```sh
+bash tools/build-distribution.sh build dist
+```
+
+Para a versão 0.5.0, os arquivos são:
+
+- `GPU-PRO-0.5.0-linux-x86_64.tar.gz`
+- `GPU-PRO-0.5.0-source.tar.gz`
+- `GPU-PRO-0.5.0-linux-x86_64.run`
+- `GPU-PRO-0.5.0-x86_64.AppImage`
+- `gpu-pro_0.5.0_ubuntu24.04_amd64.deb`
+- `GPU-PRO-0.5.0-dependency-sources.tar.gz` e `GPU-PRO-0.5.0-dependencies.json`
 - `SHA256SUMS.txt`
 
-O tar contém uma pasta `GPU-PRO/`. `release.json` deve coincidir com a versão/tag e a arquitetura. Ajuste a versão no CMake, main.cpp, diagnósticos, manifesto e changelog antes de uma nova entrega. Preserve os métodos de benchmark ou altere seu identificador quando mudar a carga.
+O TAR contém uma pasta `GPU-PRO/`. A versão do CMake, da aplicação, dos diagnósticos, de `release.json`, do changelog e da tag deve coincidir. Mudanças na carga de benchmark exigem atualizar o identificador do método para preservar comparabilidade. O empacotamento falha se não conseguir obter as fontes correspondentes das bibliotecas incluídas no AppImage.
 
-## Release
+## Publicação e compatibilidade
 
-Criar a tag `v0.3.0` sobre o commit revisado, publicar notas com mudanças e limites e anexar os três arquivos. O canal do atualizador considera releases estáveis, não draft/prerelease, e espera exatamente os nomes acima. Uma release inicial não implica validação de todas as GPUs.
+Cada tag `v<versão>` aponta para o commit revisado. As notas descrevem mudanças, validação e limites, e os arquivos produzidos são anexados à release. O atualizador considera releases estáveis, excluindo drafts e prereleases, e procura nomes exatos para TAR, manifesto e checksums. A presença de uma release não implica validação em todas as GPUs ou distribuições.
 
-O pacote binário precisa indicar a distribuição, Qt/glibc de origem e arquiteturas efetivamente testadas. Não afirmar compatibilidade universal. Para outros ambientes, orientar compilação local.
+A base dos pacotes, Qt/glibc, arquitetura e limites de compatibilidade devem constar na documentação da versão. Para ambientes incompatíveis, a alternativa é compilar localmente. Nenhum pacote é anunciado como universal para todo Linux.
 
-## Atualizador
+## Atualizador e backup
 
-Consulta `https://api.github.com/repos/eritongrnascimento-svg/GPU-PRO/releases/latest`, sem token ou envio de telemetria. Busca assets no mesmo repositório/tag, confere SHA-256 e manifesto, rejeita links/caminhos perigosos e impõe limites de tamanho. Salva a instalação antes de substituir arquivos; falhas de cópia acionam tentativa de rollback. A restauração manual permanece disponível nos arquivos de backup.
+A consulta usa `https://api.github.com/repos/eritongrnascimento-svg/GPU-PRO/releases/latest`, sem token ou envio de telemetria. TAR/RUN recebem instalação portátil com validação de origem, tamanho, hash, manifesto e caminhos; links e caminhos perigosos são recusados. Um backup precede a substituição, com tentativa de rollback em falhas de cópia e restauração manual disponível nos arquivos salvos.
 
-Não é uma transação atômica do pacote inteiro: desligamento no meio da cópia pode exigir restauração manual. Os testes locais verificam instalação/backup/restauração em diretórios temporários e recusas de pacotes inválidos; entrega por uma release real só pode ser exercitada depois de existir uma versão posterior publicada.
+A cópia não é uma transação atômica do pacote inteiro: desligamento durante a instalação pode exigir restauração manual. Os testes automatizados verificam instalação, backup, restauração e recusa de pacotes inválidos em diretórios temporários. Um teste de atualização por download entre releases reais é uma verificação separada e precisa ser registrado quando executado.
 
-Checksum da mesma release oferece verificação de integridade, sem assinatura independente. A proteção contra comprometimento da conta exige uma evolução futura do esquema de assinatura. O helper root nunca é atualizado silenciosamente.
+AppImage e DEB abrem o download oficial; a atualização utiliza a substituição do arquivo ou o gerenciador correspondente, após encerrar o aplicativo. O helper de propriedade do root não é atualizado silenciosamente pelo atualizador portátil.
+
+Os checksums da própria release verificam integridade, mas não são assinaturas independentes nem protegem contra comprometimento da conta do mantenedor. Assinaturas independentes permanecem uma melhoria futura.

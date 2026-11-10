@@ -1,4 +1,6 @@
 #include "gpu.h"
+#include "cpu_telemetry.h"
+#include "frame_log.h"
 #include "driver_packages.h"
 #include "repository.h"
 #include <cmath>
@@ -12,6 +14,32 @@ int main(int argc, char **argv) {
       ++failures;
     }
   };
+  QTemporaryDir cpuFixture;
+  auto write=[&](QString path,QByteArray data) {QDir().mkpath(QFileInfo(path).absolutePath());QFile f(path);check(f.open(QIODevice::WriteOnly),"open telemetry fixture");f.write(data);};
+  QString proc=cpuFixture.filePath("stat"), sys=cpuFixture.filePath("sys");
+  write(proc,"cpu 100 0 100 800 0 0 0 0 50 0\n");
+  write(sys+"/hwmon/hwmon0/name","coretemp");
+  write(sys+"/hwmon/hwmon0/temp1_label","Package id 0");
+  write(sys+"/hwmon/hwmon0/temp1_input","55000");
+  CpuTelemetry cpu;
+  auto first=cpu.sample(proc,sys);
+  check(!first.contains("cpuUsage") && first["cpuTemp"].toDouble()==55,"CPU first sample does not invent utilization; package temperature in Celsius");
+  write(proc,"cpu 125 0 125 850 0 0 0 0 80 0\n");
+  auto second=cpu.sample(proc,sys);
+  check(second["cpuUsage"].toDouble()==50,"CPU deltas exclude guest double counting");
+  write(sys+"/hwmon/hwmon0/temp1_input","not-a-temperature");
+  check(!cpu.sample(proc,sys).contains("cpuTemp"),"missing CPU temperature stays unavailable");
+  QString csv=cpuFixture.filePath("frames.csv");
+  write(csv,"OS,CPU,GPU\nLinux,CPU,GPU\nfps,frametime,cpu_load\n60,16.67,20\n30,33.");
+  FrameLog frames;
+  auto initial=frames.poll(csv);
+  check(initial.size()==1 && initial[0].toDouble()==16.67,"CSV header detection and incomplete row handling");
+  {QFile f(csv);check(f.open(QIODevice::Append),"append frame log fixture");f.write("33,30\n60,nan,20\n60,-1,20\n");}
+  auto appended=frames.poll(csv);
+  check(appended.size()==1 && appended[0].toDouble()==33.33,"CSV live append accepts only real finite positive frame times");
+  check(frames.poll(csv).isEmpty(),"CSV samples never duplicate when no frames arrive");
+  write(csv,"fps,frametime\n100,10\n");
+  check(frames.poll(csv).size()==1,"CSV truncation resets reader and header");
   check(displayMetric({}, "temp") == "N/D", "missing sensor must not be zero");
   check(displayMetric({{"temp", 0}}, "temp") == "0 °C", "zero is a valid reading");
   auto stage = [](double cpu, double gpu) {return QJsonObject{{"valid",true},{"width",1920},{"height",1080},{"sceneResults",QJsonArray{QJsonObject{{"cpuWorkMs",cpu},{"gpuMeanMs",gpu}}}}};};

@@ -1,6 +1,6 @@
-# Roteiro para testes de amigos — AMD e Intel
+# Participe da validação — NVIDIA, AMD e Intel
 
-Os testes locais da entrega foram feitos em uma RTX 3060 Ti; isso não homologa o comportamento em outras placas. Benchmarks e feedback não precisam de root. Não instale o helper para apenas coletar resultados em configuração padrão.
+Os testes físicos documentados foram realizados em uma RTX 3060 Ti; isso não homologa o comportamento em outras placas. Benchmarks e feedback não precisam de root. Não instale o helper para apenas coletar resultados em configuração padrão.
 
 1. Se o binário não abrir por ABI/bibliotecas, recompile com `build.sh`. Confira Qt/OpenGL, Vulkan, GTK, SQLite, FFmpeg e o driver do fabricante.
 2. Abra Feedback & Diagnóstico, consulte ferramentas, acesso ao render node e leituras disponíveis. Compare sensores com outra ferramenta do mesmo driver. RPM zero é diferente de ausência de leitura.
@@ -13,6 +13,8 @@ Os testes locais da entrega foram feitos em uma RTX 3060 Ti; isso não homologa 
 9. Gere feedback, revise o conteúdo mostrado e envie o arquivo manualmente. Não envie senha, UUID/serial ou logs com dados pessoais. O botão já remove os campos privados previstos.
 10. Ao importar, confira que o registro é não verificado, não altera o histórico local validado e não aplica clocks.
 11. No GamerMonitor, confira três formatos, superior centralizado/cantos/centro/coordenadas, monitor secundário, clique passante, minimizar painel e Alt+Q. Teste janela/borderless/fullscreen separadamente; Wayland/XWayland depende do compositor.
-12. Clocks: só testar depois de confirmar sensores e entender os controles. O modo automático curto está limitado ao backend NVIDIA; não inventa perfis AMD/Intel com offsets de outra arquitetura. Nenhuma tensão ou power limit é alterado pelo aplicativo.
+12. Confira uso/temperatura CPU, mudanças de campos/posição do HUD sem reiniciá-lo e CSV de frametime em gravação. Interrompa o produtor e confira o estado de espera. Teste sair pela bandeja com o painel oculto.
+13. Com Kvantum, confirme o estilo fixo e compare a janela durante gravação no OBS; a opção de animação pode ser desligada em Atualizações.
+14. Clocks: só testar depois de confirmar sensores e entender os controles. O modo automático curto está limitado ao backend NVIDIA; não inventa perfis AMD/Intel com offsets de outra arquitetura. Nenhuma tensão ou power limit é alterado pelo aplicativo.
 
-O teste de +15 MHz realizado nesta entrega não certifica estabilidade em jogos longos. Curvas de tensão/ventoinha e uma busca automática ampla continuam fora desta versão. Há bloqueios de temperatura e tentativa de restauração, mas falha de driver/kernel ou desligamento pode impedir recuperação por software.
+O teste histórico de +15 MHz registrado em VERIFICACAO.md não certifica estabilidade em jogos longos. Curvas de tensão/ventoinha e uma busca automática ampla continuam fora desta versão. Há bloqueios de temperatura e tentativa de restauração, mas falha de driver/kernel ou desligamento pode impedir recuperação por software.

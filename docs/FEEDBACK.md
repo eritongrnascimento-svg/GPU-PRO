@@ -16,7 +16,7 @@ Banco SQLite: tabela `records`, colunas `id`, `kind`, `device`, `created`, `orig
 
 Para análise futura, agrupe somente métodos e parâmetros equivalentes: API, resolução, duração, shader, driver, variante da placa e, para vídeo, codec/bit depth/preset/cobertura e versão do FFmpeg. Registre falhas e incompatibilidades. Scores de cobertura diferente não são diretamente comparáveis.
 
-Um futuro servidor deve manter essas validações e acrescentar controle de tamanho, autenticação, proveniência, consentimento, retenção e separação entre dados observados e perfis autorizados. Esta entrega não publica serviço nem envia dados a terceiros.
+Um futuro servidor deve manter essas validações e acrescentar controle de tamanho, autenticação, proveniência, consentimento, retenção e separação entre dados observados e perfis autorizados. O aplicativo não hospeda esse serviço nem envia feedback automaticamente a terceiros.
 
 Unidades do protocolo: temperaturas em °C; consumo `power` em W; limites `powerBefore`/`powerAfter` e `powerLimit` em mW; clocks/offsets em MHz; memória em bytes; tempos GPU/CPU em ms; `seconds` em s; `fps` em quadros/s. Campos ausentes/null não são zero: podem representar sensor, feature ou etapa indisponível. As medições computacionais levam sua própria unidade explícita por linha.
 

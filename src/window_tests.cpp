@@ -742,7 +742,7 @@ QWidget *MainWindow::energy() {
         notify("Informe uma frequência dentro da faixa mostrada");
         return;
       }
-      if (testActive || offline || !helperReady() || !latest["temp"].isDouble())
+      if (testActive || offline || !helperReady() || !latest["temp"].isDouble() || !confirmOverclock())
         return;
       if (QMessageBox::question(
               this, "Aplicar clock",
@@ -803,7 +803,7 @@ QWidget *MainWindow::energy() {
   return root;
 }
 void MainWindow::startClockTrial() {
-  if (offline || testActive || !helperReady() || selected >= gpus.size())
+  if (offline || testActive || !helperReady() || selected >= gpus.size() || !confirmOverclock())
     return;
   if (gpus[selected].vendor != "NVIDIA" || !latest["coreCurrent"].isDouble() ||
       !latest["memCurrent"].isDouble() || !latest["temp"].isDouble() ||
@@ -932,4 +932,31 @@ void MainWindow::clockCheck(QString path) {
     }
   });
   ready->start();
+}
+
+
+bool MainWindow::confirmOverclock() {
+  if(overclockAccepted) return true;
+  QDialog dialog(this);
+  dialog.setObjectName("overclockDisclaimer");
+  dialog.setWindowTitle("Overclock — aviso de riscos e responsabilidade");
+  dialog.resize(660,540);
+  auto *layout=new QVBoxLayout(&dialog);
+  auto *body=new QTextBrowser;
+  body->setMarkdown(readText(":/docs/AVISO-DE-RESPONSABILIDADE.md"));
+  layout->addWidget(body,1);
+  auto *accept=new QCheckBox("Li, compreendi os riscos e assumo a responsabilidade pelas alterações que realizar.");
+  accept->setObjectName("acceptOverclockRisk");
+  layout->addWidget(accept);
+  auto *buttons=new QDialogButtonBox(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+  auto *ok=buttons->button(QDialogButtonBox::Ok);
+  ok->setText("Aceitar e acessar Overclock");
+  buttons->button(QDialogButtonBox::Cancel)->setText("Voltar");
+  ok->setEnabled(false);
+  connect(accept,&QCheckBox::toggled,ok,&QPushButton::setEnabled);
+  connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);
+  connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
+  layout->addWidget(buttons);
+  overclockAccepted=dialog.exec()==QDialog::Accepted && accept->isChecked();
+  return overclockAccepted;
 }

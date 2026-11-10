@@ -15,7 +15,9 @@ const QList<Metric> &metricDefinitions() {
                                   {"fan", "Ventoinha", "%", 1},
                                   {"fanRpm", "Ventoinha RPM", "RPM", 1},
                                   {"encoder", "Encoder", "%", 1},
-                                  {"decoder", "Decoder", "%", 1}};
+                                  {"decoder", "Decoder", "%", 1},
+                                  {"cpuUsage", "Uso CPU", "%", 1},
+                                  {"cpuTemp", "Temperatura CPU", "°C", 1}};
   return d;
 }
 QString displayMetric(const QJsonObject &obj, const QString &key) {
@@ -31,6 +33,8 @@ QString displayMetric(const QJsonObject &obj, const QString &key) {
 QJsonObject OverlayConfig::json() const {
   return {{"enabled", enabled},
           {"onlyGame", onlyGame},
+          {"frametimeGraph", frametimeGraph},
+          {"frametimeLog", frametimeLog},
           {"monitor", monitor},
           {"x", x},
           {"y", y},
@@ -45,6 +49,8 @@ OverlayConfig OverlayConfig::fromJson(const QJsonObject &o) {
   OverlayConfig c;
   c.enabled = o["enabled"].toBool();
   c.onlyGame = o["onlyGame"].toBool();
+  c.frametimeGraph = o["frametimeGraph"].toBool();
+  c.frametimeLog = o["frametimeLog"].toString().left(4096);
   c.monitor = qBound(0, o["monitor"].toInt(), 31);
   c.x = qBound(-16384, o["x"].toInt(24), 16384);
   c.y = qBound(-16384, o["y"].toInt(24), 16384);
@@ -108,7 +114,7 @@ int overlayColumns(const OverlayConfig &c, int width) {
 QRect overlayRect(const OverlayConfig &c, const QRect &r) {
   int width = qMin(c.width, r.width()), columns = overlayColumns(c, width);
   int height = qMin(r.height(),
-                    2 * c.font + 38 + ((c.fields.size() + columns - 1) / columns) * (c.font + 12));
+                    2 * c.font + 38 + ((c.fields.size() + columns - 1) / columns) * (c.font + 12) + (c.frametimeGraph ? qMax(90,c.font+60) : 0));
   int x = r.x() + c.x, y = r.y() + c.y;
   if (c.anchor.contains("right"))
     x = r.x() + r.width() - width - c.x;

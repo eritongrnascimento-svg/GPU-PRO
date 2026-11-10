@@ -63,7 +63,7 @@ bool UpdateManager::officialUrl(const QUrl &url) {
 void UpdateManager::fetch(QUrl url, qint64 maximum, std::function<void(QByteArray, QString)> done) {
   if (!officialUrl(url)) { done({}, "Endereço fora do repositório oficial"); return; }
   QNetworkRequest request(url);
-  request.setHeader(QNetworkRequest::UserAgentHeader, "GPU-PRO/0.4.0");
+  request.setHeader(QNetworkRequest::UserAgentHeader, "GPU-PRO/0.5.0");
   request.setRawHeader("Accept", "application/vnd.github+json");
   request.setTransferTimeout(30000);
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);

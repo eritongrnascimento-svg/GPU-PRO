@@ -1,5 +1,14 @@
 # Alterações
 
+## 0.5.0
+
+- Corrigida a saída pela bandeja com a janela já oculta; teste de regressão incluído.
+- Uso global e temperatura de CPU no overlay, com leitura Linux e ausência explícita de sensores.
+- Controles do HUD aplicados ao vivo; linha de frametime com leitura incremental de CSV ativo compatível.
+- Estilo Qt Fusion e paleta fixos, repintura integral dos cards e opção de pausar a animação neon.
+- Aviso de riscos na documentação e caixa de aceite obrigatória por sessão para acessar Overclock.
+- Documentação revisada para visitantes e colaboradores, preservando informações técnicas e histórico.
+
 ## 0.4.0
 
 - Cards de especificações adaptáveis à janela, com fallback de rolagem.
