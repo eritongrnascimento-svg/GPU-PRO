@@ -1,0 +1,5204 @@
+{
+    "appVersion": "0.3.0",
+    "exportedAt": "2026-11-10T13:19:53Z",
+    "privacy": {
+        "automaticUpload": false,
+        "includesHostnames": false,
+        "includesProcessNames": false,
+        "includesRawLogs": false,
+        "includesSerials": false
+    },
+    "qtVersion": "6.12.0",
+    "records": [
+        {
+            "api": "OpenGL",
+            "cpuIterations": 0,
+            "deviceVerified": "renderer-unique-model",
+            "durationSeconds": 3,
+            "frames": 1528,
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "height": 720,
+            "id": "a1d7c81e-df28-4457-8a0e-a681467e5e4a",
+            "kind": "graphics",
+            "livePreview": true,
+            "method": "neon-throughput-v0.3",
+            "samples": [
+                {
+                    "clock": 1665,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.2e-05,
+                    "elapsedMs": 267,
+                    "gpuMeanMs": 1.23904,
+                    "memCurrent": 0,
+                    "power": 69.178,
+                    "temp": 41
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.3e-05,
+                    "elapsedMs": 534,
+                    "gpuMeanMs": 1.09056,
+                    "memCurrent": 0,
+                    "power": 82.447,
+                    "temp": 45
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000388,
+                    "elapsedMs": 797,
+                    "gpuMeanMs": 1.09568,
+                    "memCurrent": 0,
+                    "power": 94.924,
+                    "temp": 46
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000102,
+                    "elapsedMs": 1063,
+                    "gpuMeanMs": 1.084416,
+                    "memCurrent": 0,
+                    "power": 114.479,
+                    "temp": 47
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000104,
+                    "elapsedMs": 1331,
+                    "gpuMeanMs": 1.060864,
+                    "memCurrent": 0,
+                    "power": 128.145,
+                    "temp": 47
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 8.8e-05,
+                    "elapsedMs": 1599,
+                    "gpuMeanMs": 1.0752,
+                    "memCurrent": 0,
+                    "power": 139.753,
+                    "temp": 48
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.2e-05,
+                    "elapsedMs": 1865,
+                    "gpuMeanMs": 1.099776,
+                    "memCurrent": 0,
+                    "power": 142.099,
+                    "temp": 49
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 5.2e-05,
+                    "elapsedMs": 2129,
+                    "gpuMeanMs": 1.12128,
+                    "memCurrent": 0,
+                    "power": 142.678,
+                    "temp": 49
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000541,
+                    "elapsedMs": 2393,
+                    "gpuMeanMs": 1.122304,
+                    "memCurrent": 0,
+                    "power": 142.895,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 1e-04,
+                    "elapsedMs": 2662,
+                    "gpuMeanMs": 1.114112,
+                    "memCurrent": 0,
+                    "power": 145.667,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00012,
+                    "elapsedMs": 2931,
+                    "gpuMeanMs": 1.112064,
+                    "memCurrent": 0,
+                    "power": 144.798,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.5e-05,
+                    "elapsedMs": 3193,
+                    "gpuMeanMs": 1.078272,
+                    "memCurrent": 0,
+                    "power": 142.615,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000138,
+                    "elapsedMs": 3469,
+                    "gpuMeanMs": 1.09056,
+                    "memCurrent": 0,
+                    "power": 138.854,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00011,
+                    "elapsedMs": 3737,
+                    "gpuMeanMs": 1.093632,
+                    "memCurrent": 0,
+                    "power": 138.785,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000124,
+                    "elapsedMs": 4010,
+                    "gpuMeanMs": 1.139712,
+                    "memCurrent": 0,
+                    "power": 138.33,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000542,
+                    "elapsedMs": 4271,
+                    "gpuMeanMs": 1.11616,
+                    "memCurrent": 0,
+                    "power": 136.6,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.8e-05,
+                    "elapsedMs": 4539,
+                    "gpuMeanMs": 1.106944,
+                    "memCurrent": 0,
+                    "power": 136.544,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000102,
+                    "elapsedMs": 4809,
+                    "gpuMeanMs": 1.132544,
+                    "memCurrent": 0,
+                    "power": 136.182,
+                    "temp": 50
+                }
+            ],
+            "sceneResults": [
+                {
+                    "cpuWorkMs": 0.00012944466019417476,
+                    "frames": 515,
+                    "gpuMeanMs": 1.1147562252427194,
+                    "gpuP99Ms": 1.18784,
+                    "onePercentLow": 246.03942142025764,
+                    "presentedFps": 637.7372197792401,
+                    "scene": 0,
+                    "score": 826.7278344189888
+                },
+                {
+                    "cpuWorkMs": 0.00012936274509803934,
+                    "frames": 510,
+                    "gpuMeanMs": 1.0801874823529416,
+                    "gpuP99Ms": 1.169408,
+                    "onePercentLow": 235.4533210259266,
+                    "presentedFps": 615.9669481218128,
+                    "scene": 1,
+                    "score": 853.1852248394
+                },
+                {
+                    "cpuWorkMs": 0.0001253081510934394,
+                    "frames": 503,
+                    "gpuMeanMs": 1.124356071570576,
+                    "gpuP99Ms": 1.175552,
+                    "onePercentLow": 223.98122977566152,
+                    "presentedFps": 613.8565127682136,
+                    "scene": 2,
+                    "score": 819.6691629126414
+                }
+            ],
+            "score": 833.0699978721356,
+            "scoreUnit": "MPix-s-geomean",
+            "shaderVersion": "neon-city-2",
+            "timestamp": "2026-11-10T13:15:30.788Z",
+            "valid": true,
+            "width": 1280
+        },
+        {
+            "api": "Vulkan",
+            "cpuIterations": 0,
+            "cpuModel": "Intel(R) Core(TM) i5-7500 CPU @ 3.40GHz",
+            "cpuThreads": 4,
+            "deviceVerified": "DRM-PCI",
+            "durationSeconds": 6,
+            "frames": 3286,
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "height": 720,
+            "id": "8a173aa6-ab18-4c7f-8eb3-b4f59caf7efc",
+            "kind": "graphics",
+            "livePreview": true,
+            "method": "neon-throughput-v0.3",
+            "parameters": {
+                "coreCurrent": 0,
+                "coreMax": 1000,
+                "coreMin": -1000,
+                "coreMode": "offset",
+                "memCurrent": 0,
+                "memMax": 6000,
+                "memMin": -2000,
+                "memMode": "offset"
+            },
+            "samples": [
+                {
+                    "clock": 1665,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000193,
+                    "elapsedMs": 268,
+                    "gpuMeanMs": 1.206464,
+                    "memCurrent": 0,
+                    "power": 39.294,
+                    "temp": 41
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000234,
+                    "elapsedMs": 548,
+                    "gpuMeanMs": 1.252032,
+                    "memCurrent": 0,
+                    "power": 61.623,
+                    "temp": 46
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000288,
+                    "elapsedMs": 808,
+                    "gpuMeanMs": 1.247168,
+                    "memCurrent": 0,
+                    "power": 96.153,
+                    "temp": 47
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000224,
+                    "elapsedMs": 1077,
+                    "gpuMeanMs": 1.248576,
+                    "memCurrent": 0,
+                    "power": 119.352,
+                    "temp": 47
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000222,
+                    "elapsedMs": 1347,
+                    "gpuMeanMs": 1.234176,
+                    "memCurrent": 0,
+                    "power": 140.373,
+                    "temp": 48
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 5.8e-05,
+                    "elapsedMs": 1604,
+                    "gpuMeanMs": 1.20912,
+                    "memCurrent": 0,
+                    "power": 143.956,
+                    "temp": 49
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 7.2e-05,
+                    "elapsedMs": 1860,
+                    "gpuMeanMs": 1.225312,
+                    "memCurrent": 0,
+                    "power": 147.256,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000312,
+                    "elapsedMs": 2120,
+                    "gpuMeanMs": 1.251232,
+                    "memCurrent": 0,
+                    "power": 148.589,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000224,
+                    "elapsedMs": 2380,
+                    "gpuMeanMs": 1.225632,
+                    "memCurrent": 0,
+                    "power": 148.806,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000287,
+                    "elapsedMs": 2646,
+                    "gpuMeanMs": 1.219968,
+                    "memCurrent": 0,
+                    "power": 148.626,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000227,
+                    "elapsedMs": 2904,
+                    "gpuMeanMs": 1.231168,
+                    "memCurrent": 0,
+                    "power": 149.992,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000305,
+                    "elapsedMs": 3163,
+                    "gpuMeanMs": 1.203872,
+                    "memCurrent": 0,
+                    "power": 148.849,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000312,
+                    "elapsedMs": 3421,
+                    "gpuMeanMs": 1.272128,
+                    "memCurrent": 0,
+                    "power": 149.063,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000308,
+                    "elapsedMs": 3685,
+                    "gpuMeanMs": 1.209376,
+                    "memCurrent": 0,
+                    "power": 149.835,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000206,
+                    "elapsedMs": 3945,
+                    "gpuMeanMs": 1.214976,
+                    "memCurrent": 0,
+                    "power": 146.595,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00022,
+                    "elapsedMs": 4204,
+                    "gpuMeanMs": 1.061344,
+                    "memCurrent": 0,
+                    "power": 148.14,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000295,
+                    "elapsedMs": 4465,
+                    "gpuMeanMs": 1.060224,
+                    "memCurrent": 0,
+                    "power": 147.125,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000223,
+                    "elapsedMs": 4731,
+                    "gpuMeanMs": 1.009792,
+                    "memCurrent": 0,
+                    "power": 150.02,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000223,
+                    "elapsedMs": 4990,
+                    "gpuMeanMs": 1.02784,
+                    "memCurrent": 0,
+                    "power": 150.132,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000221,
+                    "elapsedMs": 5248,
+                    "gpuMeanMs": 1.03984,
+                    "memCurrent": 0,
+                    "power": 152.038,
+                    "temp": 53
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000437,
+                    "elapsedMs": 5508,
+                    "gpuMeanMs": 1.046464,
+                    "memCurrent": 0,
+                    "power": 152.461,
+                    "temp": 53
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00031,
+                    "elapsedMs": 5770,
+                    "gpuMeanMs": 1.046624,
+                    "memCurrent": 0,
+                    "power": 151.936,
+                    "temp": 53
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000239,
+                    "elapsedMs": 6029,
+                    "gpuMeanMs": 1.021024,
+                    "memCurrent": 0,
+                    "power": 152.44,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000208,
+                    "elapsedMs": 6288,
+                    "gpuMeanMs": 1.019328,
+                    "memCurrent": 0,
+                    "power": 148.848,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000359,
+                    "elapsedMs": 6547,
+                    "gpuMeanMs": 1.013664,
+                    "memCurrent": 0,
+                    "power": 146.86,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00025,
+                    "elapsedMs": 6815,
+                    "gpuMeanMs": 1.038304,
+                    "memCurrent": 0,
+                    "power": 145.497,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000189,
+                    "elapsedMs": 7076,
+                    "gpuMeanMs": 1.043936,
+                    "memCurrent": 0,
+                    "power": 142.595,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000217,
+                    "elapsedMs": 7336,
+                    "gpuMeanMs": 1.0792,
+                    "memCurrent": 0,
+                    "power": 141.067,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000257,
+                    "elapsedMs": 7596,
+                    "gpuMeanMs": 1.079808,
+                    "memCurrent": 0,
+                    "power": 140.336,
+                    "temp": 53
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000309,
+                    "elapsedMs": 7867,
+                    "gpuMeanMs": 1.052416,
+                    "memCurrent": 0,
+                    "power": 139.549,
+                    "temp": 52
+                }
+            ],
+            "sceneResults": [
+                {
+                    "cpuWorkMs": 0.00022094065281899164,
+                    "frames": 1011,
+                    "gpuMeanMs": 1.260138856577647,
+                    "gpuP99Ms": 1.592928,
+                    "onePercentLow": 284.3902753934598,
+                    "presentedFps": 625.6392678848991,
+                    "scene": 0,
+                    "score": 731.3479742247858
+                },
+                {
+                    "cpuWorkMs": 0.00026097914856646436,
+                    "frames": 1151,
+                    "gpuMeanMs": 1.0615124517810597,
+                    "gpuP99Ms": 1.39792,
+                    "onePercentLow": 513.3636252096449,
+                    "presentedFps": 715.3491900191227,
+                    "scene": 1,
+                    "score": 868.1951855144916
+                },
+                {
+                    "cpuWorkMs": 0.00026783629893238484,
+                    "frames": 1124,
+                    "gpuMeanMs": 1.0744645978647704,
+                    "gpuP99Ms": 1.408224,
+                    "onePercentLow": 257.9035454924553,
+                    "presentedFps": 704.6873283265065,
+                    "scene": 2,
+                    "score": 857.7295164786717
+                }
+            ],
+            "score": 816.6399036367615,
+            "scoreUnit": "MPix-s-geomean",
+            "shaderVersion": "neon-city-2",
+            "telemetry": [
+                {
+                    "clock": 210,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 34,
+                    "fanRpm": 871,
+                    "memClock": 405,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 11.005,
+                    "temp": 37,
+                    "timestamp": "2026-11-10T13:10:58.133Z",
+                    "usage": 0,
+                    "vram": 1334771712,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1665,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 34,
+                    "fanRpm": 864,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 39.294,
+                    "temp": 41,
+                    "timestamp": "2026-11-10T13:10:59.168Z",
+                    "usage": 66,
+                    "vram": 1361313792,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 33,
+                    "fanRpm": 851,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 140.373,
+                    "temp": 48,
+                    "timestamp": "2026-11-10T13:11:00.213Z",
+                    "usage": 70,
+                    "vram": 1361313792,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 33,
+                    "fanRpm": 845,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 148.806,
+                    "temp": 50,
+                    "timestamp": "2026-11-10T13:11:01.210Z",
+                    "usage": 68,
+                    "vram": 1361313792,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 33,
+                    "fanRpm": 844,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 149.063,
+                    "temp": 51,
+                    "timestamp": "2026-11-10T13:11:02.211Z",
+                    "usage": 64,
+                    "vram": 1361313792,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 33,
+                    "fanRpm": 842,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 147.125,
+                    "temp": 52,
+                    "timestamp": "2026-11-10T13:11:03.215Z",
+                    "usage": 61,
+                    "vram": 1361313792,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 33,
+                    "fanRpm": 840,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 152.038,
+                    "temp": 53,
+                    "timestamp": "2026-11-10T13:11:04.211Z",
+                    "usage": 60,
+                    "vram": 1361313792,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 33,
+                    "fanRpm": 842,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 148.848,
+                    "temp": 52,
+                    "timestamp": "2026-11-10T13:11:05.211Z",
+                    "usage": 66,
+                    "vram": 1361313792,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 33,
+                    "fanRpm": 845,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 141.067,
+                    "temp": 52,
+                    "timestamp": "2026-11-10T13:11:06.212Z",
+                    "usage": 58,
+                    "vram": 1361313792,
+                    "vramTotal": 8589934592
+                }
+            ],
+            "timestamp": "2026-11-10T13:11:06.747Z",
+            "valid": true,
+            "width": 1280
+        },
+        {
+            "api": "Vulkan",
+            "cpuIterations": 0,
+            "deviceVerified": "DRM-PCI",
+            "durationSeconds": 30,
+            "frames": 15363,
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "height": 720,
+            "id": "3e8ab62a-6b1c-428d-9a94-8e1ec56db389",
+            "kind": "graphics",
+            "livePreview": true,
+            "method": "neon-throughput-v0.3",
+            "samples": [
+                {
+                    "clock": 1665,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 5.4e-05,
+                    "elapsedMs": 298,
+                    "gpuMeanMs": 1.224416,
+                    "memCurrent": 0,
+                    "power": 39.895,
+                    "temp": 43
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.1e-05,
+                    "elapsedMs": 571,
+                    "gpuMeanMs": 1.227872,
+                    "memCurrent": 0,
+                    "power": 52.671,
+                    "temp": 49
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 5.8e-05,
+                    "elapsedMs": 843,
+                    "gpuMeanMs": 1.211296,
+                    "memCurrent": 0,
+                    "power": 103.498,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 6.1e-05,
+                    "elapsedMs": 1101,
+                    "gpuMeanMs": 1.225536,
+                    "memCurrent": 0,
+                    "power": 141.584,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000139,
+                    "elapsedMs": 1361,
+                    "gpuMeanMs": 1.204928,
+                    "memCurrent": 0,
+                    "power": 152.291,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 6e-05,
+                    "elapsedMs": 1618,
+                    "gpuMeanMs": 1.205728,
+                    "memCurrent": 0,
+                    "power": 154.707,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 5.7e-05,
+                    "elapsedMs": 1876,
+                    "gpuMeanMs": 1.222624,
+                    "memCurrent": 0,
+                    "power": 156.86,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000162,
+                    "elapsedMs": 2133,
+                    "gpuMeanMs": 1.219808,
+                    "memCurrent": 0,
+                    "power": 157.25,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.2e-05,
+                    "elapsedMs": 2390,
+                    "gpuMeanMs": 1.216128,
+                    "memCurrent": 0,
+                    "power": 153.674,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00032,
+                    "elapsedMs": 2660,
+                    "gpuMeanMs": 1.26784,
+                    "memCurrent": 0,
+                    "power": 153.175,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000209,
+                    "elapsedMs": 2918,
+                    "gpuMeanMs": 1.224288,
+                    "memCurrent": 0,
+                    "power": 149.31,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000233,
+                    "elapsedMs": 3178,
+                    "gpuMeanMs": 1.180672,
+                    "memCurrent": 0,
+                    "power": 145.497,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000316,
+                    "elapsedMs": 3437,
+                    "gpuMeanMs": 1.266048,
+                    "memCurrent": 0,
+                    "power": 144.614,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000206,
+                    "elapsedMs": 3695,
+                    "gpuMeanMs": 1.180768,
+                    "memCurrent": 0,
+                    "power": 142.751,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000285,
+                    "elapsedMs": 3954,
+                    "gpuMeanMs": 1.19904,
+                    "memCurrent": 0,
+                    "power": 143.215,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000238,
+                    "elapsedMs": 4214,
+                    "gpuMeanMs": 1.196064,
+                    "memCurrent": 0,
+                    "power": 142.247,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000222,
+                    "elapsedMs": 4472,
+                    "gpuMeanMs": 1.174368,
+                    "memCurrent": 0,
+                    "power": 142.653,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000196,
+                    "elapsedMs": 4731,
+                    "gpuMeanMs": 1.183872,
+                    "memCurrent": 0,
+                    "power": 144.299,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000205,
+                    "elapsedMs": 4989,
+                    "gpuMeanMs": 1.198912,
+                    "memCurrent": 0,
+                    "power": 144.295,
+                    "temp": 55
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000217,
+                    "elapsedMs": 5248,
+                    "gpuMeanMs": 1.179936,
+                    "memCurrent": 0,
+                    "power": 145.663,
+                    "temp": 55
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000237,
+                    "elapsedMs": 5507,
+                    "gpuMeanMs": 1.18016,
+                    "memCurrent": 0,
+                    "power": 144.948,
+                    "temp": 55
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00024,
+                    "elapsedMs": 5766,
+                    "gpuMeanMs": 1.163456,
+                    "memCurrent": 0,
+                    "power": 145.269,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000237,
+                    "elapsedMs": 6033,
+                    "gpuMeanMs": 1.169984,
+                    "memCurrent": 0,
+                    "power": 144.196,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000247,
+                    "elapsedMs": 6293,
+                    "gpuMeanMs": 1.16464,
+                    "memCurrent": 0,
+                    "power": 142.73,
+                    "temp": 55
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00026,
+                    "elapsedMs": 6552,
+                    "gpuMeanMs": 1.163296,
+                    "memCurrent": 0,
+                    "power": 144.562,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000217,
+                    "elapsedMs": 6811,
+                    "gpuMeanMs": 1.189504,
+                    "memCurrent": 0,
+                    "power": 142.718,
+                    "temp": 55
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000244,
+                    "elapsedMs": 7069,
+                    "gpuMeanMs": 1.203808,
+                    "memCurrent": 0,
+                    "power": 144.062,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000316,
+                    "elapsedMs": 7328,
+                    "gpuMeanMs": 1.18816,
+                    "memCurrent": 0,
+                    "power": 144.175,
+                    "temp": 55
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 5.4e-05,
+                    "elapsedMs": 7586,
+                    "gpuMeanMs": 1.177888,
+                    "memCurrent": 0,
+                    "power": 146.618,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000271,
+                    "elapsedMs": 7845,
+                    "gpuMeanMs": 1.16608,
+                    "memCurrent": 0,
+                    "power": 147.397,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000208,
+                    "elapsedMs": 8106,
+                    "gpuMeanMs": 1.169888,
+                    "memCurrent": 0,
+                    "power": 147.003,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000219,
+                    "elapsedMs": 8366,
+                    "gpuMeanMs": 1.176608,
+                    "memCurrent": 0,
+                    "power": 146.953,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000254,
+                    "elapsedMs": 8625,
+                    "gpuMeanMs": 1.169792,
+                    "memCurrent": 0,
+                    "power": 147.128,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000195,
+                    "elapsedMs": 8885,
+                    "gpuMeanMs": 1.176672,
+                    "memCurrent": 0,
+                    "power": 144.792,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000222,
+                    "elapsedMs": 9144,
+                    "gpuMeanMs": 1.19168,
+                    "memCurrent": 0,
+                    "power": 143.343,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000264,
+                    "elapsedMs": 9405,
+                    "gpuMeanMs": 1.151808,
+                    "memCurrent": 0,
+                    "power": 144.412,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000208,
+                    "elapsedMs": 9692,
+                    "gpuMeanMs": 1.191648,
+                    "memCurrent": 0,
+                    "power": 142.881,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000308,
+                    "elapsedMs": 9951,
+                    "gpuMeanMs": 1.176448,
+                    "memCurrent": 0,
+                    "power": 141.727,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000295,
+                    "elapsedMs": 10210,
+                    "gpuMeanMs": 1.17728,
+                    "memCurrent": 0,
+                    "power": 142.933,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000303,
+                    "elapsedMs": 10468,
+                    "gpuMeanMs": 1.200576,
+                    "memCurrent": 0,
+                    "power": 142.266,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000281,
+                    "elapsedMs": 10727,
+                    "gpuMeanMs": 1.190112,
+                    "memCurrent": 0,
+                    "power": 144.234,
+                    "temp": 58
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000221,
+                    "elapsedMs": 10986,
+                    "gpuMeanMs": 1.18112,
+                    "memCurrent": 0,
+                    "power": 142.649,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000307,
+                    "elapsedMs": 11245,
+                    "gpuMeanMs": 1.2104,
+                    "memCurrent": 0,
+                    "power": 144.447,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000242,
+                    "elapsedMs": 11505,
+                    "gpuMeanMs": 1.198464,
+                    "memCurrent": 0,
+                    "power": 145.021,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000232,
+                    "elapsedMs": 11765,
+                    "gpuMeanMs": 1.200416,
+                    "memCurrent": 0,
+                    "power": 142.033,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00021,
+                    "elapsedMs": 12024,
+                    "gpuMeanMs": 1.032448,
+                    "memCurrent": 0,
+                    "power": 143.21,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000215,
+                    "elapsedMs": 12284,
+                    "gpuMeanMs": 1.026784,
+                    "memCurrent": 0,
+                    "power": 142.156,
+                    "temp": 58
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000244,
+                    "elapsedMs": 12544,
+                    "gpuMeanMs": 1.029696,
+                    "memCurrent": 0,
+                    "power": 144.489,
+                    "temp": 58
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000199,
+                    "elapsedMs": 12804,
+                    "gpuMeanMs": 1.009888,
+                    "memCurrent": 0,
+                    "power": 146.789,
+                    "temp": 58
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000314,
+                    "elapsedMs": 13063,
+                    "gpuMeanMs": 1.012288,
+                    "memCurrent": 0,
+                    "power": 147.863,
+                    "temp": 58
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000393,
+                    "elapsedMs": 13323,
+                    "gpuMeanMs": 1.02736,
+                    "memCurrent": 0,
+                    "power": 149.967,
+                    "temp": 59
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000314,
+                    "elapsedMs": 13583,
+                    "gpuMeanMs": 1.045248,
+                    "memCurrent": 0,
+                    "power": 149.188,
+                    "temp": 58
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000303,
+                    "elapsedMs": 13842,
+                    "gpuMeanMs": 1.054048,
+                    "memCurrent": 0,
+                    "power": 149.369,
+                    "temp": 59
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000275,
+                    "elapsedMs": 14103,
+                    "gpuMeanMs": 1.125856,
+                    "memCurrent": 0,
+                    "power": 147.78,
+                    "temp": 58
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000191,
+                    "elapsedMs": 14364,
+                    "gpuMeanMs": 1.09552,
+                    "memCurrent": 0,
+                    "power": 147.659,
+                    "temp": 59
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000221,
+                    "elapsedMs": 14624,
+                    "gpuMeanMs": 1.07712,
+                    "memCurrent": 0,
+                    "power": 147.14,
+                    "temp": 58
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00021,
+                    "elapsedMs": 14883,
+                    "gpuMeanMs": 1.065184,
+                    "memCurrent": 0,
+                    "power": 146.926,
+                    "temp": 59
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000234,
+                    "elapsedMs": 15143,
+                    "gpuMeanMs": 1.077088,
+                    "memCurrent": 0,
+                    "power": 148.758,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00023,
+                    "elapsedMs": 15403,
+                    "gpuMeanMs": 1.104352,
+                    "memCurrent": 0,
+                    "power": 147.166,
+                    "temp": 58
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.7e-05,
+                    "elapsedMs": 15662,
+                    "gpuMeanMs": 1.061024,
+                    "memCurrent": 0,
+                    "power": 147.643,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000206,
+                    "elapsedMs": 15921,
+                    "gpuMeanMs": 1.082336,
+                    "memCurrent": 0,
+                    "power": 149.584,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000204,
+                    "elapsedMs": 16182,
+                    "gpuMeanMs": 1.116096,
+                    "memCurrent": 0,
+                    "power": 146.587,
+                    "temp": 58
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000222,
+                    "elapsedMs": 16442,
+                    "gpuMeanMs": 1.161184,
+                    "memCurrent": 0,
+                    "power": 144.965,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000217,
+                    "elapsedMs": 16703,
+                    "gpuMeanMs": 1.141184,
+                    "memCurrent": 0,
+                    "power": 145.761,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000194,
+                    "elapsedMs": 16963,
+                    "gpuMeanMs": 1.089728,
+                    "memCurrent": 0,
+                    "power": 143.824,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000214,
+                    "elapsedMs": 17223,
+                    "gpuMeanMs": 1.128768,
+                    "memCurrent": 0,
+                    "power": 145.238,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000291,
+                    "elapsedMs": 17483,
+                    "gpuMeanMs": 1.122528,
+                    "memCurrent": 0,
+                    "power": 146.735,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000331,
+                    "elapsedMs": 17742,
+                    "gpuMeanMs": 1.098688,
+                    "memCurrent": 0,
+                    "power": 146.003,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000232,
+                    "elapsedMs": 18002,
+                    "gpuMeanMs": 1.13504,
+                    "memCurrent": 0,
+                    "power": 145.915,
+                    "temp": 59
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000222,
+                    "elapsedMs": 18263,
+                    "gpuMeanMs": 1.148864,
+                    "memCurrent": 0,
+                    "power": 145.931,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000492,
+                    "elapsedMs": 18522,
+                    "gpuMeanMs": 1.232832,
+                    "memCurrent": 0,
+                    "power": 145.881,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000365,
+                    "elapsedMs": 18782,
+                    "gpuMeanMs": 1.16224,
+                    "memCurrent": 0,
+                    "power": 146.165,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000219,
+                    "elapsedMs": 19042,
+                    "gpuMeanMs": 1.155136,
+                    "memCurrent": 0,
+                    "power": 144.993,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000214,
+                    "elapsedMs": 19302,
+                    "gpuMeanMs": 1.10896,
+                    "memCurrent": 0,
+                    "power": 144.504,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000285,
+                    "elapsedMs": 19562,
+                    "gpuMeanMs": 1.11872,
+                    "memCurrent": 0,
+                    "power": 145.033,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00024,
+                    "elapsedMs": 19822,
+                    "gpuMeanMs": 1.126624,
+                    "memCurrent": 0,
+                    "power": 144.993,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000216,
+                    "elapsedMs": 20082,
+                    "gpuMeanMs": 1.112704,
+                    "memCurrent": 0,
+                    "power": 146.37,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000204,
+                    "elapsedMs": 20341,
+                    "gpuMeanMs": 1.118784,
+                    "memCurrent": 0,
+                    "power": 145.872,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000228,
+                    "elapsedMs": 20601,
+                    "gpuMeanMs": 1.130112,
+                    "memCurrent": 0,
+                    "power": 146.15,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000232,
+                    "elapsedMs": 20861,
+                    "gpuMeanMs": 1.110976,
+                    "memCurrent": 0,
+                    "power": 145.984,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000282,
+                    "elapsedMs": 21121,
+                    "gpuMeanMs": 1.138688,
+                    "memCurrent": 0,
+                    "power": 146.725,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00022,
+                    "elapsedMs": 21381,
+                    "gpuMeanMs": 1.119104,
+                    "memCurrent": 0,
+                    "power": 145.02,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000205,
+                    "elapsedMs": 21641,
+                    "gpuMeanMs": 1.121184,
+                    "memCurrent": 0,
+                    "power": 145.517,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000224,
+                    "elapsedMs": 21901,
+                    "gpuMeanMs": 1.12,
+                    "memCurrent": 0,
+                    "power": 146.177,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00029,
+                    "elapsedMs": 22161,
+                    "gpuMeanMs": 1.003968,
+                    "memCurrent": 0,
+                    "power": 145.12,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000324,
+                    "elapsedMs": 22421,
+                    "gpuMeanMs": 1.013824,
+                    "memCurrent": 0,
+                    "power": 145.138,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000224,
+                    "elapsedMs": 22680,
+                    "gpuMeanMs": 1.043456,
+                    "memCurrent": 0,
+                    "power": 142.464,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000287,
+                    "elapsedMs": 22940,
+                    "gpuMeanMs": 1.057824,
+                    "memCurrent": 0,
+                    "power": 141.442,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00022,
+                    "elapsedMs": 23201,
+                    "gpuMeanMs": 1.06704,
+                    "memCurrent": 0,
+                    "power": 141.004,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00063,
+                    "elapsedMs": 23460,
+                    "gpuMeanMs": 1.063712,
+                    "memCurrent": 0,
+                    "power": 138.987,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000227,
+                    "elapsedMs": 23720,
+                    "gpuMeanMs": 1.074976,
+                    "memCurrent": 0,
+                    "power": 139.955,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000239,
+                    "elapsedMs": 23980,
+                    "gpuMeanMs": 1.0536,
+                    "memCurrent": 0,
+                    "power": 138.959,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000305,
+                    "elapsedMs": 24240,
+                    "gpuMeanMs": 1.086016,
+                    "memCurrent": 0,
+                    "power": 138.628,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000218,
+                    "elapsedMs": 24500,
+                    "gpuMeanMs": 1.06592,
+                    "memCurrent": 0,
+                    "power": 138.893,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000247,
+                    "elapsedMs": 24760,
+                    "gpuMeanMs": 1.065472,
+                    "memCurrent": 0,
+                    "power": 138.312,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00023,
+                    "elapsedMs": 25020,
+                    "gpuMeanMs": 1.026848,
+                    "memCurrent": 0,
+                    "power": 140.031,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00025,
+                    "elapsedMs": 25294,
+                    "gpuMeanMs": 1.04816,
+                    "memCurrent": 0,
+                    "power": 140.415,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000237,
+                    "elapsedMs": 25553,
+                    "gpuMeanMs": 1.077472,
+                    "memCurrent": 0,
+                    "power": 143.071,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000214,
+                    "elapsedMs": 25811,
+                    "gpuMeanMs": 1.0608,
+                    "memCurrent": 0,
+                    "power": 143.068,
+                    "temp": 60
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000267,
+                    "elapsedMs": 26070,
+                    "gpuMeanMs": 1.06,
+                    "memCurrent": 0,
+                    "power": 142.984,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000211,
+                    "elapsedMs": 26328,
+                    "gpuMeanMs": 1.058368,
+                    "memCurrent": 0,
+                    "power": 142.817,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000284,
+                    "elapsedMs": 26587,
+                    "gpuMeanMs": 1.078976,
+                    "memCurrent": 0,
+                    "power": 141.885,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000186,
+                    "elapsedMs": 26845,
+                    "gpuMeanMs": 1.07744,
+                    "memCurrent": 0,
+                    "power": 141.858,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000255,
+                    "elapsedMs": 27104,
+                    "gpuMeanMs": 1.070624,
+                    "memCurrent": 0,
+                    "power": 142.138,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000318,
+                    "elapsedMs": 27362,
+                    "gpuMeanMs": 1.077856,
+                    "memCurrent": 0,
+                    "power": 142.348,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00021,
+                    "elapsedMs": 27621,
+                    "gpuMeanMs": 1.062336,
+                    "memCurrent": 0,
+                    "power": 143.725,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000243,
+                    "elapsedMs": 27881,
+                    "gpuMeanMs": 1.08512,
+                    "memCurrent": 0,
+                    "power": 143.824,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 5.6e-05,
+                    "elapsedMs": 28139,
+                    "gpuMeanMs": 1.089248,
+                    "memCurrent": 0,
+                    "power": 143.797,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00023,
+                    "elapsedMs": 28399,
+                    "gpuMeanMs": 1.108224,
+                    "memCurrent": 0,
+                    "power": 146.562,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000223,
+                    "elapsedMs": 28659,
+                    "gpuMeanMs": 1.079936,
+                    "memCurrent": 0,
+                    "power": 145.369,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000238,
+                    "elapsedMs": 28918,
+                    "gpuMeanMs": 1.088736,
+                    "memCurrent": 0,
+                    "power": 146.052,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000281,
+                    "elapsedMs": 29178,
+                    "gpuMeanMs": 1.090144,
+                    "memCurrent": 0,
+                    "power": 146.067,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000214,
+                    "elapsedMs": 29438,
+                    "gpuMeanMs": 1.10512,
+                    "memCurrent": 0,
+                    "power": 144.637,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000238,
+                    "elapsedMs": 29698,
+                    "gpuMeanMs": 1.074432,
+                    "memCurrent": 0,
+                    "power": 142.028,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 2e-04,
+                    "elapsedMs": 29959,
+                    "gpuMeanMs": 1.072096,
+                    "memCurrent": 0,
+                    "power": 141.404,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00023,
+                    "elapsedMs": 30218,
+                    "gpuMeanMs": 1.04976,
+                    "memCurrent": 0,
+                    "power": 141.484,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000214,
+                    "elapsedMs": 30478,
+                    "gpuMeanMs": 1.024544,
+                    "memCurrent": 0,
+                    "power": 141.469,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00024,
+                    "elapsedMs": 30738,
+                    "gpuMeanMs": 0.996096,
+                    "memCurrent": 0,
+                    "power": 141.724,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000218,
+                    "elapsedMs": 30998,
+                    "gpuMeanMs": 1.01088,
+                    "memCurrent": 0,
+                    "power": 141.306,
+                    "temp": 61
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000234,
+                    "elapsedMs": 31258,
+                    "gpuMeanMs": 0.988192,
+                    "memCurrent": 0,
+                    "power": 141.748,
+                    "temp": 62
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000315,
+                    "elapsedMs": 31518,
+                    "gpuMeanMs": 0.993344,
+                    "memCurrent": 0,
+                    "power": 142.441,
+                    "temp": 63
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000314,
+                    "elapsedMs": 31778,
+                    "gpuMeanMs": 1.00992,
+                    "memCurrent": 0,
+                    "power": 142.049,
+                    "temp": 62
+                }
+            ],
+            "sceneResults": [
+                {
+                    "cpuWorkMs": 0.00024669675686841687,
+                    "frames": 4841,
+                    "gpuMeanMs": 1.1874941673208015,
+                    "gpuP99Ms": 1.260832,
+                    "onePercentLow": 503.50653252458005,
+                    "presentedFps": 649.8808413003818,
+                    "scene": 0,
+                    "score": 776.088022461023
+                },
+                {
+                    "cpuWorkMs": 0.000246400902668761,
+                    "frames": 5096,
+                    "gpuMeanMs": 1.1043165588697024,
+                    "gpuP99Ms": 1.20224,
+                    "onePercentLow": 519.1312011583426,
+                    "presentedFps": 687.9850865677998,
+                    "scene": 1,
+                    "score": 834.5433133261013
+                },
+                {
+                    "cpuWorkMs": 0.00023429340213785652,
+                    "frames": 5426,
+                    "gpuMeanMs": 1.054546618503499,
+                    "gpuP99Ms": 1.125888,
+                    "onePercentLow": 544.4192723670129,
+                    "presentedFps": 717.8844868716071,
+                    "scene": 2,
+                    "score": 873.930069879544
+                }
+            ],
+            "score": 827.2031542439638,
+            "scoreUnit": "MPix-s-geomean",
+            "shaderVersion": "neon-city-2",
+            "timestamp": "2026-11-10T13:07:01.888Z",
+            "valid": true,
+            "width": 1280
+        },
+        {
+            "api": "OpenGL",
+            "cpuIterations": 0,
+            "deviceVerified": "renderer-unique-model",
+            "durationSeconds": 3,
+            "frames": 3938,
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "height": 720,
+            "id": "4eec51be-6371-4e33-9aae-55ce16c6e04b",
+            "kind": "graphics",
+            "method": "city-throughput-v0.2",
+            "samples": [
+                {
+                    "clock": 1665,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000133,
+                    "elapsedMs": 261,
+                    "gpuMeanMs": 0.439296,
+                    "memCurrent": 0,
+                    "power": 36.645,
+                    "temp": 42
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.3e-05,
+                    "elapsedMs": 519,
+                    "gpuMeanMs": 0.442368,
+                    "memCurrent": 0,
+                    "power": 64.155,
+                    "temp": 48
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000175,
+                    "elapsedMs": 777,
+                    "gpuMeanMs": 0.442368,
+                    "memCurrent": 0,
+                    "power": 106.313,
+                    "temp": 49
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000164,
+                    "elapsedMs": 1041,
+                    "gpuMeanMs": 0.442368,
+                    "memCurrent": 0,
+                    "power": 133.163,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00019,
+                    "elapsedMs": 1299,
+                    "gpuMeanMs": 0.442368,
+                    "memCurrent": 0,
+                    "power": 160.144,
+                    "temp": 51
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 9.1e-05,
+                    "elapsedMs": 1556,
+                    "gpuMeanMs": 0.434176,
+                    "memCurrent": 0,
+                    "power": 167.099,
+                    "temp": 52
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000147,
+                    "elapsedMs": 1815,
+                    "gpuMeanMs": 0.439296,
+                    "memCurrent": 0,
+                    "power": 168.385,
+                    "temp": 52
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000226,
+                    "elapsedMs": 2074,
+                    "gpuMeanMs": 0.4352,
+                    "memCurrent": 0,
+                    "power": 168.47,
+                    "temp": 52
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000235,
+                    "elapsedMs": 2333,
+                    "gpuMeanMs": 0.4352,
+                    "memCurrent": 0,
+                    "power": 169.487,
+                    "temp": 52
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000217,
+                    "elapsedMs": 2591,
+                    "gpuMeanMs": 0.4352,
+                    "memCurrent": 0,
+                    "power": 169.205,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000207,
+                    "elapsedMs": 2849,
+                    "gpuMeanMs": 0.44032,
+                    "memCurrent": 0,
+                    "power": 169.316,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000258,
+                    "elapsedMs": 3108,
+                    "gpuMeanMs": 0.462848,
+                    "memCurrent": 0,
+                    "power": 170.438,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000214,
+                    "elapsedMs": 3368,
+                    "gpuMeanMs": 0.461824,
+                    "memCurrent": 0,
+                    "power": 169.248,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.00017,
+                    "elapsedMs": 3628,
+                    "gpuMeanMs": 0.474112,
+                    "memCurrent": 0,
+                    "power": 165.559,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000198,
+                    "elapsedMs": 3887,
+                    "gpuMeanMs": 0.477184,
+                    "memCurrent": 0,
+                    "power": 161.705,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000226,
+                    "elapsedMs": 4148,
+                    "gpuMeanMs": 0.570368,
+                    "memCurrent": 0,
+                    "power": 156.78,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000183,
+                    "elapsedMs": 4408,
+                    "gpuMeanMs": 0.576512,
+                    "memCurrent": 0,
+                    "power": 154.958,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 0.000207,
+                    "elapsedMs": 4668,
+                    "gpuMeanMs": 0.577536,
+                    "memCurrent": 0,
+                    "power": 157.877,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "cpuWorkMs": 8.1e-05,
+                    "elapsedMs": 4927,
+                    "gpuMeanMs": 0.589824,
+                    "memCurrent": 0,
+                    "power": 160.558,
+                    "temp": 55
+                }
+            ],
+            "sceneResults": [
+                {
+                    "cpuWorkMs": 0.0002186845721424113,
+                    "frames": 1601,
+                    "gpuMeanMs": 0.4369966371018112,
+                    "gpuP99Ms": 0.44544,
+                    "onePercentLow": 857.5179455807006,
+                    "presentedFps": 1652.3107046083244,
+                    "scene": 0,
+                    "score": 2108.940714308715
+                },
+                {
+                    "cpuWorkMs": 0.0001891631799163187,
+                    "frames": 1195,
+                    "gpuMeanMs": 0.46737502259414393,
+                    "gpuP99Ms": 0.478208,
+                    "onePercentLow": 1022.6350903084787,
+                    "presentedFps": 1237.1302415053701,
+                    "scene": 1,
+                    "score": 1971.8640394702754
+                },
+                {
+                    "cpuWorkMs": 0.00020369264448336305,
+                    "frames": 1142,
+                    "gpuMeanMs": 0.5758341155866881,
+                    "gpuP99Ms": 0.5888,
+                    "onePercentLow": 904.6292365766026,
+                    "presentedFps": 1184.0955438606816,
+                    "scene": 2,
+                    "score": 1600.4609227798683
+                }
+            ],
+            "score": 1881.0289125320294,
+            "scoreUnit": "MPix-s-geomean",
+            "shaderVersion": "city-1",
+            "timestamp": "2026-11-10T11:31:05.469Z",
+            "valid": true,
+            "width": 1280
+        },
+        {
+            "comparison": [
+                {
+                    "api": "Vulkan",
+                    "cpuIterations": 0,
+                    "deviceVerified": "DRM-PCI",
+                    "durationSeconds": 6,
+                    "frames": 6761,
+                    "height": 720,
+                    "kind": "clock-trial",
+                    "method": "city-throughput-v0.2",
+                    "samples": [
+                        {
+                            "clock": 1665,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000187,
+                            "elapsedMs": 261,
+                            "gpuMeanMs": 0.5088,
+                            "memCurrent": 0,
+                            "power": 19.606,
+                            "temp": 38
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000185,
+                            "elapsedMs": 519,
+                            "gpuMeanMs": 0.514336,
+                            "memCurrent": 0,
+                            "power": 38.89,
+                            "temp": 44
+                        },
+                        {
+                            "clock": 1920,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 9.7e-05,
+                            "elapsedMs": 781,
+                            "gpuMeanMs": 0.511072,
+                            "memCurrent": 0,
+                            "power": 76.915,
+                            "temp": 48
+                        },
+                        {
+                            "clock": 1920,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000196,
+                            "elapsedMs": 1041,
+                            "gpuMeanMs": 0.509664,
+                            "memCurrent": 0,
+                            "power": 102.141,
+                            "temp": 49
+                        },
+                        {
+                            "clock": 1920,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000183,
+                            "elapsedMs": 1299,
+                            "gpuMeanMs": 0.511744,
+                            "memCurrent": 0,
+                            "power": 151.64,
+                            "temp": 51
+                        },
+                        {
+                            "clock": 1920,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 2e-04,
+                            "elapsedMs": 1557,
+                            "gpuMeanMs": 0.514208,
+                            "memCurrent": 0,
+                            "power": 155.687,
+                            "temp": 51
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000193,
+                            "elapsedMs": 1815,
+                            "gpuMeanMs": 0.50896,
+                            "memCurrent": 0,
+                            "power": 156.019,
+                            "temp": 51
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000296,
+                            "elapsedMs": 2074,
+                            "gpuMeanMs": 0.503616,
+                            "memCurrent": 0,
+                            "power": 155.771,
+                            "temp": 52
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000238,
+                            "elapsedMs": 2332,
+                            "gpuMeanMs": 0.50624,
+                            "memCurrent": 0,
+                            "power": 155.606,
+                            "temp": 52
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 3e-04,
+                            "elapsedMs": 2590,
+                            "gpuMeanMs": 0.504064,
+                            "memCurrent": 0,
+                            "power": 154.631,
+                            "temp": 52
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000113,
+                            "elapsedMs": 2848,
+                            "gpuMeanMs": 0.50928,
+                            "memCurrent": 0,
+                            "power": 154.356,
+                            "temp": 52
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000205,
+                            "elapsedMs": 3106,
+                            "gpuMeanMs": 0.511936,
+                            "memCurrent": 0,
+                            "power": 154.823,
+                            "temp": 53
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000236,
+                            "elapsedMs": 3366,
+                            "gpuMeanMs": 0.512928,
+                            "memCurrent": 0,
+                            "power": 154.402,
+                            "temp": 52
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 8.1e-05,
+                            "elapsedMs": 3625,
+                            "gpuMeanMs": 0.508384,
+                            "memCurrent": 0,
+                            "power": 152.97,
+                            "temp": 52
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000286,
+                            "elapsedMs": 3884,
+                            "gpuMeanMs": 0.517664,
+                            "memCurrent": 0,
+                            "power": 154.295,
+                            "temp": 53
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.00023,
+                            "elapsedMs": 4144,
+                            "gpuMeanMs": 0.541216,
+                            "memCurrent": 0,
+                            "power": 151.899,
+                            "temp": 53
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000223,
+                            "elapsedMs": 4404,
+                            "gpuMeanMs": 0.544576,
+                            "memCurrent": 0,
+                            "power": 152.469,
+                            "temp": 53
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000227,
+                            "elapsedMs": 4665,
+                            "gpuMeanMs": 0.543744,
+                            "memCurrent": 0,
+                            "power": 155.649,
+                            "temp": 54
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000294,
+                            "elapsedMs": 4925,
+                            "gpuMeanMs": 0.546976,
+                            "memCurrent": 0,
+                            "power": 156.353,
+                            "temp": 54
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 9.6e-05,
+                            "elapsedMs": 5183,
+                            "gpuMeanMs": 0.549056,
+                            "memCurrent": 0,
+                            "power": 158.376,
+                            "temp": 54
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000296,
+                            "elapsedMs": 5443,
+                            "gpuMeanMs": 0.55088,
+                            "memCurrent": 0,
+                            "power": 158.796,
+                            "temp": 54
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000231,
+                            "elapsedMs": 5703,
+                            "gpuMeanMs": 0.55296,
+                            "memCurrent": 0,
+                            "power": 162.771,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.00022,
+                            "elapsedMs": 5965,
+                            "gpuMeanMs": 0.550688,
+                            "memCurrent": 0,
+                            "power": 163.304,
+                            "temp": 55
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000227,
+                            "elapsedMs": 6224,
+                            "gpuMeanMs": 0.660832,
+                            "memCurrent": 0,
+                            "power": 161.747,
+                            "temp": 55
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000221,
+                            "elapsedMs": 6484,
+                            "gpuMeanMs": 0.669536,
+                            "memCurrent": 0,
+                            "power": 163.605,
+                            "temp": 55
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000252,
+                            "elapsedMs": 6744,
+                            "gpuMeanMs": 0.67184,
+                            "memCurrent": 0,
+                            "power": 160.482,
+                            "temp": 55
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000233,
+                            "elapsedMs": 7004,
+                            "gpuMeanMs": 0.672896,
+                            "memCurrent": 0,
+                            "power": 161.306,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000234,
+                            "elapsedMs": 7264,
+                            "gpuMeanMs": 0.677312,
+                            "memCurrent": 0,
+                            "power": 161.759,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000269,
+                            "elapsedMs": 7524,
+                            "gpuMeanMs": 0.67808,
+                            "memCurrent": 0,
+                            "power": 163.279,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1935,
+                            "coreCurrent": 0,
+                            "cpuWorkMs": 0.000267,
+                            "elapsedMs": 7784,
+                            "gpuMeanMs": 0.682464,
+                            "memCurrent": 0,
+                            "power": 163.647,
+                            "temp": 56
+                        }
+                    ],
+                    "sceneResults": [
+                        {
+                            "cpuWorkMs": 0.00022469577935645572,
+                            "frames": 2393,
+                            "gpuMeanMs": 0.5104955988299209,
+                            "gpuP99Ms": 0.51904,
+                            "onePercentLow": 790.1477530206197,
+                            "presentedFps": 1235.5805758918286,
+                            "scene": 0,
+                            "score": 1805.3044964782246
+                        },
+                        {
+                            "cpuWorkMs": 0.0001974148802017645,
+                            "frames": 2379,
+                            "gpuMeanMs": 0.5479808995376205,
+                            "gpuP99Ms": 0.556864,
+                            "onePercentLow": 557.281761612231,
+                            "presentedFps": 1234.686086999668,
+                            "scene": 1,
+                            "score": 1681.8104440823295
+                        },
+                        {
+                            "cpuWorkMs": 0.0002617978883861238,
+                            "frames": 1989,
+                            "gpuMeanMs": 0.6726122795374553,
+                            "gpuP99Ms": 0.685024,
+                            "onePercentLow": 715.85745602944,
+                            "presentedFps": 1025.9674904513158,
+                            "scene": 2,
+                            "score": 1370.1801588186431
+                        }
+                    ],
+                    "score": 1608.3049345666775,
+                    "scoreUnit": "MPix-s-geomean",
+                    "shaderVersion": "city-1",
+                    "timestamp": "2026-11-10T11:16:17.338Z",
+                    "valid": true,
+                    "width": 1280
+                },
+                {
+                    "api": "Vulkan",
+                    "cpuIterations": 0,
+                    "deviceVerified": "DRM-PCI",
+                    "durationSeconds": 6,
+                    "frames": 6768,
+                    "height": 720,
+                    "kind": "clock-trial",
+                    "method": "city-throughput-v0.2",
+                    "samples": [
+                        {
+                            "clock": 1665,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000132,
+                            "elapsedMs": 260,
+                            "gpuMeanMs": 0.509888,
+                            "memCurrent": 0,
+                            "power": 17.351,
+                            "temp": 44
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000286,
+                            "elapsedMs": 519,
+                            "gpuMeanMs": 0.501568,
+                            "memCurrent": 0,
+                            "power": 76.258,
+                            "temp": 53
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000182,
+                            "elapsedMs": 778,
+                            "gpuMeanMs": 0.503616,
+                            "memCurrent": 0,
+                            "power": 103.371,
+                            "temp": 54
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000183,
+                            "elapsedMs": 1036,
+                            "gpuMeanMs": 0.505216,
+                            "memCurrent": 0,
+                            "power": 140.207,
+                            "temp": 54
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000224,
+                            "elapsedMs": 1294,
+                            "gpuMeanMs": 0.506208,
+                            "memCurrent": 0,
+                            "power": 156.05,
+                            "temp": 55
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.00015,
+                            "elapsedMs": 1551,
+                            "gpuMeanMs": 0.50304,
+                            "memCurrent": 0,
+                            "power": 160.534,
+                            "temp": 55
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000179,
+                            "elapsedMs": 1809,
+                            "gpuMeanMs": 0.501056,
+                            "memCurrent": 0,
+                            "power": 160.435,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.00024,
+                            "elapsedMs": 2068,
+                            "gpuMeanMs": 0.499456,
+                            "memCurrent": 0,
+                            "power": 160.498,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000227,
+                            "elapsedMs": 2327,
+                            "gpuMeanMs": 0.502976,
+                            "memCurrent": 0,
+                            "power": 160.257,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000251,
+                            "elapsedMs": 2589,
+                            "gpuMeanMs": 0.504,
+                            "memCurrent": 0,
+                            "power": 159.049,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000231,
+                            "elapsedMs": 2853,
+                            "gpuMeanMs": 0.502496,
+                            "memCurrent": 0,
+                            "power": 157.595,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000261,
+                            "elapsedMs": 3117,
+                            "gpuMeanMs": 0.509856,
+                            "memCurrent": 0,
+                            "power": 156.242,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000245,
+                            "elapsedMs": 3380,
+                            "gpuMeanMs": 0.507296,
+                            "memCurrent": 0,
+                            "power": 155.261,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000195,
+                            "elapsedMs": 3644,
+                            "gpuMeanMs": 0.51136,
+                            "memCurrent": 0,
+                            "power": 154.276,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000242,
+                            "elapsedMs": 3908,
+                            "gpuMeanMs": 0.513344,
+                            "memCurrent": 0,
+                            "power": 154.163,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000243,
+                            "elapsedMs": 4173,
+                            "gpuMeanMs": 0.540032,
+                            "memCurrent": 0,
+                            "power": 154.587,
+                            "temp": 57
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000307,
+                            "elapsedMs": 4438,
+                            "gpuMeanMs": 0.539744,
+                            "memCurrent": 0,
+                            "power": 154.463,
+                            "temp": 56
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000216,
+                            "elapsedMs": 4701,
+                            "gpuMeanMs": 0.544448,
+                            "memCurrent": 0,
+                            "power": 157.863,
+                            "temp": 57
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000228,
+                            "elapsedMs": 4965,
+                            "gpuMeanMs": 0.546112,
+                            "memCurrent": 0,
+                            "power": 159.25,
+                            "temp": 58
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000164,
+                            "elapsedMs": 5228,
+                            "gpuMeanMs": 0.551296,
+                            "memCurrent": 0,
+                            "power": 161.171,
+                            "temp": 57
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000232,
+                            "elapsedMs": 5493,
+                            "gpuMeanMs": 0.549632,
+                            "memCurrent": 0,
+                            "power": 162.428,
+                            "temp": 58
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000225,
+                            "elapsedMs": 5756,
+                            "gpuMeanMs": 0.550144,
+                            "memCurrent": 0,
+                            "power": 162.545,
+                            "temp": 57
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000224,
+                            "elapsedMs": 6018,
+                            "gpuMeanMs": 0.657632,
+                            "memCurrent": 0,
+                            "power": 160.497,
+                            "temp": 58
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000217,
+                            "elapsedMs": 6282,
+                            "gpuMeanMs": 0.666048,
+                            "memCurrent": 0,
+                            "power": 162.221,
+                            "temp": 59
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000264,
+                            "elapsedMs": 6548,
+                            "gpuMeanMs": 0.667168,
+                            "memCurrent": 0,
+                            "power": 163.307,
+                            "temp": 59
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000238,
+                            "elapsedMs": 6811,
+                            "gpuMeanMs": 0.668544,
+                            "memCurrent": 0,
+                            "power": 163.572,
+                            "temp": 59
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.00024,
+                            "elapsedMs": 7073,
+                            "gpuMeanMs": 0.66752,
+                            "memCurrent": 0,
+                            "power": 165.343,
+                            "temp": 59
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000272,
+                            "elapsedMs": 7339,
+                            "gpuMeanMs": 0.680384,
+                            "memCurrent": 0,
+                            "power": 166.417,
+                            "temp": 60
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.000102,
+                            "elapsedMs": 7601,
+                            "gpuMeanMs": 0.675008,
+                            "memCurrent": 0,
+                            "power": 166.305,
+                            "temp": 59
+                        },
+                        {
+                            "clock": 1950,
+                            "coreCurrent": 15,
+                            "cpuWorkMs": 0.00023,
+                            "elapsedMs": 7866,
+                            "gpuMeanMs": 0.672832,
+                            "memCurrent": 0,
+                            "power": 167.526,
+                            "temp": 59
+                        }
+                    ],
+                    "sceneResults": [
+                        {
+                            "cpuWorkMs": 0.0002399672681493908,
+                            "frames": 2383,
+                            "gpuMeanMs": 0.5072645774234147,
+                            "gpuP99Ms": 0.516928,
+                            "onePercentLow": 698.8515365037239,
+                            "presentedFps": 1248.953703840712,
+                            "scene": 0,
+                            "score": 1816.803382331857
+                        },
+                        {
+                            "cpuWorkMs": 0.00022944970414201084,
+                            "frames": 2366,
+                            "gpuMeanMs": 0.5462418799661884,
+                            "gpuP99Ms": 0.55472,
+                            "onePercentLow": 629.7947884533739,
+                            "presentedFps": 1239.9377414577634,
+                            "scene": 1,
+                            "score": 1687.164667888602
+                        },
+                        {
+                            "cpuWorkMs": 0.00022349628528974658,
+                            "frames": 2019,
+                            "gpuMeanMs": 0.6701316374442798,
+                            "gpuP99Ms": 0.681312,
+                            "onePercentLow": 753.8311854648712,
+                            "presentedFps": 1063.4534908065207,
+                            "scene": 2,
+                            "score": 1375.2521870400863
+                        }
+                    ],
+                    "score": 1615.409311826275,
+                    "scoreUnit": "MPix-s-geomean",
+                    "shaderVersion": "city-1",
+                    "timestamp": "2026-11-10T11:16:33.373Z",
+                    "valid": true,
+                    "width": 1280
+                }
+            ],
+            "coreBefore": 0,
+            "coreRestored": 0,
+            "coreTested": 15,
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "id": "78f3eef7-ab39-4641-93db-2190f6d1b39f",
+            "kind": "clock-trial",
+            "memoryAfter": 0,
+            "memoryBefore": 0,
+            "method": "core-plus15-short-trial-v1",
+            "originalLimitsPreserved": true,
+            "powerAfter": 225000,
+            "powerBefore": 225000,
+            "powerLimitWritten": false,
+            "restored": true,
+            "status": "passed-short-trial",
+            "telemetry": [
+                {
+                    "clock": 210,
+                    "coreCurrent": 15,
+                    "elapsedMs": 256,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 12.997,
+                    "temp": 43
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 15,
+                    "elapsedMs": 513,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 35.181,
+                    "temp": 48
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 773,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 76.258,
+                    "temp": 53
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 1033,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 103.371,
+                    "temp": 54
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 1291,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 140.207,
+                    "temp": 54
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 1549,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 156.05,
+                    "temp": 55
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 1807,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 160.534,
+                    "temp": 55
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 2064,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 160.435,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 2321,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 160.498,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 2578,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 160.257,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 2838,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 159.049,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 3099,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 157.595,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 3362,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 156.242,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 3624,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 155.261,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 3888,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 154.276,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 4152,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 154.163,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 4417,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 154.587,
+                    "temp": 57
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 4682,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 154.463,
+                    "temp": 56
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 4945,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 157.863,
+                    "temp": 57
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 5209,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 159.25,
+                    "temp": 58
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 5473,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 161.171,
+                    "temp": 57
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 5738,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 162.428,
+                    "temp": 58
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 6000,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 162.545,
+                    "temp": 57
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 6264,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 162.66,
+                    "temp": 58
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 6527,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 162.221,
+                    "temp": 59
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 6792,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 163.307,
+                    "temp": 59
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 7056,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 163.572,
+                    "temp": 59
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 7318,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 165.343,
+                    "temp": 59
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 7583,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 166.417,
+                    "temp": 60
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 7846,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 166.305,
+                    "temp": 59
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 8110,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 167.526,
+                    "temp": 59
+                },
+                {
+                    "clock": 1950,
+                    "coreCurrent": 15,
+                    "elapsedMs": 8371,
+                    "hotspot": null,
+                    "memCurrent": 0,
+                    "power": 167.933,
+                    "temp": 60
+                }
+            ],
+            "timestamp": "2026-11-10T11:16:33.572Z",
+            "valid": true,
+            "voltageWritten": false
+        },
+        {
+            "api": "Vulkan",
+            "cpuIterations": 0,
+            "deviceVerified": "DRM-PCI",
+            "durationSeconds": 3,
+            "frames": 144,
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "height": 4320,
+            "id": "a32b5777-fe32-462b-a757-c594f18064de",
+            "kind": "graphics",
+            "method": "city-throughput-v0.2",
+            "powerLimitWritten": false,
+            "samples": [
+                {
+                    "clock": 1665,
+                    "cpuWorkMs": 0.000281,
+                    "elapsedMs": 266,
+                    "gpuMeanMs": 17.4352,
+                    "power": 40.754,
+                    "temp": 42
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000301,
+                    "elapsedMs": 567,
+                    "gpuMeanMs": 17.529184,
+                    "power": 71.291,
+                    "temp": 49
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.00029,
+                    "elapsedMs": 868,
+                    "gpuMeanMs": 17.510048,
+                    "power": 115.214,
+                    "temp": 47
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.00016,
+                    "elapsedMs": 1141,
+                    "gpuMeanMs": 17.671232,
+                    "power": 144.707,
+                    "temp": 49
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.00017,
+                    "elapsedMs": 1416,
+                    "gpuMeanMs": 17.477952,
+                    "power": 182.311,
+                    "temp": 52
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000288,
+                    "elapsedMs": 1678,
+                    "gpuMeanMs": 17.373504,
+                    "power": 190.493,
+                    "temp": 53
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000131,
+                    "elapsedMs": 1941,
+                    "gpuMeanMs": 17.36944,
+                    "power": 194.085,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000313,
+                    "elapsedMs": 2200,
+                    "gpuMeanMs": 17.366368,
+                    "power": 197.09,
+                    "temp": 54
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.00031,
+                    "elapsedMs": 2459,
+                    "gpuMeanMs": 17.388992,
+                    "power": 197.172,
+                    "temp": 55
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000308,
+                    "elapsedMs": 2719,
+                    "gpuMeanMs": 17.440544,
+                    "power": 197.38,
+                    "temp": 55
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000327,
+                    "elapsedMs": 2987,
+                    "gpuMeanMs": 17.536,
+                    "power": 198.422,
+                    "temp": 55
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000314,
+                    "elapsedMs": 3247,
+                    "gpuMeanMs": 18.614848,
+                    "power": 197.672,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000219,
+                    "elapsedMs": 3525,
+                    "gpuMeanMs": 18.959296,
+                    "power": 198.195,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000322,
+                    "elapsedMs": 3789,
+                    "gpuMeanMs": 18.811328,
+                    "power": 198.368,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000313,
+                    "elapsedMs": 4066,
+                    "gpuMeanMs": 22.809792,
+                    "power": 197.927,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000324,
+                    "elapsedMs": 4335,
+                    "gpuMeanMs": 22.774272,
+                    "power": 198.213,
+                    "temp": 56
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000302,
+                    "elapsedMs": 4603,
+                    "gpuMeanMs": 22.889056,
+                    "power": 198.753,
+                    "temp": 57
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.00043,
+                    "elapsedMs": 4875,
+                    "gpuMeanMs": 23.014336,
+                    "power": 198.973,
+                    "temp": 57
+                }
+            ],
+            "sceneResults": [
+                {
+                    "cpuWorkMs": 0.0003245283018867924,
+                    "frames": 53,
+                    "gpuMeanMs": 17.449253433962266,
+                    "gpuP99Ms": 17.639936,
+                    "onePercentLow": 50.30694278068206,
+                    "presentedFps": 55.28618907247861,
+                    "scene": 0,
+                    "score": 1901.3764758224527
+                },
+                {
+                    "cpuWorkMs": 0.0003065,
+                    "frames": 50,
+                    "gpuMeanMs": 18.80874176,
+                    "gpuP99Ms": 19.042752,
+                    "onePercentLow": 46.971714760692265,
+                    "presentedFps": 51.310465491683146,
+                    "scene": 1,
+                    "score": 1763.9457451937496
+                },
+                {
+                    "cpuWorkMs": 0.00033290243902439013,
+                    "frames": 41,
+                    "gpuMeanMs": 22.97227941463415,
+                    "gpuP99Ms": 23.480576,
+                    "onePercentLow": 39.588031113025416,
+                    "presentedFps": 42.181929784542,
+                    "scene": 2,
+                    "score": 1444.2450137910432
+                }
+            ],
+            "score": 1691.9910915987514,
+            "scoreUnit": "MPix-s-geomean",
+            "shaderVersion": "city-1",
+            "timestamp": "2026-11-10T10:59:27.315Z",
+            "valid": true,
+            "voltageWritten": false,
+            "width": 7680
+        },
+        {
+            "classification": "Carga mista",
+            "comparison": [
+                {
+                    "api": "Vulkan",
+                    "cpuIterations": 150000,
+                    "deviceVerified": "DRM-PCI",
+                    "durationSeconds": 3,
+                    "frames": 596,
+                    "height": 720,
+                    "kind": "graphics",
+                    "method": "city-throughput-v0.2",
+                    "samples": [
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.306382,
+                            "elapsedMs": 259,
+                            "gpuMeanMs": 0.588992,
+                            "power": 26.554,
+                            "temp": 41
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.343905,
+                            "elapsedMs": 516,
+                            "gpuMeanMs": 0.589472,
+                            "power": 44.068,
+                            "temp": 41
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.341711,
+                            "elapsedMs": 773,
+                            "gpuMeanMs": 0.593408,
+                            "power": 55.674,
+                            "temp": 42
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.381044,
+                            "elapsedMs": 1030,
+                            "gpuMeanMs": 0.586944,
+                            "power": 73.049,
+                            "temp": 42
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.654414,
+                            "elapsedMs": 1287,
+                            "gpuMeanMs": 0.58976,
+                            "power": 75.302,
+                            "temp": 42
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.372514,
+                            "elapsedMs": 1546,
+                            "gpuMeanMs": 0.58896,
+                            "power": 75.615,
+                            "temp": 42
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.56061,
+                            "elapsedMs": 1804,
+                            "gpuMeanMs": 0.595104,
+                            "power": 75.79,
+                            "temp": 42
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.307186,
+                            "elapsedMs": 2062,
+                            "gpuMeanMs": 0.583456,
+                            "power": 76.039,
+                            "temp": 42
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.366296,
+                            "elapsedMs": 2321,
+                            "gpuMeanMs": 0.594304,
+                            "power": 76.092,
+                            "temp": 42
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.619165,
+                            "elapsedMs": 2581,
+                            "gpuMeanMs": 0.590496,
+                            "power": 75.852,
+                            "temp": 42
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.391451,
+                            "elapsedMs": 2841,
+                            "gpuMeanMs": 0.593152,
+                            "power": 75.701,
+                            "temp": 43
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.325044,
+                            "elapsedMs": 3104,
+                            "gpuMeanMs": 0.626848,
+                            "power": 75.386,
+                            "temp": 43
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.401335,
+                            "elapsedMs": 3368,
+                            "gpuMeanMs": 1.195168,
+                            "power": 75.423,
+                            "temp": 43
+                        },
+                        {
+                            "clock": 870,
+                            "cpuWorkMs": 3.407958,
+                            "elapsedMs": 3631,
+                            "gpuMeanMs": 1.241856,
+                            "power": 67.482,
+                            "temp": 41
+                        },
+                        {
+                            "clock": 810,
+                            "cpuWorkMs": 3.380499,
+                            "elapsedMs": 3899,
+                            "gpuMeanMs": 1.308352,
+                            "power": 58.521,
+                            "temp": 40
+                        },
+                        {
+                            "clock": 780,
+                            "cpuWorkMs": 3.379415,
+                            "elapsedMs": 4165,
+                            "gpuMeanMs": 1.671488,
+                            "power": 45.094,
+                            "temp": 40
+                        },
+                        {
+                            "clock": 765,
+                            "cpuWorkMs": 3.349784,
+                            "elapsedMs": 4427,
+                            "gpuMeanMs": 1.709216,
+                            "power": 32.13,
+                            "temp": 40
+                        },
+                        {
+                            "clock": 750,
+                            "cpuWorkMs": 3.309244,
+                            "elapsedMs": 4693,
+                            "gpuMeanMs": 1.750016,
+                            "power": 25.53,
+                            "temp": 40
+                        },
+                        {
+                            "clock": 720,
+                            "cpuWorkMs": 3.353912,
+                            "elapsedMs": 4959,
+                            "gpuMeanMs": 1.842528,
+                            "power": 25.093,
+                            "temp": 39
+                        }
+                    ],
+                    "sceneResults": [
+                        {
+                            "cpuWorkMs": 3.4370443991228083,
+                            "frames": 228,
+                            "gpuMeanMs": 0.5886442105263158,
+                            "gpuP99Ms": 0.597376,
+                            "onePercentLow": 114.1138219187623,
+                            "presentedFps": 233.60757486250074,
+                            "scene": 0,
+                            "score": 1565.631638806034
+                        },
+                        {
+                            "cpuWorkMs": 3.3646417079207933,
+                            "frames": 202,
+                            "gpuMeanMs": 1.0521036039603966,
+                            "gpuP99Ms": 1.365216,
+                            "onePercentLow": 176.75953809197506,
+                            "presentedFps": 212.07438453184193,
+                            "scene": 1,
+                            "score": 875.9593604003004
+                        },
+                        {
+                            "cpuWorkMs": 3.3652270662650605,
+                            "frames": 166,
+                            "gpuMeanMs": 1.740576192771084,
+                            "gpuP99Ms": 1.861728,
+                            "onePercentLow": 140.43069109945364,
+                            "presentedFps": 173.52941457487387,
+                            "scene": 2,
+                            "score": 529.4798376695977
+                        }
+                    ],
+                    "score": 898.8233054581023,
+                    "scoreUnit": "MPix-s-geomean",
+                    "shaderVersion": "city-1",
+                    "timestamp": "2026-11-10T10:51:35.052Z",
+                    "valid": true,
+                    "width": 1280
+                },
+                {
+                    "api": "Vulkan",
+                    "cpuIterations": 150000,
+                    "deviceVerified": "DRM-PCI",
+                    "durationSeconds": 3,
+                    "frames": 469,
+                    "height": 1440,
+                    "kind": "graphics",
+                    "method": "city-throughput-v0.2",
+                    "samples": [
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.404224,
+                            "elapsedMs": 298,
+                            "gpuMeanMs": 2.410688,
+                            "power": 39.231,
+                            "temp": 43
+                        },
+                        {
+                            "clock": 1755,
+                            "cpuWorkMs": 3.3027,
+                            "elapsedMs": 560,
+                            "gpuMeanMs": 2.32016,
+                            "power": 51.805,
+                            "temp": 44
+                        },
+                        {
+                            "clock": 1755,
+                            "cpuWorkMs": 4.354415,
+                            "elapsedMs": 825,
+                            "gpuMeanMs": 2.134432,
+                            "power": 72.446,
+                            "temp": 45
+                        },
+                        {
+                            "clock": 1755,
+                            "cpuWorkMs": 3.299078,
+                            "elapsedMs": 1083,
+                            "gpuMeanMs": 2.13504,
+                            "power": 86.28,
+                            "temp": 45
+                        },
+                        {
+                            "clock": 1755,
+                            "cpuWorkMs": 3.303295,
+                            "elapsedMs": 1341,
+                            "gpuMeanMs": 2.132352,
+                            "power": 97.402,
+                            "temp": 45
+                        },
+                        {
+                            "clock": 1755,
+                            "cpuWorkMs": 3.311478,
+                            "elapsedMs": 1601,
+                            "gpuMeanMs": 2.129856,
+                            "power": 99.086,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1755,
+                            "cpuWorkMs": 3.386536,
+                            "elapsedMs": 1861,
+                            "gpuMeanMs": 2.135136,
+                            "power": 99.206,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1755,
+                            "cpuWorkMs": 3.300704,
+                            "elapsedMs": 2122,
+                            "gpuMeanMs": 2.261568,
+                            "power": 99.093,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.299848,
+                            "elapsedMs": 2381,
+                            "gpuMeanMs": 2.252384,
+                            "power": 98.543,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.298301,
+                            "elapsedMs": 2642,
+                            "gpuMeanMs": 2.259744,
+                            "power": 97.285,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.299083,
+                            "elapsedMs": 2902,
+                            "gpuMeanMs": 2.264992,
+                            "power": 95.478,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1665,
+                            "cpuWorkMs": 3.303093,
+                            "elapsedMs": 3161,
+                            "gpuMeanMs": 2.47792,
+                            "power": 94.411,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1620,
+                            "cpuWorkMs": 3.299021,
+                            "elapsedMs": 3425,
+                            "gpuMeanMs": 2.484512,
+                            "power": 92.904,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1650,
+                            "cpuWorkMs": 3.297908,
+                            "elapsedMs": 3683,
+                            "gpuMeanMs": 2.449504,
+                            "power": 92.584,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1650,
+                            "cpuWorkMs": 3.467617,
+                            "elapsedMs": 3942,
+                            "gpuMeanMs": 2.465728,
+                            "power": 92.285,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1650,
+                            "cpuWorkMs": 4.300091,
+                            "elapsedMs": 4206,
+                            "gpuMeanMs": 2.868224,
+                            "power": 92.328,
+                            "temp": 46
+                        },
+                        {
+                            "clock": 1710,
+                            "cpuWorkMs": 4.005704,
+                            "elapsedMs": 4463,
+                            "gpuMeanMs": 2.579616,
+                            "power": 93.594,
+                            "temp": 47
+                        },
+                        {
+                            "clock": 1920,
+                            "cpuWorkMs": 3.400756,
+                            "elapsedMs": 4724,
+                            "gpuMeanMs": 2.59616,
+                            "power": 109.676,
+                            "temp": 49
+                        },
+                        {
+                            "clock": 1905,
+                            "cpuWorkMs": 3.391161,
+                            "elapsedMs": 4987,
+                            "gpuMeanMs": 2.61504,
+                            "power": 116.513,
+                            "temp": 50
+                        }
+                    ],
+                    "sceneResults": [
+                        {
+                            "cpuWorkMs": 3.403326987730061,
+                            "frames": 163,
+                            "gpuMeanMs": 2.2600035337423314,
+                            "gpuP99Ms": 2.29056,
+                            "onePercentLow": 88.48691838156896,
+                            "presentedFps": 167.52889058843354,
+                            "scene": 0,
+                            "score": 1631.1478920104626
+                        },
+                        {
+                            "cpuWorkMs": 3.3894939683544294,
+                            "frames": 158,
+                            "gpuMeanMs": 2.4735169620253163,
+                            "gpuP99Ms": 2.877408,
+                            "onePercentLow": 136.61052884667927,
+                            "presentedFps": 161.72986625253282,
+                            "scene": 1,
+                            "score": 1490.3475725436604
+                        },
+                        {
+                            "cpuWorkMs": 3.635869297297299,
+                            "frames": 148,
+                            "gpuMeanMs": 2.711465729729729,
+                            "gpuP99Ms": 3.2792,
+                            "onePercentLow": 89.10531977025619,
+                            "presentedFps": 151.29160067315965,
+                            "scene": 2,
+                            "score": 1359.5598718363478
+                        }
+                    ],
+                    "score": 1489.5659874627393,
+                    "scoreUnit": "MPix-s-geomean",
+                    "shaderVersion": "city-1",
+                    "timestamp": "2026-11-10T10:51:40.336Z",
+                    "valid": true,
+                    "width": 2560
+                }
+            ],
+            "confidence": "limited-synthetic",
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "highCpuMs": 3.4762300844605964,
+            "highGpuMs": 2.4816620751657923,
+            "id": "e764252c-6841-4915-b9fc-de4b4ab17c09",
+            "kind": "bottleneck",
+            "lowCpuMs": 3.388971057769554,
+            "lowGpuMs": 1.1271080024192655,
+            "method": "resolution-cpu-transform-v1",
+            "powerLimitWritten": false,
+            "resolutionGain": 2.2017961631352656,
+            "timestamp": "2026-11-10T10:40:00Z",
+            "valid": true,
+            "voltageWritten": false
+        },
+        {
+            "attempted": 6,
+            "cancelled": false,
+            "codecResults": [
+                {
+                    "codec": "h264",
+                    "ffmpegVersion": "ffmpeg version n9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+                    "fps": 247.31718934747872,
+                    "frames": 360,
+                    "method": "codec-pipeline-v0.2",
+                    "mode": "encode",
+                    "seconds": 1.455620618,
+                    "status": "passed",
+                    "timestamp": "2026-11-10T10:39:38Z",
+                    "valid": true
+                },
+                {
+                    "codec": "h264",
+                    "ffmpegVersion": "ffmpeg version n9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+                    "fps": 482.92273208116205,
+                    "frames": 360,
+                    "method": "codec-pipeline-v0.2",
+                    "mode": "decode",
+                    "seconds": 0.74546087,
+                    "status": "passed",
+                    "timestamp": "2026-11-10T10:39:39Z",
+                    "valid": true
+                },
+                {
+                    "codec": "hevc",
+                    "ffmpegVersion": "ffmpeg version n9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+                    "fps": 293.5797698245063,
+                    "frames": 360,
+                    "method": "codec-pipeline-v0.2",
+                    "mode": "encode",
+                    "seconds": 1.226242531,
+                    "status": "passed",
+                    "timestamp": "2026-11-10T10:39:41Z",
+                    "valid": true
+                },
+                {
+                    "codec": "hevc",
+                    "ffmpegVersion": "ffmpeg version n9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+                    "fps": 648.1436128098945,
+                    "frames": 360,
+                    "method": "codec-pipeline-v0.2",
+                    "mode": "decode",
+                    "seconds": 0.555432458,
+                    "status": "passed",
+                    "timestamp": "2026-11-10T10:39:43Z",
+                    "valid": true
+                },
+                {
+                    "codec": "av1",
+                    "errorCode": "UNSUPPORTED_CODEC_OR_FFMPEG_BUILD",
+                    "mode": "encode",
+                    "status": "unsupported",
+                    "valid": false
+                },
+                {
+                    "codec": "av1",
+                    "ffmpegVersion": "ffmpeg version n9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+                    "fps": 456.0698270573461,
+                    "frames": 360,
+                    "method": "codec-pipeline-v0.2",
+                    "mode": "decode",
+                    "seconds": 0.789352811,
+                    "status": "passed",
+                    "timestamp": "2026-11-10T10:39:45Z",
+                    "valid": true
+                }
+            ],
+            "coverage": "h264-encode,h264-decode,hevc-encode,hevc-decode,av1-decode",
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "height": 1080,
+            "id": "e403e42d-dd44-4e78-b12e-c95daf3b48eb",
+            "kind": "video",
+            "method": "codec-suite-v0.2",
+            "partial": true,
+            "powerLimitWritten": false,
+            "score": 831.4518746844082,
+            "scoreUnit": "MPix-s-geomean",
+            "supported": 5,
+            "telemetry": [
+                {
+                    "clock": 210,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 405,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 10.882,
+                    "temp": 37,
+                    "timestamp": "2026-11-10T10:39:36.485Z",
+                    "usage": 0,
+                    "vram": 1264648192,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 210,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 405,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 12.645,
+                    "temp": 37,
+                    "timestamp": "2026-11-10T10:39:37.000Z",
+                    "usage": 24,
+                    "vram": 1274806272,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1020,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 5001,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 15.978,
+                    "temp": 38,
+                    "timestamp": "2026-11-10T10:39:37.344Z",
+                    "usage": 8,
+                    "vram": 1529675776,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1350,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 100,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 5001,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 31.04,
+                    "temp": 39,
+                    "timestamp": "2026-11-10T10:39:37.811Z",
+                    "usage": 7,
+                    "vram": 1534132224,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 100,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9251,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 52.324,
+                    "temp": 41,
+                    "timestamp": "2026-11-10T10:39:38.288Z",
+                    "usage": 12,
+                    "vram": 1534132224,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 69.984,
+                    "temp": 41,
+                    "timestamp": "2026-11-10T10:39:38.761Z",
+                    "usage": 0,
+                    "vram": 1267466240,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 1,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9251,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 80.366,
+                    "temp": 42,
+                    "timestamp": "2026-11-10T10:39:39.237Z",
+                    "usage": 3,
+                    "vram": 1480785920,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 67,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 80.82,
+                    "temp": 42,
+                    "timestamp": "2026-11-10T10:39:39.710Z",
+                    "usage": 17,
+                    "vram": 1266286592,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 3,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9251,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 81.399,
+                    "temp": 42,
+                    "timestamp": "2026-11-10T10:39:40.188Z",
+                    "usage": 5,
+                    "vram": 1526071296,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 100,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9251,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 81.597,
+                    "temp": 43,
+                    "timestamp": "2026-11-10T10:39:40.681Z",
+                    "usage": 11,
+                    "vram": 1533607936,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 30,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 83.597,
+                    "temp": 43,
+                    "timestamp": "2026-11-10T10:39:41.206Z",
+                    "usage": 8,
+                    "vram": 1273495552,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 81.745,
+                    "temp": 42,
+                    "timestamp": "2026-11-10T10:39:41.680Z",
+                    "usage": 0,
+                    "vram": 1273757696,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 78.957,
+                    "temp": 43,
+                    "timestamp": "2026-11-10T10:39:42.183Z",
+                    "usage": 0,
+                    "vram": 1273757696,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1935,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 78.322,
+                    "temp": 43,
+                    "timestamp": "2026-11-10T10:39:42.680Z",
+                    "usage": 0,
+                    "vram": 1499529216,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1500,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 20,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 72.962,
+                    "temp": 42,
+                    "timestamp": "2026-11-10T10:39:43.185Z",
+                    "usage": 16,
+                    "vram": 1273757696,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1500,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 66.368,
+                    "temp": 42,
+                    "timestamp": "2026-11-10T10:39:43.679Z",
+                    "usage": 6,
+                    "vram": 1266155520,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1500,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 63.569,
+                    "temp": 42,
+                    "timestamp": "2026-11-10T10:39:44.183Z",
+                    "usage": 0,
+                    "vram": 1266155520,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1500,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 0,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 9501,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 63.341,
+                    "temp": 42,
+                    "timestamp": "2026-11-10T10:39:44.680Z",
+                    "usage": 0,
+                    "vram": 1417674752,
+                    "vramTotal": 8589934592
+                },
+                {
+                    "clock": 1020,
+                    "coreCurrent": 0,
+                    "coreMax": 1000,
+                    "coreMin": -1000,
+                    "coreMode": "offset",
+                    "decoder": 67,
+                    "encoder": 0,
+                    "fan": 0,
+                    "fanRpm": 0,
+                    "memClock": 5001,
+                    "memCurrent": 0,
+                    "memMax": 6000,
+                    "memMin": -2000,
+                    "memMode": "offset",
+                    "power": 59.218,
+                    "temp": 41,
+                    "timestamp": "2026-11-10T10:39:45.190Z",
+                    "usage": 26,
+                    "vram": 1539833856,
+                    "vramTotal": 8589934592
+                }
+            ],
+            "timestamp": "2026-11-10T10:39:45.302Z",
+            "valid": true,
+            "voltageWritten": false,
+            "width": 1920
+        },
+        {
+            "api": "Vulkan",
+            "attempted": 7,
+            "computeResults": [
+                {
+                    "frames": 8,
+                    "gpuMeanMs": 0.259136,
+                    "metric": "Leitura memória (redução)",
+                    "status": "passed",
+                    "unit": "GB/s",
+                    "value": 129.48579896270687
+                },
+                {
+                    "frames": 8,
+                    "gpuMeanMs": 0.062324000000000004,
+                    "metric": "Escrita memória",
+                    "status": "passed",
+                    "unit": "GB/s",
+                    "value": 538.3870098196521
+                },
+                {
+                    "frames": 8,
+                    "gpuMeanMs": 0.12664,
+                    "metric": "Cópia memória (leitura + escrita)",
+                    "status": "passed",
+                    "unit": "GB/s",
+                    "value": 529.9183828174353
+                },
+                {
+                    "frames": 8,
+                    "gpuMeanMs": 0.17491199999999998,
+                    "metric": "FP32 FMA",
+                    "status": "passed",
+                    "unit": "GFLOPS",
+                    "value": 12277.50896450787
+                },
+                {
+                    "frames": 8,
+                    "gpuMeanMs": 8.765460000000001,
+                    "metric": "FP64 FMA",
+                    "status": "passed",
+                    "unit": "GFLOPS",
+                    "value": 244.99383352385385
+                },
+                {
+                    "frames": 8,
+                    "gpuMeanMs": 0.225624,
+                    "metric": "Inteiros 32 bits",
+                    "status": "passed",
+                    "unit": "GIOPS",
+                    "value": 9517.975250859838
+                },
+                {
+                    "frames": 8,
+                    "gpuMeanMs": 0.647888,
+                    "metric": "Inteiros 64 bits",
+                    "status": "passed",
+                    "unit": "GIOPS",
+                    "value": 3314.5908675573555
+                }
+            ],
+            "deviceVerified": "DRM-PCI",
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "id": "763432e5-de45-4ed9-b37c-879f56bd8b7e",
+            "kind": "compute",
+            "method": "compute-micro-v1",
+            "powerLimitWritten": false,
+            "supported": 7,
+            "telemetry": [
+                {
+                    "clock": 1665,
+                    "power": 15.151,
+                    "temp": 36
+                },
+                {
+                    "clock": 1665,
+                    "power": 15.151,
+                    "temp": 36
+                },
+                {
+                    "clock": 1665,
+                    "power": 15.151,
+                    "temp": 36
+                },
+                {
+                    "clock": 1665,
+                    "power": 15.151,
+                    "temp": 36
+                },
+                {
+                    "clock": 1665,
+                    "power": 15.151,
+                    "temp": 36
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1665,
+                    "power": 25.285,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 42.023,
+                    "temp": 39
+                },
+                {
+                    "clock": 1935,
+                    "power": 56.092,
+                    "temp": 41
+                },
+                {
+                    "clock": 1935,
+                    "power": 56.092,
+                    "temp": 41
+                },
+                {
+                    "clock": 1935,
+                    "power": 56.092,
+                    "temp": 41
+                },
+                {
+                    "clock": 1935,
+                    "power": 56.092,
+                    "temp": 41
+                },
+                {
+                    "clock": 1935,
+                    "power": 56.092,
+                    "temp": 41
+                },
+                {
+                    "clock": 1935,
+                    "power": 56.092,
+                    "temp": 41
+                },
+                {
+                    "clock": 1935,
+                    "power": 56.092,
+                    "temp": 41
+                },
+                {
+                    "clock": 1935,
+                    "power": 56.092,
+                    "temp": 41
+                }
+            ],
+            "timestamp": "2026-11-10T10:38:19.811Z",
+            "valid": true,
+            "voltageWritten": false
+        },
+        {
+            "api": "Vulkan",
+            "cpuIterations": 0,
+            "deviceVerified": "DRM-PCI",
+            "durationSeconds": 3,
+            "frames": 3315,
+            "gpu": {
+                "architecture": "Ampere",
+                "deviceId": "0x24c9",
+                "driverVersion": "620.70.06",
+                "gpuCores": 4864,
+                "maxGraphicsMHz": 2100,
+                "maxMemoryMHz": 9501,
+                "memoryBusWidthBits": 256,
+                "memoryBytes": 8589934592,
+                "name": "NVIDIA GeForce RTX 3060 Ti",
+                "subsystemDevice": "0x13b7",
+                "subsystemVendor": "0x196e",
+                "vbios": "94.04.94.40.0B",
+                "vendor": "NVIDIA"
+            },
+            "height": 720,
+            "id": "2673c782-7632-4939-b382-da443a1ef5a5",
+            "kind": "graphics",
+            "method": "city-throughput-v0.2",
+            "powerLimitWritten": false,
+            "samples": [
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000175,
+                    "elapsedMs": 261,
+                    "gpuMeanMs": 0.509216,
+                    "power": 44.485,
+                    "temp": 43
+                },
+                {
+                    "clock": 1935,
+                    "cpuWorkMs": 0.000182,
+                    "elapsedMs": 521,
+                    "gpuMeanMs": 0.511808,
+                    "power": 44.485,
+                    "temp": 45
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000176,
+                    "elapsedMs": 779,
+                    "gpuMeanMs": 0.508384,
+                    "power": 82.767,
+                    "temp": 46
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000173,
+                    "elapsedMs": 1039,
+                    "gpuMeanMs": 0.50944,
+                    "power": 121.406,
+                    "temp": 48
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000176,
+                    "elapsedMs": 1298,
+                    "gpuMeanMs": 0.513568,
+                    "power": 141.613,
+                    "temp": 49
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000106,
+                    "elapsedMs": 1593,
+                    "gpuMeanMs": 0.513888,
+                    "power": 156.383,
+                    "temp": 49
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.00024,
+                    "elapsedMs": 1851,
+                    "gpuMeanMs": 0.512448,
+                    "power": 157.408,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000187,
+                    "elapsedMs": 2111,
+                    "gpuMeanMs": 0.512992,
+                    "power": 154.762,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000273,
+                    "elapsedMs": 2369,
+                    "gpuMeanMs": 0.514816,
+                    "power": 153.599,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.00018,
+                    "elapsedMs": 2627,
+                    "gpuMeanMs": 0.515872,
+                    "power": 152.827,
+                    "temp": 50
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000181,
+                    "elapsedMs": 2886,
+                    "gpuMeanMs": 0.517536,
+                    "power": 155.001,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000182,
+                    "elapsedMs": 3145,
+                    "gpuMeanMs": 0.546016,
+                    "power": 154.392,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000178,
+                    "elapsedMs": 3404,
+                    "gpuMeanMs": 0.551936,
+                    "power": 153.495,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000187,
+                    "elapsedMs": 3662,
+                    "gpuMeanMs": 0.552256,
+                    "power": 153.092,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000204,
+                    "elapsedMs": 3921,
+                    "gpuMeanMs": 0.56112,
+                    "power": 152.885,
+                    "temp": 51
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000184,
+                    "elapsedMs": 4179,
+                    "gpuMeanMs": 0.674496,
+                    "power": 153.247,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.00021,
+                    "elapsedMs": 4438,
+                    "gpuMeanMs": 0.67456,
+                    "power": 155.63,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 0.000177,
+                    "elapsedMs": 4701,
+                    "gpuMeanMs": 0.67424,
+                    "power": 157.757,
+                    "temp": 52
+                },
+                {
+                    "clock": 1920,
+                    "cpuWorkMs": 9.9e-05,
+                    "elapsedMs": 4958,
+                    "gpuMeanMs": 0.690816,
+                    "power": 160.459,
+                    "temp": 53
+                }
+            ],
+            "sceneResults": [
+                {
+                    "cpuWorkMs": 0.00019439180327868804,
+                    "frames": 1220,
+                    "gpuMeanMs": 0.514012380327869,
+                    "gpuP99Ms": 0.52208,
+                    "onePercentLow": 601.5698381397683,
+                    "presentedFps": 1258.4714482624245,
+                    "scene": 0,
+                    "score": 1792.9529234532176
+                },
+                {
+                    "cpuWorkMs": 0.00019080866425992692,
+                    "frames": 1108,
+                    "gpuMeanMs": 0.5513768086642592,
+                    "gpuP99Ms": 0.560576,
+                    "onePercentLow": 501.0921721468751,
+                    "presentedFps": 1143.9382594964077,
+                    "scene": 1,
+                    "score": 1671.4522365070575
+                },
+                {
+                    "cpuWorkMs": 0.00021167781155015188,
+                    "frames": 987,
+                    "gpuMeanMs": 0.6760676312056737,
+                    "gpuP99Ms": 0.6872,
+                    "onePercentLow": 463.26511476559347,
+                    "presentedFps": 1022.0725514503782,
+                    "scene": 2,
+                    "score": 1363.1772288172606
+                }
+            ],
+            "score": 1598.5947906448243,
+            "scoreUnit": "MPix-s-geomean",
+            "shaderVersion": "city-1",
+            "timestamp": "2026-11-10T10:28:35.378Z",
+            "valid": true,
+            "voltageWritten": false,
+            "width": 1280
+        }
+    ],
+    "schema": "linux-gpu-feedback/1"
+}

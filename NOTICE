@@ -1,0 +1,28 @@
+GPU-PRO — Copyright (c) 2026 Ériton do Nascimento
+
+O código original do projeto está sob a licença LICENSE, salvo avisos em contrário.
+As dependências não são relicenciadas pelo projeto. Drivers e bibliotecas de
+fabricantes não são distribuídos no pacote; são obtidos pelo usuário/distribuição.
+
+Dependências usadas dinamicamente ou fornecidas pelo sistema:
+- Qt 6 Core/Gui/Widgets/Network/OpenGL: licenciamento Qt LGPLv3/GPL/comercial,
+  conforme módulo e distribuição. https://www.qt.io/licensing/open-source-lgpl-obligations
+- GTK3 / GLib / Pango: licenças LGPL conforme os componentes.
+  https://www.gtk.org/docs/architecture/
+- Cairo: LGPL 2.1 ou MPL 1.1. https://www.cairographics.org/
+- SQLite: domínio público. https://www.sqlite.org/copyright.html
+- libarchive: licenças BSD e avisos por arquivo. https://github.com/libarchive/libarchive/blob/master/COPYING
+- Xlib/libX11: licença MIT/X11. https://gitlab.freedesktop.org/xorg/lib/libx11
+- Vulkan-Headers e loader: licenças dos respectivos projetos Khronos.
+  https://github.com/KhronosGroup/Vulkan-Headers/blob/main/LICENSE.md
+- glslang: compilador de shaders usado apenas no build, licenças por arquivo.
+  https://github.com/KhronosGroup/glslang
+- FFmpeg: processo externo opcional, LGPL/GPL conforme configuração da distribuição.
+  https://ffmpeg.org/legal.html
+- MangoHud, vkBasalt e Gamescope: programas externos opcionais, não incorporados.
+
+Os pacotes de sistema mantêm seus próprios avisos e código-fonte. O aplicativo
+não impede substituir bibliotecas compartilhadas por versões compatíveis.
+NVIDIA, GeForce, RTX, AMD, Radeon, Intel, Arc, Vulkan, OpenGL e demais marcas
+pertencem aos respectivos titulares. GPU-PRO não é um produto oficial desses
+fabricantes e não representa homologação ou endosso.

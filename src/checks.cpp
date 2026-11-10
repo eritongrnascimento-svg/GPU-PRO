@@ -1,0 +1,132 @@
+#include "gpu.h"
+#include "repository.h"
+#include <cmath>
+#include <cstdio>
+int main(int argc, char **argv) {
+  QCoreApplication app(argc, argv);
+  int failures = 0;
+  auto check = [&](bool ok, const char *message) {
+    if (!ok) {
+      fprintf(stderr, "FAIL %s\n", message);
+      ++failures;
+    }
+  };
+  check(displayMetric({}, "temp") == "N/D", "missing sensor must not be zero");
+  check(displayMetric({{"temp", 0}}, "temp") == "0 °C", "zero is a valid reading");
+  auto c = OverlayConfig::fromJson({{"font", 999},
+                                    {"width", 0},
+                                    {"opacity", -1},
+                                    {"layout", "invalid"},
+                                    {"fields", QJsonArray{"temp", "temp", "not-a-sensor"}}});
+  check(c.font == 40 && c.width == 220 && c.opacity == 0 && c.layout == "list", "config bounds");
+  check(c.fields == QStringList{"temp"}, "field allowlist and deduplication");
+  check(OverlayConfig::fromJson(c.json()).json() == c.json(), "overlay settings roundtrip");
+  OverlayConfig geo;
+  QRect screen(-1920, 0, 1920, 1080);
+  geo.anchor = "bottom-right";
+  auto rect = overlayRect(geo, screen);
+  check(rect.right() == -25 && rect.bottom() == 1055,
+        "anchor on a monitor with negative coordinates");
+  geo.x = 50000;
+  geo.y = -50000;
+  rect = overlayRect(geo, screen);
+  check(screen.contains(rect), "HUD is clamped to the monitor");
+  geo.layout = "compact";
+  geo.width = 1600;
+  QRect small(0, 0, 640, 480);
+  check(small.contains(overlayRect(geo, small)), "compact HUD fits a small monitor");
+  auto s = summarize({10, 10, 20, 0, -2, std::numeric_limits<double>::quiet_NaN()});
+  check(s.frames == 3 && std::abs(s.mean - 75) < .001 && s.p99 == 20 && s.low == 50,
+        "frametime statistics use frame durations and reject invalid samples");
+  check(summarize({}).frames == 0, "no samples means no score");
+  auto amd =
+      parseAmdOverdrive("OD_SCLK:\n0: 500Mhz\n1: 2500Mhz\nOD_MCLK:\n1: 1000Mhz\nOD_RANGE:\nSCLK: "
+                        "500Mhz 3000Mhz\nMCLK: 600Mhz 1200Mhz\n");
+  check(amd["coreMin"].toInt() == 500 && amd["coreMax"].toInt() == 3000 &&
+            amd["coreCurrent"].toInt() == 2500 && amd["memMin"].toInt() == 600,
+        "modern AMD clock range parser");
+  check(parseAmdOverdrive("OD_SCLK:\n0: 500Mhz 800mV\n1: 2000Mhz "
+                          "1000mV\nOD_RANGE:\nSCLK: 500Mhz 3000Mhz")
+            .isEmpty(),
+        "legacy voltage tables must not use modern clock commands");
+  check(parseAmdOverdrive("OD_SCLK:\n1: 2500Mhz").isEmpty(),
+        "missing clock ranges disables writes");
+  auto centered =
+      OverlayConfig::fromJson({{"anchor", "top-center"}, {"width", 360}, {"x", 0}, {"y", 20}});
+  QRect monitor(100, -1080, 1920, 1080);
+  auto top = overlayRect(centered, monitor);
+  check(centered.anchor == "top-center" && top.x() == 880 && top.y() == -1060,
+        "top-center anchor and vertical offset on negative monitor");
+  QTemporaryDir dir;
+  QString hw = dir.filePath("device/hwmon/hwmon0/");
+  QDir().mkpath(hw);
+  auto sensorFile = [&](QString name, QByteArray data) { QFile file(hw + name); return file.open(QIODevice::WriteOnly) && file.write(data) == data.size(); };
+  check(sensorFile("temp1_label", "edge") && sensorFile("temp1_input", "46000") &&
+        sensorFile("temp2_label", "junction") && sensorFile("temp2_input", "67000") &&
+        sensorFile("temp3_label", "memory junction") && sensorFile("temp3_input", "78000"), "fixture hwmon");
+  Gpu fixture; fixture.vendor = "AMD"; fixture.sys = dir.filePath("device"); fixture.pci = "0000:ff:00.0";
+  GpuBackend sensors;
+  auto readings = sensors.sample(fixture);
+  check(readings["temp"].toDouble() == 46 && readings["hotspot"].toDouble() == 67 && readings["memoryTemp"].toDouble() == 78,
+        "memory junction must not overwrite GPU hotspot");
+  QFile::remove(hw + "temp2_input");
+  check(!sensors.sample(fixture).contains("hotspot"), "missing hotspot must remain unavailable even with memory junction");
+  QString err;
+  QJsonObject obj{{"message", "GPU · teste"}};
+  check(saveJson(dir.filePath("deep/test.json"), obj, &err), "atomic save");
+  check(QJsonDocument::fromJson(readText(dir.filePath("deep/test.json")).toUtf8()).object() == obj,
+        "JSON roundtrip");
+  {
+    Repository database(dir.filePath("tests.sqlite"));
+    check(database.error.isEmpty(), "SQLite schema creation");
+    QStringList ids;
+    for (int i = 0; i < 5; ++i) {
+      QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
+      ids << id;
+      check(database.add("graphics", "test-device",
+                         {{"id", id},
+                          {"valid", true},
+                          {"score", i + 1},
+                          {"api", "Vulkan"},
+                          {"timestamp", QString("2026-11-10T10:00:0%1Z").arg(i)},
+                          {"rawLog", "/home/private-user/game"},
+                          {"uuid", "GPU-PRIVATE"},
+                          {"gpu", QJsonObject{{"name", "Example GPU"},
+                                              {"deviceId", "0x0001"},
+                                              {"vendor", "NVIDIA"},
+                                              {"uuid", "PRIVATE"},
+                                              {"sys", "/home/private"}}}}),
+            "persist test");
+    }
+    auto history = database.recent("graphics", "test-device");
+    check(history.size() == 3 && history[0].toObject()["score"].toInt() == 5 &&
+              history[2].toObject()["score"].toInt() == 3,
+          "three newest tests per GPU/category");
+    auto feedback = database.feedback();
+    QString error;
+    check(validFeedback(feedback, error), "exported feedback validates");
+    auto bytes = QJsonDocument(feedback).toJson();
+    check(!bytes.contains("PRIVATE") && !bytes.contains("private-user") &&
+              !bytes.contains("rawLog") && !bytes.contains("/home/"),
+          "feedback strips identity and raw logs");
+    check(database.importFeedback(feedback, error) == 0,
+          "existing IDs cannot be imported over local records");
+    Repository other(dir.filePath("friend.sqlite"));
+    check(other.importFeedback(feedback, error) == 5 && other.importFeedback(feedback, error) == 0,
+          "import validation and deduplication");
+    check(other.recent("graphics", "test-device").isEmpty(),
+          "imported results never become local verified history");
+    feedback["schema"] = "unknown";
+    check(other.importFeedback(feedback, error) == -1, "unknown schema rejected");
+  }
+  auto clean = sanitizeResult(
+      {{"unit", "GB/s"},
+       {"gpu", QJsonObject{{"name", "GPU"}, {"uuid", "secret"}, {"serial", "secret"}}},
+       {"telemetry", QJsonArray{QJsonObject{
+                         {"temp", 45}, {"processName", "private-game"}, {"processPid", 123}}}}});
+  check(clean["unit"].toString() == "GB/s" &&
+            !QJsonDocument(clean).toJson().contains("private-game"),
+        "units retained, process identifiers removed");
+  printf("Offline checks: %s\n", failures ? "FAILED" : "PASS");
+  return failures ? 1 : 0;
+}

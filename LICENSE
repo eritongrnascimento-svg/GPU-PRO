@@ -1,0 +1,65 @@
+GPU-PRO Source Available License — versão 1.0
+Copyright (c) 2026 Ériton do Nascimento. Direitos reservados.
+
+Esta é uma licença de código disponível (source available). Não é uma licença
+open source aprovada pela OSI. Aplica-se ao código e aos materiais originais do
+GPU-PRO, salvo indicação expressa de outra licença no arquivo correspondente.
+
+1. Permissões
+O titular concede licença gratuita, mundial e não exclusiva para:
+a) obter e executar as distribuições oficiais do GPU-PRO;
+b) consultar, estudar e auditar o código-fonte;
+c) compilar e modificar o código para uso próprio, testes e auditoria;
+d) criar e manter forks no GitHub para auditoria, experimentação e preparação
+   de contribuições, respeitando também os direitos concedidos pelos termos
+   do GitHub;
+e) enviar correções e propostas ao repositório oficial por pull requests,
+   patches ou relatórios, e publicar pequenos trechos necessários à discussão
+   técnica de uma auditoria ou contribuição.
+O uso comercial do aplicativo pelo usuário final é permitido; a revenda e a
+redistribuição não estão incluídas nessa permissão.
+
+2. Redistribuição
+Fora das permissões da seção 1, é vedado, sem autorização escrita do titular:
+a) redistribuir ou disponibilizar a terceiros o software, seus binários ou
+   versões modificadas, gratuitamente ou mediante pagamento;
+b) publicar distribuições independentes, mirrors, pacotes ou aplicativos
+   derivados que incorporem partes substanciais do código;
+c) sublicenciar o código sob termos diferentes.
+Compartilhar links para o repositório e para as releases oficiais é permitido.
+A vedação não limita os direitos concedidos pelos termos do GitHub para uso
+normal de um repositório público, nem direitos obrigatórios previstos em lei.
+Um fork permitido não confere direito adicional de distribuir binários ou
+lançar um produto independente fora dessas permissões.
+
+3. Identificação e contribuições
+Preserve os avisos de autoria e licença. Identifique alterações em forks e não
+apresente uma versão modificada como release oficial, homologada pelo titular
+ou pelos fabricantes de GPUs. O nome e os sinais distintivos GPU-PRO não são
+licenciados para identificar ou endossar produtos independentes.
+O envio de uma contribuição não garante sua aceitação. A política de concessão
+de direitos sobre contribuições consta em CONTRIBUTING.md e deve ser aceita
+pelo contribuinte ao enviar sua proposta.
+
+4. Componentes de terceiros
+Cada dependência e material de terceiros mantém sua própria licença. Esta
+licença não restringe direitos concedidos por essas licenças, inclusive os
+relativos à substituição de bibliotecas e à engenharia reversa necessária para
+depurar modificações em bibliotecas sob LGPL. Consulte NOTICE.
+
+5. Ausência de garantia e responsabilidade
+O software é fornecido no estado em que se encontra, sem garantias expressas
+ou implícitas, incluindo adequação a finalidade específica ou ausência de
+erros. Monitoramento depende do hardware e do driver. Ajustes de clocks e
+cargas de teste são executados sob responsabilidade do usuário. Na máxima
+extensão permitida pela lei aplicável, os titulares não respondem por danos
+decorrentes do uso do software. Esta cláusula não exclui direitos obrigatórios.
+
+6. Descumprimento e autorizações
+Os direitos desta licença cessam no caso de descumprimento de seus termos.
+Autorizações adicionais, inclusive para redistribuir, devem ser obtidas do
+titular por escrito. Esta licença não pode ser alterada unilateralmente por
+quem recebe o software.
+
+Repositório oficial: https://github.com/eritongrnascimento-svg/GPU-PRO
+Titular: Ériton do Nascimento

@@ -1,0 +1,11 @@
+/build/
+/bin/
+/dist/
+*.user
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+*.log
+*.tar.gz
+SHA256SUMS.txt
+.env

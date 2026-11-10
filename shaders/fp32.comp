@@ -1,0 +1,6 @@
+#version 450
+layout(local_size_x=256) in;
+layout(set=0,binding=0,std430) readonly buffer Input {uint data[];} inputData;
+layout(set=0,binding=1,std430) buffer Output {uint data[];} outputData;
+layout(push_constant) uniform Params {uint count;uint iterations;uint seed;} params;
+void main(){uint i=gl_GlobalInvocationID.x;if(i>=params.count)return;float a=uintBitsToFloat(inputData.data[i]),b=a,c=a,d=a;for(uint j=0u;j<params.iterations;++j){a=fma(a,1.000001,0.000001);b=fma(b,0.999999,0.000002);c=fma(c,1.000002,0.000003);d=fma(d,0.999998,0.000004);}outputData.data[i]=floatBitsToUint(a+b+c+d);}
