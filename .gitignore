@@ -9,3 +9,6 @@
 *.tar.gz
 SHA256SUMS.txt
 .env
+
+__pycache__/
+*.pyc
