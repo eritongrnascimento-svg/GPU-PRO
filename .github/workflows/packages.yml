@@ -21,6 +21,7 @@ jobs:
       - name: Gerar e verificar formatos
         run: bash tools/build-distribution.sh build dist
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: GPU-PRO-linux-packages
           path: dist/*

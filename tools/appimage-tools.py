@@ -2,7 +2,7 @@
 import hashlib,json,pathlib,sys,urllib.request
 root=pathlib.Path(sys.argv[1]);root.mkdir(parents=True,exist_ok=True)
 records=[]
-for repo,name in [('linuxdeploy/linuxdeploy','linuxdeploy-x86_64.AppImage'),('linuxdeploy/linuxdeploy-plugin-qt','linuxdeploy-plugin-qt-x86_64.AppImage'),('AppImage/appimagetool','appimagetool-x86_64.AppImage')]:
+for repo,name in [('linuxdeploy/linuxdeploy','linuxdeploy-x86_64.AppImage'),('linuxdeploy/linuxdeploy-plugin-qt','linuxdeploy-plugin-qt-x86_64.AppImage'),('AppImage/appimagetool','appimagetool-x86_64.AppImage'),('AppImage/type2-runtime','runtime-x86_64')]:
  request=urllib.request.Request(f'https://api.github.com/repos/{repo}/releases/tags/continuous',headers={'User-Agent':'GPU-PRO-packaging'})
  with urllib.request.urlopen(request,timeout=60) as response:release=json.load(response)
  asset=next(x for x in release['assets'] if x['name']==name)
