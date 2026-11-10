@@ -12,7 +12,7 @@ A restrição de redistribuição do GPU-PRO não se aplica às bibliotecas de t
 
 | Componente | Forma usada | Condições relevantes |
 | --- | --- | --- |
-| Qt Core, Gui, Widgets, Network e OpenGL | Bibliotecas compartilhadas do sistema | Módulos utilizados disponíveis sob LGPLv3. Avisos, cópias das licenças GNU aplicáveis e mecanismo de substituição por biblioteca compatível. Não há módulos Qt exclusivamente GPL declarados no CMake atual. |
+| Qt Core, Gui, Widgets, Network, OpenGL e DBus | Bibliotecas compartilhadas do sistema | Módulos utilizados disponíveis sob LGPLv3. Avisos, cópias das licenças GNU aplicáveis e mecanismo de substituição por biblioteca compatível. Não há módulos Qt exclusivamente GPL declarados no CMake atual. |
 | GTK3/GDK, GLib, Pango, GdkPixbuf e ATK | Bibliotecas compartilhadas do sistema | Família LGPL; conferir versão/opção por componente. O pacote local declara GTK LGPL-2.1-or-later e Pango LGPL-2.0-or-later. Não transformar essas bibliotecas em código proprietário. |
 | Cairo | Biblioteca compartilhada do sistema | Alternativa LGPL-2.1 ou MPL-1.1 conforme avisos do projeto. |
 | SQLite | Biblioteca compartilhada | Código de entrega dedicado ao domínio público; não exige tornar o GPU-PRO aberto. |

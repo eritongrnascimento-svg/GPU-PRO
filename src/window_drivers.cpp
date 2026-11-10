@@ -10,7 +10,7 @@ QWidget *MainWindow::driversControls() {
   auto *packages = new QComboBox, *versions = new QComboBox;
   form->addRow("Pacote / componente",packages); form->addRow("Versão / repositório",versions); layout->addLayout(form);
   auto *actions = new QHBoxLayout;
-  auto *preview = new QPushButton("Simular e revisar transação");actions->addWidget(preview);
+  auto *preview = new QPushButton("Prévia / simular transação");actions->addWidget(preview);
   auto *install = new QPushButton("Instalar / atualizar versão selecionada");actions->addWidget(install);
   layout->addLayout(actions); install->setEnabled(false); preview->setEnabled(false);
   auto *details = new QLabel("AMD/Intel: Mesa, Vulkan e VA-API são componentes de espaço de usuário; o driver do kernel acompanha o kernel da distro. "

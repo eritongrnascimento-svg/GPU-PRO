@@ -37,3 +37,10 @@ FPS = quadros efetivamente reportados / tempo monotônico. Exige retorno zero e 
 Mesma cena Vulkan em 720p e 1440p, com 150 mil transformações/trigonometria CPU por quadro. Compara tempo GPU e tempo do trabalho CPU, além da razão entre tempos GPU das resoluções. Uma diferença superior a 1,5× indica predominância de uma das cargas; caso contrário, carga mista.
 
 É um diagnóstico sintético limitado, com trabalho CPU de uma thread. Não modela automaticamente motores comerciais, todas as threads, RAM, armazenamento ou PCIe. Não produz um percentual universal de gargalo do computador. A relação de tempos GPU ao mudar resolução também não equivale diretamente ao ganho de FPS de um jogo.
+
+
+## Gargalo 0.4: resolução alvo e percentuais
+
+Método `resolution-cpu-balance-v3`: referência em 720p e alvo selecionável até 8K, com o mesmo trabalho CPU de uma thread. Para tempos médios C (CPU sintética) e G (GPU), o modelo de sobreposição ideal usa F=max(C,G). Limite de CPU = 100×(1−G/F), relativo ao potencial da GPU; limite de GPU = 100×(1−C/F), relativo ao potencial da CPU. A classificação indica predominância acima de 15%, ou equilíbrio.
+
+Os percentuais são estimativas condicionadas a essa carga/modelo, não uma medição da perda de FPS em jogos. O worker executa trabalho CPU e GPU com sincronização, e a prévia custa recursos; o modelo ideal não representa exatamente seu tempo total. Tempos originais e resolução são preservados no JSON. Registros antigos continuam visíveis sem recalcular seus resultados.

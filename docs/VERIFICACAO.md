@@ -1,3 +1,12 @@
+# Atualização 0.4 — verificações
+
+- Cinco verificações locais aprovadas, incluindo percentuais CPU/GPU, validação de versões de drivers e alcance da rolagem.
+- Layout adaptável das especificações verificado em 1240×900, com fallback de rolagem em janela menor.
+- Consulta real ao pacman/CachyOS retornou 74 opções de componentes NVIDIA; versões disponíveis e instaladas foram diferenciadas. Não foi executada instalação/atualização de drivers.
+- Ensaios curtos Vulkan com CPU sintética em 720p e 1080p concluídos. A estimativa em 1080p indicou CPU predominante, cerca de 40,3% relativo ao potencial GPU no modelo. Isso não é perda real de desempenho de jogos.
+- Nenhuma escrita de tensão, power limit ou clocks nesta etapa; helper root existente preservado.
+- Compilação/testes Ubuntu e instaladores são produzidos pelo workflow Pacotes Linux; consulte as execuções e os arquivos finais da release.
+
 # Registro de validação — GPU-PRO 0.3.0
 
 ## Atualização 0.3.0 — 10/11/2026

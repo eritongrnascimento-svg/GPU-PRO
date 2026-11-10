@@ -18,12 +18,17 @@ QString nativePackageManager() {
   QString manager = id.contains("arch") || id.contains("cachyos") || id.contains("manjaro") ? "pacman"
       : id.contains("debian") || id.contains("ubuntu") ? "apt"
       : id.contains("fedora") || id.contains("rhel") ? "dnf" : QString{};
-  return QFileInfo(binary(manager)).isExecutable() ? manager : QString{};
+  if (QFileInfo("/run/ostree-booted").exists()) return "immutable";
+  if (id.contains("nixos") || QFileInfo("/etc/NIXOS").exists()) return "declarative";
+  if (QFileInfo(binary(manager)).isExecutable()) return manager;
+  if (QFileInfo("/usr/bin/pkcon").isExecutable()) return "packagekit";
+  return {};
+
 }
 bool driverPackageAllowed(QString name, QString vendor) {
   if (!token(name)) return false;
   bool nvidia = QRegularExpression("^(?:(?:lib32-)?nvidia(?:-[A-Za-z0-9+._-]+)*|libnvidia-[A-Za-z0-9+._-]+|linux(?:-[a-z0-9]+)*-nvidia(?:-open)?|akmod-nvidia|xorg-x11-drv-nvidia(?:-[a-z0-9-]+)?)$").match(name).hasMatch();
-  bool shared = QStringList{"mesa","lib32-mesa","mesa-vulkan-drivers","mesa-va-drivers","mesa-dri-drivers","libgl1-mesa-dri"}.contains(name);
+  bool shared = QRegularExpression("^[Mm]esa(?:[-A-Za-z0-9+._]*)$").match(name).hasMatch() || QStringList{"mesa","lib32-mesa","mesa-vulkan-drivers","mesa-va-drivers","mesa-dri-drivers","libgl1-mesa-dri"}.contains(name);
   bool amd = QStringList{"vulkan-radeon","lib32-vulkan-radeon","libva-mesa-driver","lib32-libva-mesa-driver","xf86-video-amdgpu","xf86-video-ati","firmware-amd-graphics"}.contains(name);
   bool intel = QStringList{"vulkan-intel","lib32-vulkan-intel","intel-media-driver","intel-media-va-driver","intel-media-va-driver-non-free","i965-va-driver","libva-intel-driver","xf86-video-intel","firmware-intel-graphics"}.contains(name);
   return vendor == "NVIDIA" ? nvidia : vendor == "AMD" ? amd || shared : vendor == "Intel" ? intel || shared : nvidia || shared || amd || intel;
@@ -55,6 +60,13 @@ QJsonArray parseDriverPackages(QString manager, QString text, QString vendor) {
 }
 QStringList driverTransaction(const QJsonObject &candidate, bool simulate) {
   QString manager=candidate["manager"].toString(),name=candidate["name"].toString(),version=candidate["version"].toString(),repo=candidate["repo"].toString();
+  if (manager=="packagekit") {
+    QString id=candidate["packageId"].toString();auto parts=id.split(';');
+    if(parts.size()!=4 || parts[0]!=name || parts[1]!=version || !driverPackageAllowed(name.section('/',-1)) || !token(version) || !token(parts[2]) ||
+       (!parts[3].isEmpty() && !QRegularExpression("^[A-Za-z0-9][A-Za-z0-9._:+/-]*$").match(parts[3]).hasMatch())) return {};
+    return simulate ? QStringList{"/usr/bin/pkcon","--plain","--noninteractive","get-depends",id}
+      : QStringList{"/usr/bin/pkcon","install",id};
+  }
   if (!driverPackageAllowed(name) || !token(version)) return {};
   if (manager=="pacman" && token(repo)) return simulate ? QStringList{"/usr/bin/pacman","-Sup","--needed","--print-format","%r/%n %v",repo+'/'+name+'='+version}
       : QStringList{"/usr/bin/pacman","-Syu","--needed",repo+'/'+name+'='+version};
@@ -69,7 +81,10 @@ QStringList driverTransaction(const QJsonObject &candidate, bool simulate) {
 }
 DriverCatalog::DriverCatalog(QObject *parent):QObject(parent) {
   timeout.setSingleShot(true);
-  connect(&timeout,&QTimer::timeout,this,[this]{process.kill();});
+  connect(&timeout,&QTimer::timeout,this,[this]{
+    if (dbusBusy) { dbusBusy=false; QDBusConnection::systemBus().disconnect("org.freedesktop.PackageKit",transactionPath,"org.freedesktop.PackageKit.Transaction",QString(),this,nullptr); emit listed({},"PackageKit não respondeu dentro do prazo"); }
+    else process.kill();
+  });
   connect(&process,&QProcess::readyReadStandardOutput,this,[this]{output+=process.readAllStandardOutput();if(output.size()>16*1024*1024)process.kill();});
   connect(&process,qOverload<int,QProcess::ExitStatus>(&QProcess::finished),this,&DriverCatalog::completed);
   connect(&process,&QProcess::errorOccurred,this,[this](QProcess::ProcessError error){if(error==QProcess::FailedToStart){timeout.stop();emit listed({},"Gerenciador nativo indisponível: "+process.errorString());}});
@@ -81,7 +96,9 @@ void DriverCatalog::run(QStringList args) {
 void DriverCatalog::refresh(QString selectedVendor) {
   if(busy()) return;
   manager=nativePackageManager();vendor=selectedVendor;phase=0;installed.clear();names.clear();
-  if(manager.isEmpty()){emit listed({},"Distro não suportada para instalação pelo painel. Use seu gerenciador nativo; suporte atual: APT, pacman e DNF.");return;}
+  if(manager=="immutable" || manager=="declarative") {emit listed({},manager=="immutable" ? "Sistema imutável detectado: drivers seguem deployments/atualização nativa do sistema; instalação imperativa de pacotes não foi habilitada." : "NixOS detectado: drivers são definidos na configuração declarativa e ativados por rebuild; não será executado APT, DNF ou pacman.");return;}
+  if(manager.isEmpty()){emit listed({},"Nenhum backend de instalação compatível disponível. O painel detecta gerenciador/repositórios, mas não executa comandos de outra distribuição. PackageKit com backend da distro amplia o suporte.");return;}
+  if(manager=="packagekit"){queryPackageKit();return;}
   if(manager=="pacman")run({"-Sl"});
   else if(manager=="apt")run({"pkgnames"});
   else run({"--color=never","--showduplicates","list","--available","nvidia*","akmod-nvidia","xorg-x11-drv-nvidia*","mesa-vulkan-drivers","mesa-dri-drivers","intel-media-driver"});
@@ -102,4 +119,38 @@ void DriverCatalog::completed(int code,QProcess::ExitStatus status) {
     for(int i=0;i<result.size();++i){auto row=result[i].toObject();row["installed"]=versions.value(row["name"].toString());result[i]=row;}
   }
   emit listed(result,QString("%1 · %2 opções nos repositórios configurados. Consulta usa índices locais; não adiciona repositórios nem baixa instaladores externos.").arg(manager).arg(result.size()));
+}
+
+void DriverCatalog::queryPackageKit() {
+  dbusBusy=true;backendRows={};backendError.clear();timeout.start(30000);
+  QDBusInterface service("org.freedesktop.PackageKit","/org/freedesktop/PackageKit","org.freedesktop.PackageKit",QDBusConnection::systemBus());
+  service.setTimeout(5000);
+  backendName=service.property("BackendName").toString();
+  auto *watcher=new QDBusPendingCallWatcher(service.asyncCall("CreateTransaction"),this);
+  connect(watcher,&QDBusPendingCallWatcher::finished,this,[this,watcher] {
+    QDBusPendingReply<QDBusObjectPath> reply=*watcher;watcher->deleteLater();
+    if(!dbusBusy)return;
+    if(reply.isError()){dbusBusy=false;timeout.stop();emit listed({},"Backend PackageKit indisponível: "+reply.error().message());return;}
+    transactionPath=reply.value().path();auto bus=QDBusConnection::systemBus();
+    bus.connect("org.freedesktop.PackageKit",transactionPath,"org.freedesktop.PackageKit.Transaction","Package",this,SLOT(packageReceived(uint,QString,QString)));
+    bus.connect("org.freedesktop.PackageKit",transactionPath,"org.freedesktop.PackageKit.Transaction","Finished",this,SLOT(packageQueryFinished(uint,uint)));
+    bus.connect("org.freedesktop.PackageKit",transactionPath,"org.freedesktop.PackageKit.Transaction","ErrorCode",this,SLOT(packageQueryError(uint,QString)));
+    QDBusMessage query=QDBusMessage::createMethodCall("org.freedesktop.PackageKit",transactionPath,"org.freedesktop.PackageKit.Transaction","GetPackages");
+    query<<QVariant::fromValue<qulonglong>(0);bus.asyncCall(query);
+  });
+}
+void DriverCatalog::packageReceived(uint info,QString id,QString summary) {
+  Q_UNUSED(summary);
+  if(!dbusBusy || backendRows.size()>=1500)return;
+  auto parts=id.split(';');if(parts.size()!=4 || !driverPackageAllowed(parts[0].section('/',-1),vendor) || !token(parts[1]) || !token(parts[2]))return;
+  QJsonObject row{{"manager","packagekit"},{"name",parts[0]},{"version",parts[1]},{"repo",parts[3].isEmpty()?"Backend da distro":parts[3]},
+    {"architecture",parts[2]},{"packageId",id},{"installed",info==1?parts[1]:QString{}}};
+  if(!driverTransaction(row,false).isEmpty()&&!backendRows.contains(row))backendRows.append(row);
+}
+void DriverCatalog::packageQueryError(uint code,QString details) {Q_UNUSED(code);backendError=details;}
+void DriverCatalog::packageQueryFinished(uint code,uint runtime) {
+  Q_UNUSED(runtime);if(!dbusBusy)return;dbusBusy=false;timeout.stop();
+  QDBusConnection::systemBus().disconnect("org.freedesktop.PackageKit",transactionPath,"org.freedesktop.PackageKit.Transaction",QString(),this,nullptr);
+  bool ok=code==1 && backendError.isEmpty();
+  emit listed(ok?backendRows:QJsonArray{},ok?QString("PackageKit (%1) · %2 opções dos repositórios desta distribuição. Prévia mostra dependências; confirme a transação final no gerenciador.").arg(backendName.isEmpty()?"backend nativo":backendName).arg(backendRows.size()):"O backend da distro não concluiu a consulta: "+backendError);
 }

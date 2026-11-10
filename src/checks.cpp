@@ -29,6 +29,10 @@ int main(int argc, char **argv) {
   check(driverTransaction({{"manager","apt"},{"name","nvidia-driver-580"},{"version","580;touch /tmp/file"}},false).isEmpty(),"reject malformed package version");
   auto apt=parseDriverPackages("apt","nvidia-driver-580 | 580.1-0ubuntu1 | http://archive.ubuntu.com/ubuntu noble/restricted amd64 Packages\n","NVIDIA");
   check(apt.size()==1 && driverTransaction(apt[0].toObject(),true).contains("--simulate"),"APT versions and simulation");
+  QJsonObject generic{{"manager","packagekit"},{"name","nvidia-drivers"},{"version","580.1"},{"packageId","nvidia-drivers;580.1;x86_64;native-repo"}};
+  check(driverTransaction(generic,false).last()=="nvidia-drivers;580.1;x86_64;native-repo","PackageKit pins native package ID and repository");
+  generic["packageId"]="bash;580.1;x86_64;native-repo";
+  check(driverTransaction(generic,false).isEmpty(),"PackageKit rejects unrelated package IDs");
   auto c = OverlayConfig::fromJson({{"font", 999},
                                     {"width", 0},
                                     {"opacity", -1},
