@@ -71,3 +71,8 @@ TAR, RUN e DEB usam as bibliotecas compartilhadas do sistema, mecanismo previsto
 O AppImage muda o modo de distribuição: inclui bibliotecas e mantém seus avisos em `usr/share/doc/gpu-pro/thirdparty`. A release fornece `GPU-PRO-<versão>-dependency-sources.tar.gz` com fontes Ubuntu nas versões exatas mapeadas dos arquivos embarcados, mais os arquivos de copyright e licenças comuns. O build falha se não conseguir mapear uma biblioteca ou obter sua fonte correspondente. Esses componentes continuam redistribuíveis nos termos de suas próprias licenças; a restrição do código original do GPU-PRO não se aplica a eles.
 
 É possível extrair o AppImage com `--appimage-extract` e substituir bibliotecas compatíveis no AppDir, sem assinatura/DRM que impeça essa operação. A edição .deb não agrupa bibliotecas e usa dependências calculadas por `dpkg-shlibdeps`.
+
+
+## Integrações da versão 0.6
+
+A manutenção de drivers usa o `pacman` externo e não vincula a biblioteca GPL libalpm ao painel nem ao worker. A simulação Arch é uma execução isolada do programa instalado pela distro, com confirmação de instalação recusada; APT/DNF usam comandos nativos de prévia. `pactl` e `bubblewrap` também são executáveis externos não redistribuídos. Não foi incorporada biblioteca exclusivamente GPL ao código original. Qt/LGPL, runtimes e demais bibliotecas mantêm os termos descritos acima; não se afirma ausência de qualquer componente com alternativa GPL ou exceção de runtime.

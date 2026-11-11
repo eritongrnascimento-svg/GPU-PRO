@@ -1,6 +1,7 @@
 #include "update_manager.h"
 #include <archive.h>
 #include <archive_entry.h>
+#include "driver_packages.h"
 namespace {
 constexpr qint64 maxPackage = 128ll * 1024 * 1024, maxFiles = 512ll * 1024 * 1024;
 const QString repository = "eritongrnascimento-svg/GPU-PRO";
@@ -63,7 +64,7 @@ bool UpdateManager::officialUrl(const QUrl &url) {
 void UpdateManager::fetch(QUrl url, qint64 maximum, std::function<void(QByteArray, QString)> done) {
   if (!officialUrl(url)) { done({}, "Endereço fora do repositório oficial"); return; }
   QNetworkRequest request(url);
-  request.setHeader(QNetworkRequest::UserAgentHeader, "GPU-PRO/0.5.0");
+  request.setHeader(QNetworkRequest::UserAgentHeader, "GPU-PRO/0.6.0");
   request.setRawHeader("Accept", "application/vnd.github+json");
   request.setTransferTimeout(30000);
   request.setAttribute(QNetworkRequest::RedirectPolicyAttribute, QNetworkRequest::NoLessSafeRedirectPolicy);
@@ -94,7 +95,7 @@ void UpdateManager::check() {
       QString version = tag.startsWith('v') ? tag.mid(1) : tag;
       if (json["draft"].toBool() || json["prerelease"].toBool() || !newer(version, QCoreApplication::applicationVersion())) { emit message("Nenhuma versão estável mais recente disponível"); emit checked(version, false); return; }
       release.version = version; release.tag = tag;
-      release.assetName = "GPU-PRO-" + version + "-linux-x86_64.tar.gz";
+      release.assetName = kind=="appimage" ? "GPU-PRO-"+version+"-x86_64.AppImage" : kind=="deb" ? "gpu-pro_"+version+"_ubuntu24.04_amd64.deb" : "GPU-PRO-"+version+"-linux-x86_64.tar.gz";
       for (auto value : json["assets"].toArray()) {
         auto a = value.toObject();
         if (a["name"].toString() == release.assetName) release.assetUrl = QUrl(a["browser_download_url"].toString());
@@ -107,6 +108,8 @@ void UpdateManager::check() {
     });
 }
 QString UpdateManager::backup(QString &error) {
+  if(kind=="appimage")return imageBackup(error);
+  if(kind=="deb"){error="Use o backup do pacote instalado pelo painel";return {}; }
   if (!validRoot(root) || !QFileInfo(root).isWritable()) { error = "Atualização pelo painel requer pacote portátil com bin/ e diretório gravável pelo usuário"; return {}; }
   auto files = installedFiles(root, error); if (!error.isEmpty() || files.isEmpty()) return {};
   QString folder = storage + "/backups/" + QDateTime::currentDateTimeUtc().toString("yyyyMMdd-HHmmss-zzz") + '-' + QUuid::createUuid().toString(QUuid::WithoutBraces);
@@ -120,6 +123,14 @@ QString UpdateManager::backup(QString &error) {
   return folder;
 }
 bool UpdateManager::restore(QString folder, QString &error) {
+  if(kind=="appimage") {
+    QFile manifest(storage+"/app-last-backup.json");if(!manifest.open(QIODevice::ReadOnly)){error="Backup AppImage ausente";return false;}
+    auto data=QJsonDocument::fromJson(manifest.readAll()).object();QString file=data["file"].toString();
+    if(data["kind"]!="appimage"||data["target"]!=managedTarget||!QFileInfo(file).canonicalFilePath().startsWith(QFileInfo(storage+"/app-backups").canonicalFilePath()+'/')){error="Backup pertence a outra instalação";return false;}
+    QFile input(file);if(!input.open(QIODevice::ReadOnly)){error="Arquivo de backup ausente";return false;}QCryptographicHash h(QCryptographicHash::Sha256);h.addData(&input);
+    if(h.result().toHex()!=data["sha256"].toString().toLatin1()){error="Checksum do backup não confere";return false;}
+    return copyAtomic(file,managedTarget,error);
+  }
   if (folder.isEmpty()) { QFile f(storage + "/last-backup.txt"); if (f.open(QIODevice::ReadOnly)) folder = QString::fromUtf8(f.readAll()); }
   QString canonical = QFileInfo(folder).canonicalFilePath(), backups = QFileInfo(storage + "/backups").canonicalFilePath();
   if (backups.isEmpty() || !canonical.startsWith(backups + '/')) { error = "Backup local não encontrado"; return false; }
@@ -212,11 +223,96 @@ void UpdateManager::downloadAndInstall() {
       if (error.isEmpty()) {
         QDir().mkpath(storage); QTemporaryFile package(storage + "/download-XXXXXX.tar.gz");
         if (!package.open() || package.write(bytes) != bytes.size() || !package.flush()) error = "Falha ao salvar download";
-        else installed = installArchive(package.fileName(), expected, release.version, error);
+        else if(kind=="appimage")installed=installImage(package.fileName(),expected,release.version,error);
+        else if(kind=="deb") {
+          QString path;
+          if(stageDeb(package.fileName(),expected,release.version,path,error)) {
+            backupDeb([this,path](QString e){working=false;if(!e.isEmpty()){emit message(e);emit finished(false);return;}emit message("Novo DEB verificado e pacote anterior preservado. Confira a simulação antes de autorizar a instalação.");emit managedPackageReady(path,release.version,false);});
+            return;
+          }
+        } else installed = installArchive(package.fileName(), expected, release.version, error);
       }
       working = false;
       if (!error.isEmpty()) emit message(error);
       emit finished(installed);
     });
   });
+}
+
+namespace {
+bool jsonAtomic(QString path,QJsonObject value,QString &error) {
+  QDir().mkpath(QFileInfo(path).absolutePath());QSaveFile f(path);auto data=QJsonDocument(value).toJson();
+  if(!f.open(QIODevice::WriteOnly)||f.write(data)!=data.size()||!f.commit()){error="Falha ao registrar backup";return false;}return true;
+}
+QByteArray fileDigest(QString path) {QFile f(path);if(!f.open(QIODevice::ReadOnly))return {};QCryptographicHash hash(QCryptographicHash::Sha256);hash.addData(&f);return hash.result().toHex();}
+bool verifiedFile(QString file,QByteArray expected,QString &error) {
+  if(expected.size()!=64||!QRegularExpression("^[a-fA-F0-9]{64}$").match(QString::fromLatin1(expected)).hasMatch()||QFileInfo(file).size()>maxPackage||fileDigest(file)!=expected.toLower()){error="Pacote/checksum inválido";return false;}return true;
+}
+QByteArray checksum(QByteArray sums,QString name) {for(auto l:sums.split('\n')){auto parts=l.simplified().split(' ');if(parts.size()==2&&(parts[1]==name.toUtf8()||parts[1]=='*'+name.toUtf8()))return parts[0];}return {};}
+QString debField(QString path,QString field) {
+  QProcess p;p.setProcessEnvironment(nativeEnvironment());p.start("/usr/bin/dpkg-deb",{"--field",path,field});if(!p.waitForFinished(10000)||p.exitCode()!=0)return {};return QString::fromUtf8(p.readAllStandardOutput()).trimmed();
+}
+}
+QString UpdateManager::imageBackup(QString &error) {
+  QFileInfo info(managedTarget);
+  if(info.isSymLink()||!info.isFile()||!QFileInfo(info.absolutePath()).isWritable()){error="AppImage precisa ser arquivo normal em pasta gravável pelo seu usuário";return {};}
+  QString folder=storage+"/app-backups/"+QDateTime::currentDateTimeUtc().toString("yyyyMMdd-HHmmss-zzz")+'-'+QUuid::createUuid().toString(QUuid::WithoutBraces);QDir().mkpath(folder);
+  QString target=folder+"/GPU-PRO-"+QCoreApplication::applicationVersion()+".AppImage";
+  if(!copyAtomic(managedTarget,target,error))return {};
+  QJsonObject manifest{{"kind","appimage"},{"target",managedTarget},{"file",target},{"sha256",QString::fromLatin1(fileDigest(target))},{"version",QCoreApplication::applicationVersion()}};
+  if(!jsonAtomic(storage+"/app-last-backup.json",manifest,error))return {};
+  return target;
+}
+bool UpdateManager::installImage(QString file,QByteArray expected,QString version,QString &error) {
+  if(!mayInstall()){error="Operação em andamento; atualização recusada";return false;}
+  if(!QRegularExpression("^[0-9]+\\.[0-9]+\\.[0-9]+$").match(version).hasMatch()||!verifiedFile(file,expected,error))return false;
+  QFile input(file);if(!input.open(QIODevice::ReadOnly)){error="AppImage indisponível";return false;}auto header=input.read(64);input.close();
+  if(header.size()<64||header.left(4)!=QByteArray("\x7f" "ELF",4)||header[4]!=2||header[5]!=1||header[18]!=62||header[19]!=0||header.mid(8,3)!=QByteArray("AI\x02",3)){error="Arquivo não é AppImage tipo 2 x86_64";return false;}
+  auto permissions=QFile::permissions(managedTarget);
+  if(imageBackup(error).isEmpty())return false;
+  if(!copyAtomic(file,managedTarget,error))return false;
+  QFile::setPermissions(managedTarget,permissions|QFileDevice::ExeOwner);
+  emit message("AppImage atualizado no mesmo caminho com backup preservado. Reinicie o aplicativo.");return true;
+}
+bool UpdateManager::stageDeb(QString file,QByteArray expected,QString version,QString &path,QString &error) {
+  if(!mayInstall()){error="Operação em andamento; instalação recusada";return false;}
+  if(!QRegularExpression("^[0-9]+\\.[0-9]+\\.[0-9]+$").match(version).hasMatch()||!verifiedFile(file,expected,error))return false;
+  if(debField(file,"Package")!="gpu-pro"||debField(file,"Version")!=version||debField(file,"Architecture")!="amd64"){error="Identificação/versão/arquitetura do DEB não corresponde à release";return false;}
+  path=storage+"/downloads/gpu-pro_"+version+"_amd64.deb";
+  return copyAtomic(file,path,error);
+}
+void UpdateManager::backupDeb(std::function<void(QString)> done) {
+  QString current=QCoreApplication::applicationVersion();
+  QProcess installed;installed.setProcessEnvironment(nativeEnvironment());installed.start("/usr/bin/dpkg-query",{"-W","-f=${Version}","gpu-pro"});
+  if(!installed.waitForFinished(5000)||installed.exitCode()!=0||QString::fromUtf8(installed.readAllStandardOutput()).trimmed()!=current){done("A versão do pacote instalado difere desta execução. Reinicie o painel antes de atualizar ou salvar backup.");return;}
+  if(!QRegularExpression("^[0-9]+\\.[0-9]+\\.[0-9]+$").match(current).hasMatch()){done("Versão instalada não reconhecida");return;}
+  QString name="gpu-pro_"+current+"_ubuntu24.04_amd64.deb";
+  QString url="https://github.com/"+repository+"/releases/download/v"+current+'/';
+  emit message("Preservando o pacote oficial da versão atual antes da instalação…");
+  fetch(QUrl(url+"SHA256SUMS.txt"),65536,[this,done,url,name,current](QByteArray sums,QString error){
+    auto expected=checksum(sums,name);if(!error.isEmpty()||expected.size()!=64){done("Não foi possível obter backup da versão instalada. Nada foi instalado. "+error);return;}
+    QString folder=storage+"/app-backups/"+current;QDir().mkpath(folder);QString path=folder+'/'+name;
+    auto complete=[this,done,path,current,expected](QByteArray bytes,QString error){
+      if(!error.isEmpty()){done(error);return;}
+      if(!bytes.isEmpty()){QSaveFile f(path);if(!f.open(QIODevice::WriteOnly)||f.write(bytes)!=bytes.size()||!f.commit()){done("Falha ao salvar DEB anterior");return;}}
+      if(!verifiedFile(path,expected,error)||debField(path,"Package")!="gpu-pro"||debField(path,"Version")!=current||debField(path,"Architecture")!="amd64"){done("Pacote de backup não confere: "+error);return;}
+      QJsonObject manifest{{"kind","deb"},{"file",path},{"version",current},{"sha256",QString::fromLatin1(expected)}};
+      jsonAtomic(storage+"/app-last-backup.json",manifest,error);done(error);
+    };
+    if(fileDigest(path)==expected)complete({},{});else fetch(QUrl(url+name),maxPackage,complete);
+  });
+}
+void UpdateManager::backupCurrent() {
+  if(working)return;
+  if(kind=="deb"){working=true;backupDeb([this](QString error){working=false;emit message(error.isEmpty()?"Pacote anterior salvo para restauração":error);});}
+  else {QString error;auto path=backup(error);emit message(path.isEmpty()?error:"Backup salvo: "+path);}
+}
+void UpdateManager::restoreManaged() {
+  if(working||!mayInstall())return;
+  if(kind=="appimage"){QString error;bool ok=restore({},error);emit message(ok?"AppImage anterior restaurado. Reinicie.":error);emit finished(ok);return;}
+  QFile f(storage+"/app-last-backup.json");if(!f.open(QIODevice::ReadOnly)){emit message("Nenhum backup do pacote disponível");return;}
+  auto b=QJsonDocument::fromJson(f.readAll()).object();QString file=b["file"].toString(),version=b["version"].toString(),error;
+  QString base=QFileInfo(storage+"/app-backups").canonicalFilePath();
+  if(b["kind"]!="deb"||base.isEmpty()||!QFileInfo(file).canonicalFilePath().startsWith(base+'/')||!verifiedFile(file,b["sha256"].toString().toLatin1(),error)||debField(file,"Package")!="gpu-pro"||debField(file,"Version")!=version){emit message("Backup DEB não validado: "+error);return;}
+  emit managedPackageReady(file,version,true);
 }

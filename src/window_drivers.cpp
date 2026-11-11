@@ -1,91 +1,417 @@
-#include "window.h"
 #include "driver_packages.h"
-QWidget *MainWindow::driversControls() {
-  auto *box = new QGroupBox("Drivers · repositórios da distribuição");
-  auto *layout = new QVBoxLayout(box);
-  auto *info = new QLabel("Consulte as versões disponíveis nos repositórios já configurados. Nenhum driver é instalado automaticamente.");
-  info->setWordWrap(true); info->setTextFormat(Qt::PlainText); layout->addWidget(info);
-  auto *refresh = new QPushButton("Consultar drivers e versões disponíveis"); layout->addWidget(refresh);
-  auto *form = new QFormLayout;
-  auto *packages = new QComboBox, *versions = new QComboBox;
-  form->addRow("Pacote / componente",packages); form->addRow("Versão / repositório",versions); layout->addLayout(form);
-  auto *actions = new QHBoxLayout;
-  auto *preview = new QPushButton("Prévia / simular transação");actions->addWidget(preview);
-  auto *install = new QPushButton("Instalar / atualizar versão selecionada");actions->addWidget(install);
-  layout->addLayout(actions); install->setEnabled(false); preview->setEnabled(false);
-  auto *details = new QLabel("AMD/Intel: Mesa, Vulkan e VA-API são componentes de espaço de usuário; o driver do kernel acompanha o kernel da distro. "
-      "NVIDIA: mantenha a família compatível com sua GPU e kernel. A troca de módulo pode exigir headers/DKMS e reinicialização. "
-      "No Arch/CachyOS a instalação usa atualização completa do sistema, evitando atualização parcial. Não há backup/rollback de drivers pelo GPU-PRO.");
-  details->setWordWrap(true);layout->addWidget(details);
-  auto *output = new QPlainTextEdit;output->setReadOnly(true);output->setMaximumHeight(180);output->setMinimumHeight(110);
-  output->document()->setMaximumBlockCount(1500);layout->addWidget(output);
-  auto *catalog = new DriverCatalog(this);
-  auto *simulation = new QProcess(this);
-  auto *timeout = new QTimer(simulation);timeout->setSingleShot(true);timeout->setInterval(30000);
-  connect(timeout,&QTimer::timeout,simulation,&QProcess::kill);
-  auto rows = std::make_shared<QJsonArray>();auto verified=std::make_shared<QString>();auto planText=std::make_shared<QString>();
-  auto selectedKey = [versions] {return QString::fromUtf8(QJsonDocument(versions->currentData().toJsonObject()).toJson(QJsonDocument::Compact));};
-  connect(packages,qOverload<int>(&QComboBox::currentIndexChanged),box,[rows,packages,versions,install,preview,verified] {
-    versions->clear();verified->clear();install->setEnabled(false);
-    for(auto value:*rows){auto row=value.toObject();if(row["name"].toString()!=packages->currentText())continue;
-      QString label=row["version"].toString()+" · "+row["repo"].toString();
-      if(!row["installed"].toString().isEmpty())label+=" · instalado: "+row["installed"].toString();
-      versions->addItem(label,row);
+#include "driver_stack.h"
+#include "window.h"
+void MainWindow::startNativeTransaction(QStringList command, std::function<void(int)> done) {
+  if (offline || testActive || driverBusy || displayBusy ||
+      clockProcess.state() != QProcess::NotRunning || command.isEmpty())
+    return;
+  if (!QStringList{"/usr/bin/pacman", "/usr/bin/apt-get", "/usr/bin/dnf", "/usr/bin/pkcon"}
+           .contains(command.first()))
+    return;
+  QString terminal;
+  QStringList args;
+  for (auto item :
+       QList<QPair<QString, QStringList>>{{"/usr/bin/konsole", {"--separate", "--nofork", "-e"}},
+                                          {"/usr/bin/xterm", {"-e"}},
+                                          {"/usr/bin/gnome-terminal", {"--wait", "--"}},
+                                          {"/usr/bin/xfce4-terminal", {"--disable-server", "-x"}}})
+    if (QFileInfo(item.first).isExecutable()) {
+      terminal = item.first;
+      args = item.second;
+      break;
     }
-    preview->setEnabled(versions->count()>0);
+  if (terminal.isEmpty() || !QFileInfo("/usr/bin/pkexec").isExecutable()) {
+    notify("É necessário terminal compatível e pkexec", command.join(' '));
+    return;
+  }
+  args << "/usr/bin/pkexec" << "--disable-internal-agent";
+  args << command;
+  auto *process = new QProcess(this);
+  process->setProcessEnvironment(nativeEnvironment());
+  driverBusy = true;
+  activeKind = "package-maintenance";
+  setTesting(true);
+  connect(process, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), this,
+          [this, process, done](int code, QProcess::ExitStatus state) {
+            driverBusy = false;
+            setTesting(false);
+            process->deleteLater();
+            done(state == QProcess::NormalExit ? code : -1);
+          });
+  connect(process, &QProcess::errorOccurred, this, [this, process](QProcess::ProcessError error) {
+    if (error == QProcess::FailedToStart) {
+      driverBusy = false;
+      setTesting(false);
+      notify("Não foi possível abrir o gerenciador", process->errorString());
+      process->deleteLater();
+    }
   });
-  connect(versions,qOverload<int>(&QComboBox::currentIndexChanged),box,[verified,install,output,versions] {
-    verified->clear();install->setEnabled(false);
-    auto command=driverTransaction(versions->currentData().toJsonObject(),false);
-    output->setPlainText(command.isEmpty()?"Selecione um pacote válido":"Comando proposto (após autenticação):\n"+command.join(' ')+"\n\nSimule a transação antes de instalar. Os índices podem mudar; o gerenciador nativo fará a confirmação final.");
+  process->start(terminal, args);
+}
+QWidget *MainWindow::driversControls() {
+  auto *box = new QGroupBox("Drivers completos · repositórios e restauração");
+  auto *layout = new QVBoxLayout(box);
+  auto *info = new QLabel(
+      "Consulte as versões realmente disponíveis nos repositórios configurados. Open refere-se ao "
+      "módulo de kernel NVIDIA; componentes de espaço de usuário mantêm suas licenças.");
+  info->setWordWrap(true);
+  layout->addWidget(info);
+  auto *refresh = new QPushButton("Consultar drivers completos");
+  layout->addWidget(refresh);
+  auto *available = new QComboBox, *installed = new QComboBox;
+  available->setObjectName("completeDriverChoices");
+  for (auto *combo : {available, installed}) {
+    combo->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
+    combo->setMinimumContentsLength(28);
+    combo->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+  }
+  installed->setObjectName("installedDriverOnly");
+  auto *form = new QFormLayout;
+  form->addRow("Drivers disponíveis · antiga → nova", available);
+  form->addRow("Somente driver instalado", installed);
+  layout->addLayout(form);
+  auto *preview = new QPushButton("Simular instalação / mostrar alterações"),
+       *install = new QPushButton("Instalar versão selecionada"),
+       *rollback = new QPushButton("Restaurar versão anterior do driver");
+  layout->addWidget(preview);
+  layout->addWidget(install);
+  layout->addWidget(rollback);
+  install->setEnabled(false);
+  preview->setEnabled(false);
+  auto *output = new QPlainTextEdit;
+  output->setReadOnly(true);
+  output->setMinimumHeight(150);
+  output->setMaximumHeight(280);
+  output->document()->setMaximumBlockCount(2000);
+  layout->addWidget(output);
+  auto *note = new QLabel(
+      "A lista não mistura ferramentas de contêiner ou componentes avulsos. Uma troca pode exigir "
+      "reinicialização. No Arch/CachyOS, a prévia inclui atualização completa usando os mesmos "
+      "índices locais; não sincroniza índices depois da simulação. A restauração depende de backup "
+      "completo e dos pacotes anteriores disponíveis, nunca de um número de versão isolado.");
+  note->setWordWrap(true);
+  layout->addWidget(note);
+  auto candidate = std::make_shared<QJsonObject>(), plan = std::make_shared<QJsonObject>(),
+       installedDriver = std::make_shared<QJsonObject>();
+  auto queryDevice = std::make_shared<QString>();
+  auto worker = new QProcess(this);
+  auto fallback = new DriverCatalog(this);
+  auto planFile = std::make_shared<std::unique_ptr<QTemporaryFile>>();
+  auto operation = std::make_shared<QString>();
+  auto resultBytes = std::make_shared<QByteArray>();
+  auto limit = new QTimer(worker);
+  limit->setSingleShot(true);
+  limit->setInterval(60000);
+  connect(limit, &QTimer::timeout, worker, &QProcess::kill);
+  connect(worker, &QProcess::readyReadStandardOutput, box, [worker, resultBytes] {
+    *resultBytes += worker->readAllStandardOutput();
+    if (resultBytes->size() > 8 * 1024 * 1024)
+      worker->kill();
   });
-  connect(refresh,&QPushButton::clicked,this,[this,catalog,info,refresh,install,preview,verified] {
-    if(offline||testActive||driverBusy||catalog->busy())return;
-    verified->clear();install->setEnabled(false);preview->setEnabled(false);refresh->setEnabled(false);
-    info->setText("Consultando índices do gerenciador nativo…");catalog->refresh(gpus.value(selected).vendor);
+  auto populate = [this, available, installed, info, preview, candidate, plan, install,
+                   installedDriver](QJsonArray choices, QJsonArray current, QString message) {
+    QSignalBlocker b(available);
+    available->clear();
+    installed->clear();
+    *plan = {};
+    install->setEnabled(false);
+    for (auto v : choices) {
+      auto row = v.toObject();
+      QString architecture = gpus.value(selected).specs["architecture"].toString(),
+              name = row["name"].toString();
+      if ((architecture == "Ampere" || architecture == "Ada Lovelace" ||
+           architecture == "Blackwell") &&
+          (name.contains("390xx") || name.contains("470xx")))
+        continue;
+      if ((architecture == "Maxwell" || architecture == "Pascal" || architecture == "Kepler" ||
+           architecture == "Volta") &&
+          row["variant"] == "Open")
+        continue;
+      available->addItem(row["label"].toString(), row);
+      available->setItemData(available->count() - 1, row["label"].toString(), Qt::ToolTipRole);
+    }
+    QString currentVersion, variant;
+    QStringList moduleNames;
+    *installedDriver = {};
+    for (auto v : current) {
+      auto row = v.toObject();
+      QString name = row["name"].toString();
+      if (QRegularExpression("^(?:nvidia(?:-[0-9]+xx)?-utils|nvidia-driver-[0-9]+(?:-server)?(?:-"
+                             "open)?|akmod-nvidia(?:-open)?|mesa|Mesa)$")
+              .match(name)
+              .hasMatch()) {
+        currentVersion = row["version"].toString();
+        *installedDriver = row;
+      }
+      if (QRegularExpression("^(?:nvidia(?:-open)?(?:-dkms|-lts)?|nvidia-[0-9]+xx(?:-open)?-dkms|"
+                             "linux(?:-[a-z0-9]+)*-nvidia(?:-open)?)$")
+              .match(name)
+              .hasMatch()) {
+        moduleNames << name;
+        variant = name.contains("open") ? "Open" : "Proprietário";
+      }
+    }
+    if (!currentVersion.isEmpty())
+      installed->addItem(gpus.value(selected).vendor + " " + currentVersion +
+                         (variant.isEmpty() ? QString{} : " · " + variant));
+    else
+      installed->addItem("Versão do pacote principal não identificada");
+    installed->setToolTip(moduleNames.join('\n'));
+    auto loaded = gpus.value(selected).specs["driverVersion"].toString();
+    if (!loaded.isEmpty())
+      installed->setToolTip(installed->toolTip() + "\nCarregado nesta sessão: " + loaded);
+    *candidate = available->currentData().toJsonObject();
+    preview->setEnabled(available->count() > 0 && !offline);
+    info->setText(message);
+  };
+  connect(available, qOverload<int>(&QComboBox::currentIndexChanged), box,
+          [candidate, plan, available, install, output] {
+            *candidate = available->currentData().toJsonObject();
+            *plan = {};
+            install->setEnabled(false);
+            output->setPlainText(
+                "Simule para conferir pacotes adicionados, atualizados e removidos.");
+          });
+  connect(fallback, &DriverCatalog::listed, box,
+          [this, populate, refresh, queryDevice](QJsonArray rows, QString message) {
+            if (*queryDevice != gpus.value(selected).pci) {
+              refresh->setEnabled(!offline);
+              return;
+            }
+            QJsonArray current;
+            for (auto v : rows) {
+              auto row = v.toObject();
+              if (!row["installed"].toString().isEmpty()) {
+                row["version"] = row["installed"];
+                current.append(row);
+              }
+            }
+            populate(completeDriverProfiles(rows, current, gpus.value(selected).vendor), current,
+                     message);
+            refresh->setEnabled(!offline);
+          });
+  auto query = [this, worker, refresh, install, preview, info, operation, resultBytes, fallback,
+                limit, queryDevice] {
+    if (offline || testActive || driverBusy || worker->state() != QProcess::NotRunning)
+      return;
+    *queryDevice = gpus.value(selected).pci;
+    install->setEnabled(false);
+    preview->setEnabled(false);
+    refresh->setEnabled(false);
+    info->setText("Consultando drivers completos e pacotes instalados…");
+    if (nativePackageManager() != "pacman") {
+      fallback->refresh(gpus.value(selected).vendor);
+      return;
+    }
+    *operation = "catalog";
+    resultBytes->clear();
+    worker->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+    worker->start(QCoreApplication::applicationDirPath() + "/gpu-system-worker",
+                  {"--driver-catalog", gpus.value(selected).vendor});
+    limit->start();
+  };
+  connect(refresh, &QPushButton::clicked, this, query);
+  auto simulate = [this, worker, operation, resultBytes, planFile, candidate, plan, install, output,
+                   limit, queryDevice] {
+    if (offline || testActive || driverBusy || candidate->isEmpty() ||
+        worker->state() != QProcess::NotRunning)
+      return;
+    *queryDevice = gpus.value(selected).pci;
+    *plan = {};
+    install->setEnabled(false);
+    if (nativePackageManager() != "pacman") {
+      auto cmd = driverTransaction(*candidate, true);
+      if (cmd.isEmpty()) {
+        output->setPlainText("Sem prévia nativa compatível para este conjunto");
+        return;
+      }
+      *operation = "native-preview";
+      resultBytes->clear();
+      auto env = nativeEnvironment();
+      env.insert("LC_ALL", "C");
+      worker->setProcessEnvironment(env);
+      QString exe = cmd.takeFirst();
+      worker->setProcessChannelMode(QProcess::MergedChannels);
+      worker->start(exe, cmd);
+      limit->start();
+      return;
+    }
+    *planFile = std::make_unique<QTemporaryFile>();
+    if (!(*planFile)->open())
+      return;
+    (*planFile)->write(QJsonDocument(*candidate).toJson());
+    (*planFile)->flush();
+    *operation = "plan";
+    resultBytes->clear();
+    worker->setProcessEnvironment(QProcessEnvironment::systemEnvironment());
+    worker->start(QCoreApplication::applicationDirPath() + "/gpu-system-worker",
+                  {"--driver-plan", (*planFile)->fileName()});
+    limit->start();
+    output->setPlainText("Preparando transação no resolvedor nativo, sem instalar…");
+  };
+  connect(preview, &QPushButton::clicked, this, simulate);
+  connect(
+      worker, qOverload<int, QProcess::ExitStatus>(&QProcess::finished), box,
+      [this, worker, operation, resultBytes, plan, populate, refresh, install, output, candidate,
+       limit, queryDevice](int code, QProcess::ExitStatus state) {
+        limit->stop();
+        *resultBytes += worker->readAllStandardOutput();
+        if (*queryDevice != gpus.value(selected).pci) {
+          refresh->setEnabled(!offline);
+          return;
+        }
+        if (*operation == "native-preview") {
+          QString text = QString::fromUtf8(*resultBytes);
+          bool ok =
+              state == QProcess::NormalExit &&
+              (code == 0 || (code == 1 && text.contains("Operation aborted", Qt::CaseInsensitive)));
+          *plan = {{"valid", ok}, {"candidate", *candidate}, {"nativeText", text}};
+          output->setPlainText(
+              text + "\nRevise as linhas de adição/remoção e a confirmação final do gerenciador. "
+                     "Backups transacionais ainda dependem do backend da distribuição.");
+          install->setEnabled(ok);
+          return;
+        }
+        auto r = QJsonDocument::fromJson(*resultBytes).object();
+        if (!r["valid"].toBool() || code != 0 || state != QProcess::NormalExit) {
+          output->setPlainText(r["error"].toString("Consulta não concluída: ") +
+                               QString::fromUtf8(worker->readAllStandardError()).left(1000));
+          refresh->setEnabled(!offline);
+          return;
+        }
+        if (*operation == "catalog") {
+          populate(r["profiles"].toArray(), r["installed"].toArray(),
+                   QString("%1 conjuntos completos disponíveis; somente versões presentes nos "
+                           "repositórios atuais.")
+                       .arg(r["profiles"].toArray().size()));
+          refresh->setEnabled(!offline);
+        } else {
+          *plan = r;
+          output->setPlainText(driverPlanDescription(r));
+          install->setText(candidate->value("restore").toBool() ? "Restaurar conjunto selecionado"
+                                                                : "Instalar versão selecionada");
+          install->setEnabled(!offline);
+        }
+      });
+  connect(worker, &QProcess::errorOccurred, box,
+          [worker, refresh, output, limit](QProcess::ProcessError e) {
+            if (e == QProcess::FailedToStart) {
+              limit->stop();
+              refresh->setEnabled(true);
+              output->setPlainText("Worker ou gerenciador indisponível: " + worker->errorString());
+            }
+          });
+  connect(rollback, &QPushButton::clicked, this, [this, candidate, plan, simulate, output] {
+    if (offline || driverBusy || testActive)
+      return;
+    QJsonArray choices;
+    QStringList labels;
+    for (auto v : savedDriverSnapshots(configRoot() + "/driver-backups")) {
+      auto s = v.toObject();
+      if ((s["complete"].toBool() || s["repositoryReference"].toBool()) &&
+          s["vendor"] == gpus.value(selected).vendor) {
+        choices.append(s);
+        labels << s["label"].toString();
+      }
+    }
+    if (choices.isEmpty()) {
+      output->setPlainText(
+          "Ainda não há backup completo desta GPU. Antes de uma troca pelo painel, o aplicativo "
+          "registra a instalação e preserva os pacotes anteriores presentes no cache. Backups "
+          "incompletos não habilitam restauração.");
+      return;
+    }
+    bool ok = false;
+    auto label = QInputDialog::getItem(this, "Restaurar driver anterior",
+                                       "Conjunto anterior preservado", labels, 0, false, &ok);
+    if (!ok)
+      return;
+    *candidate = choices[labels.indexOf(label)].toObject();
+    *plan = {};
+    simulate();
   });
-  connect(catalog,&DriverCatalog::listed,box,[this,rows,packages,versions,info,refresh,install](QJsonArray result,QString message) {
-    *rows=result;packages->clear();versions->clear();QSet<QString> names;
-    for(auto value:result){QString name=value.toObject()["name"].toString();if(!names.contains(name)){names.insert(name);packages->addItem(name);}}
-    info->setText(message);refresh->setEnabled(!offline);install->setEnabled(false);
-  });
-  connect(simulation,&QProcess::readyReadStandardOutput,box,[simulation,output,planText] {QString text=QString::fromUtf8(simulation->readAllStandardOutput());output->moveCursor(QTextCursor::End);output->insertPlainText(text);*planText=(*planText+text).right(250000);});
-  connect(simulation,&QProcess::readyReadStandardError,box,[simulation,output,planText] {QString text=QString::fromUtf8(simulation->readAllStandardError());output->moveCursor(QTextCursor::End);output->insertPlainText(text);*planText=(*planText+text).right(250000);});
-  auto simulationKey=std::make_shared<QString>();
-  connect(preview,&QPushButton::clicked,this,[this,simulation,timeout,versions,output,verified,simulationKey,selectedKey,planText,install] {
-    if(offline||testActive||driverBusy||simulation->state()!=QProcess::NotRunning)return;
-    auto command=driverTransaction(versions->currentData().toJsonObject(),true);if(command.isEmpty())return;
-    *simulationKey=selectedKey();verified->clear();planText->clear();install->setEnabled(false);output->setPlainText("Simulação sem instalação: "+command.join(' ')+"\n");
-    auto env = nativeEnvironment(); env.insert("LC_ALL","C"); simulation->setProcessEnvironment(env);QString program=command.takeFirst();simulation->start(program,command);timeout->start();
-  });
-  connect(simulation,qOverload<int,QProcess::ExitStatus>(&QProcess::finished),this,[this,simulationKey,selectedKey,verified,planText,install,timeout,output](int code,QProcess::ExitStatus state) {
-    timeout->stop();bool dnfAbort=code==1&&planText->contains("Operation aborted",Qt::CaseInsensitive);
-    bool ok=state==QProcess::NormalExit&&(code==0||dnfAbort)&&*simulationKey==selectedKey();
-    *verified=ok?*simulationKey:QString{};install->setEnabled(ok&&!offline&&!testActive);
-    output->appendPlainText(ok?"\nSimulação concluída. Revise os pacotes e confirme no gerenciador ao instalar.":"\nSimulação não validada. Confira erros, índices e compatibilidade; nada foi instalado.");
-  });
-  connect(simulation,&QProcess::errorOccurred,box,[output,timeout](QProcess::ProcessError error){if(error==QProcess::FailedToStart){timeout->stop();output->appendPlainText("Não foi possível iniciar o gerenciador nativo");}});
-  connect(install,&QPushButton::clicked,this,[this,versions,verified,selectedKey,output,install] {
-    if(offline||testActive||driverBusy||*verified!=selectedKey()||clockProcess.state()!=QProcess::NotRunning)return;
-    auto row=versions->currentData().toJsonObject();auto command=driverTransaction(row,false);if(command.isEmpty())return;
-    if(QMessageBox::question(this,"Confirmar instalação de driver",QString("Instalar/atualizar %1 na versão %2?\n\n%3\n\n%4\n\nO terminal mostrará a transação final. Confirme também no gerenciador. Pode ser necessário reiniciar.")
-       .arg(row["name"].toString(),row["version"].toString(),command.join(' '),row["manager"].toString()=="pacman"?"Arch/CachyOS: atualizará também os demais pacotes do sistema.":"Somente repositórios já configurados serão usados."))!=QMessageBox::Yes)return;
-    QString terminal;QStringList args;
-    if(QFileInfo("/usr/bin/konsole").isExecutable()){terminal="/usr/bin/konsole";args={"--separate","--nofork","-e"};}
-    else if(QFileInfo("/usr/bin/xterm").isExecutable()){terminal="/usr/bin/xterm";args={"-e"};}
-    else if(QFileInfo("/usr/bin/gnome-terminal").isExecutable()){terminal="/usr/bin/gnome-terminal";args={"--wait","--"};}
-    else if(QFileInfo("/usr/bin/xfce4-terminal").isExecutable()){terminal="/usr/bin/xfce4-terminal";args={"--disable-server","-x"};}
-    if(terminal.isEmpty()||!QFileInfo("/usr/bin/pkexec").isExecutable()){notify("Instale um terminal compatível e pkexec para executar pelo painel",command.join(' '));return;}
-    args<<"/usr/bin/pkexec"<<"--disable-internal-agent";args<<command;
-    driverBusy=true;activeKind="driver-maintenance";setTesting(true);install->setEnabled(false);
-    driverTerminal.setProcessEnvironment(nativeEnvironment());driverTerminal.start(terminal,args);
-    output->appendPlainText("\nGerenciador aberto no terminal. A autenticação ocorre no diálogo do sistema; nunca digite senha no GPU-PRO.");
-  });
-  connect(&driverTerminal,qOverload<int,QProcess::ExitStatus>(&QProcess::finished),this,[this,catalog,output,verified](int code,QProcess::ExitStatus) {
-    driverBusy=false;setTesting(false);verified->clear();output->appendPlainText(QString("Terminal encerrado (código %1). Confira o resultado do gerenciador; o driver carregado pode mudar apenas após reiniciar.").arg(code));
-    catalog->refresh(gpus.value(selected).vendor);
-  });
-  connect(&driverTerminal,&QProcess::errorOccurred,this,[this,output](QProcess::ProcessError error){if(error==QProcess::FailedToStart){driverBusy=false;setTesting(false);output->appendPlainText("Falha ao abrir terminal: "+driverTerminal.errorString());}});
-  if(offline)refresh->setEnabled(false);
+  connect(
+      install, &QPushButton::clicked, this,
+      [this, candidate, plan, output, install, query, installedDriver] {
+        if (offline || testActive || driverBusy || !plan->value("valid").toBool() ||
+            plan->value("candidate").toObject() != *candidate)
+          return;
+        QStringList command;
+        if (nativePackageManager() == "pacman") {
+          auto checked = nativeDriverPlan(*candidate);
+          if (!checked["valid"].toBool() || checked["add"] != plan->value("add") ||
+              checked["remove"] != plan->value("remove")) {
+            output->appendPlainText("Os pacotes mudaram. Simule novamente antes de instalar.");
+            install->setEnabled(false);
+            return;
+          }
+          if (!candidate->value("restore").toBool()) {
+            QString error;
+            auto snapshot = saveDriverSnapshot(checked, configRoot() + "/driver-backups", &error);
+            if (!snapshot["complete"].toBool() &&
+                QMessageBox::warning(
+                    this, "Backup de driver incompleto",
+                    "Não foi possível preservar todos os pacotes anteriores. A restauração "
+                    "automática desta troca não estará disponível.\n" +
+                        error + "\nPacotes ausentes: " +
+                        QString::fromUtf8(QJsonDocument(snapshot["missing"].toArray()).toJson()) +
+                        "\nContinuar mesmo assim?",
+                    QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+              return;
+          }
+          command << checked["program"].toString();
+          for (auto v : checked["arguments"].toArray())
+            command << v.toString();
+        } else {
+          command = driverTransaction(*candidate, false);
+          if (!candidate->value("restore").toBool() && !installedDriver->isEmpty()) {
+            auto previous = *installedDriver;
+            previous["schema"] = "gpu-pro-driver-backup/1";
+            previous["restore"] = true;
+            previous["repositoryReference"] = true;
+            previous["vendor"] = gpus.value(selected).vendor;
+            previous["label"] = QDateTime::currentDateTime().toString("dd/MM/yyyy HH:mm:ss") +
+                                " · " + gpus.value(selected).vendor + " " +
+                                previous["version"].toString() +
+                                " · exige disponibilidade no repositório";
+            previous["complete"] = false;
+            QString e;
+            saveJson(configRoot() + "/driver-backups/" +
+                         QDateTime::currentDateTimeUtc().toString("yyyyMMdd-HHmmss-zzz") +
+                         "/snapshot.json",
+                     previous, &e);
+          }
+        }
+        if (command.isEmpty())
+          return;
+        if (QMessageBox::question(this, "Confirmar troca do driver",
+                                  output->toPlainText().left(14000) +
+                                      "\n\nAbrir autenticação e gerenciador nativo para confirmar "
+                                      "esta transação? Pode exigir reinicialização.",
+                                  QMessageBox::Yes | QMessageBox::No,
+                                  QMessageBox::No) != QMessageBox::Yes)
+          return;
+        install->setEnabled(false);
+        startNativeTransaction(command, [this, output, query](int code) {
+          output->appendPlainText(
+              QString("Terminal encerrado (%1). Confira o gerenciador e reinicie quando "
+                      "necessário; o driver carregado não é trocado ao vivo.")
+                  .arg(code));
+          query();
+        });
+      });
+  connect(this, &MainWindow::selectGpu, box,
+          [candidate, plan, available, installed, install, preview] {
+            *candidate = {};
+            *plan = {};
+            available->clear();
+            installed->clear();
+            install->setEnabled(false);
+            preview->setEnabled(false);
+          });
+  if (offline) {
+    refresh->setEnabled(false);
+    rollback->setEnabled(false);
+  }
   return box;
 }

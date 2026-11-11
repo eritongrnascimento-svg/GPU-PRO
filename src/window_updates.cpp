@@ -1,5 +1,6 @@
 #include "window.h"
 #include "update_manager.h"
+#include "driver_packages.h"
 QWidget *MainWindow::updatesPage() {
   auto *root = page("GPU-PRO · Atualizações e backup");
   auto *layout = qobject_cast<QVBoxLayout *>(root->layout());
@@ -14,7 +15,7 @@ QWidget *MainWindow::updatesPage() {
   auto *check = new QPushButton("Verificar atualizações"); row->addWidget(check);
   auto *install = new QPushButton("Baixar, salvar backup e atualizar"); row->addWidget(install);
   install->setEnabled(false);
-  if (managed) install->setText("Baixar atualização no formato instalado");
+  if (managed) install->setText("Baixar, salvar backup e instalar atualização");
   layout->addLayout(row);
   auto *backup = new QPushButton("Salvar backup da versão atual"); layout->addWidget(backup);
   auto *restore = new QPushButton("Restaurar último backup"); layout->addWidget(restore);
@@ -28,9 +29,10 @@ QWidget *MainWindow::updatesPage() {
       "Atualização pelo painel: pacote portátil x86_64 em diretório gravável pelo usuário. "
       "Instalações por gerenciador de pacotes ou compiladas em build/ devem ser atualizadas pelo mesmo método. "
       "Dados de testes ficam preservados no diretório de configuração. O helper root não é atualizado automaticamente.");
-  if (managed) details->setText("Este formato é atualizado pela release oficial ou pelo gerenciador de pacotes. Use o .deb para instalações Debian/Ubuntu e substitua o AppImage após fechar o aplicativo. A atualização com backup automático continua disponível na edição portátil .tar.gz/.run. Seus testes ficam preservados na configuração do usuário.");
+  if (managed) details->setText("AppImage: download verificado, backup integral e troca no mesmo caminho gravável pelo usuário. DEB: preserva o pacote oficial anterior, baixa a atualização e mostra a simulação APT antes de solicitar autenticação no gerenciador nativo. A opção de abrir o GitHub continua disponível. Dados de testes permanecem no diretório de configuração; reinicie após atualizar.");
   details->setWordWrap(true); layout->addWidget(details);
   layout->addWidget(driversControls());
+  layout->addWidget(systemControls());
   auto *licenses = new QPushButton("Licenças e componentes de terceiros"); layout->addWidget(licenses);
   connect(licenses, &QPushButton::clicked, this, [this] {
     QDialog dialog(this); dialog.setWindowTitle("GPU-PRO · Licenças"); dialog.resize(850, 640);
@@ -74,46 +76,71 @@ QWidget *MainWindow::updatesPage() {
   layout->addWidget(behavior);
   layout->addStretch();
   auto *manager = new UpdateManager(QFileInfo(QCoreApplication::applicationDirPath()).dir().absolutePath(), configRoot() + "/updates", this);
-  auto allowed = [this, manager] {
+  if(!qEnvironmentVariable("APPIMAGE").isEmpty())manager->setFormat("appimage",qEnvironmentVariable("APPIMAGE"));
+  else if(managed&&nativePackageManager()=="apt")manager->setFormat("deb");
+  auto allowed = [this, manager, managed] {
     if (offline || driverBusy || testActive || codecSuite.busy() || clockProcess.state() != QProcess::NotRunning || displayBusy || manager->busy()) {
       notify("Aguarde as operações em andamento antes de atualizar"); return false;
     }
-    if (QFileInfo(QCoreApplication::applicationDirPath()).fileName() != "bin") {
+    if(managed&&manager->format()=="portable"){notify("Este pacote foi instalado por outro gerenciador; utilize o método nativo ou o AppImage oficial");return false;}
+    if (manager->format()=="portable" && QFileInfo(QCoreApplication::applicationDirPath()).fileName() != "bin") {
       notify("Esta execução usa build/; recompile com build.sh para atualizar"); return false;
     }
     return true;
   };
-  manager->mayInstall = [this] { return !testActive && !codecSuite.busy() && clockProcess.state() == QProcess::NotRunning && !displayBusy; };
+  manager->mayInstall = [this] { return !driverBusy && !testActive && !codecSuite.busy() && clockProcess.state() == QProcess::NotRunning && !displayBusy; };
   connect(check, &QPushButton::clicked, this, [this, manager] {
     if (!offline && !testActive) manager->check();
   });
   connect(manager, &UpdateManager::message, this, [state](QString message) { state->setText(message); });
   connect(manager, &UpdateManager::checked, this, [install, this](QString, bool available) { install->setEnabled(available && !offline); });
   connect(install, &QPushButton::clicked, this, [this, manager, allowed, install, managed] {
-    if (managed) { QDesktopServices::openUrl(QUrl("https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest")); return; }
     if (!allowed()) return;
-    if (QMessageBox::question(this, "Atualizar GPU-PRO", "Baixar a release oficial, salvar backup da instalação atual e substituir os arquivos do aplicativo?") != QMessageBox::Yes) return;
+    if (QMessageBox::question(this, "Atualizar GPU-PRO", "Baixar a release oficial e preservar a versão atual? AppImage será substituído no mesmo caminho; DEB solicitará confirmação no gerenciador nativo após a simulação.") != QMessageBox::Yes) return;
     install->setEnabled(false); manager->downloadAndInstall();
   });
   connect(manager, &UpdateManager::finished, this, [restart](bool installed) { restart->setEnabled(installed); });
   connect(backup, &QPushButton::clicked, this, [this, manager, allowed, state] {
     if (!allowed()) return;
+    if(manager->format()!="portable"){manager->backupCurrent();return;}
     QString error; auto folder = manager->backup(error);
     state->setText(folder.isEmpty() ? error : "Backup salvo: " + folder);
   });
   connect(restore, &QPushButton::clicked, this, [this, manager, allowed, state, restart] {
     if (!allowed()) return;
     if (QMessageBox::question(this, "Restaurar backup", "Restaurar os arquivos da versão anterior nesta instalação? Os resultados dos testes serão preservados.") != QMessageBox::Yes) return;
+    if(manager->format()!="portable"){manager->restoreManaged();return;}
     QString error; bool ok = manager->restore({}, error);
     state->setText(ok ? "Backup restaurado. Reinicie o GPU-PRO." : error); restart->setEnabled(ok);
   });
   connect(releases, &QPushButton::clicked, this, [] { QDesktopServices::openUrl(QUrl("https://github.com/eritongrnascimento-svg/GPU-PRO/releases")); });
+  connect(manager,&UpdateManager::managedPackageReady,this,[this,manager,state,restart](QString package,QString version,bool restoring){
+    if(offline||driverBusy||testActive||nativePackageManager()!="apt")return;
+    auto *simulation=new QProcess(this);simulation->setProcessEnvironment(nativeEnvironment());
+    auto *timer=new QTimer(simulation);timer->setSingleShot(true);timer->setInterval(30000);connect(timer,&QTimer::timeout,simulation,&QProcess::kill);
+    driverBusy=true;setTesting(true);
+    connect(simulation,qOverload<int,QProcess::ExitStatus>(&QProcess::finished),this,[this,simulation,timer,package,version,restoring,state,restart](int code,QProcess::ExitStatus exit){
+      timer->stop();driverBusy=false;setTesting(false);QString text=QString::fromUtf8(simulation->readAllStandardOutput())+QString::fromUtf8(simulation->readAllStandardError());simulation->deleteLater();
+      if(code!=0||exit!=QProcess::NormalExit){state->setText("Simulação APT recusada; nada instalado.\n"+text);return;}
+      QMessageBox confirm(QMessageBox::Question,restoring?"Restaurar GPU-PRO anterior":"Instalar atualização GPU-PRO","Pacote verificado: GPU-PRO "+version+"\nA versão anterior foi preservada. Confira os pacotes adicionados/removidos nos detalhes. Abrir autenticação do sistema e confirmar no APT?",QMessageBox::Yes|QMessageBox::No,this);confirm.setDetailedText(text);confirm.setDefaultButton(QMessageBox::No);
+      if(confirm.exec()!=QMessageBox::Yes)return;
+      QStringList command{"/usr/bin/apt-get","install"};if(restoring)command<<"--allow-downgrades";command<<package;
+      startNativeTransaction(command,[this,state,restart,version](int result){
+        QProcess query;query.setProcessEnvironment(nativeEnvironment());query.start("/usr/bin/dpkg-query",{"-W","-f=${Version}","gpu-pro"});query.waitForFinished(5000);
+        bool ok=result==0&&QString::fromUtf8(query.readAllStandardOutput()).trimmed()==version;
+        state->setText(ok?"Pacote GPU-PRO "+version+" confirmado no sistema. Reinicie o painel.":"Terminal encerrado; versão esperada não confirmada. Confira o resultado do APT.");restart->setEnabled(ok);
+      });
+    });
+    connect(simulation,&QProcess::errorOccurred,this,[this,simulation,timer,state](QProcess::ProcessError error){if(error==QProcess::FailedToStart){timer->stop();driverBusy=false;setTesting(false);state->setText(simulation->errorString());simulation->deleteLater();}});
+    QStringList args{"--simulate","install"};if(restoring)args<<"--allow-downgrades";args<<package;simulation->start("/usr/bin/apt-get",args);timer->start();
+  });
   connect(restart, &QPushButton::clicked, this, [this, allowed] {
     if (!allowed()) return;
-    if (QProcess::startDetached(QCoreApplication::applicationFilePath(), {})) close();
-    else notify("Não foi possível reiniciar; feche e abra pelo run.sh");
+    QString executable=qEnvironmentVariable("APPIMAGE");if(executable.isEmpty())executable=QCoreApplication::applicationFilePath();
+    explicitQuit=true;bool accepted=close();explicitQuit=false;
+    if(accepted){QProcess::startDetached(executable,{});QCoreApplication::quit();}
   });
-  if (managed) { backup->setEnabled(false); restore->setEnabled(false); }
+
   if (offline) for (auto *button : {check, install, backup, restore, releases}) button->setEnabled(false);
   return root;
 }

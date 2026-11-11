@@ -20,14 +20,14 @@ sh run.sh
 ### Arch / CachyOS
 
 ```sh
-sudo pacman -S --needed base-devel cmake pkgconf qt6-base gtk3 libx11 vulkan-headers vulkan-icd-loader glslang sqlite libarchive
+sudo pacman -S --needed base-devel cmake pkgconf qt6-base gtk3 libx11 libdrm vulkan-headers vulkan-icd-loader glslang sqlite libarchive
 ```
 
 ### Debian / Ubuntu com Qt 6.4 ou posterior
 
 ```sh
 sudo apt update
-sudo apt install build-essential cmake pkg-config qt6-base-dev libqt6opengl6-dev libgtk-3-dev libx11-dev libvulkan-dev glslang-tools libsqlite3-dev libarchive-dev
+sudo apt install build-essential cmake pkg-config qt6-base-dev libqt6opengl6-dev libgtk-3-dev libx11-dev libvulkan-dev libdrm-dev glslang-tools libsqlite3-dev libarchive-dev
 ```
 
 Os workflows públicos do [GitHub Actions](https://github.com/eritongrnascimento-svg/GPU-PRO/actions) registram compilação e verificações no Ubuntu 24.04. A validação física registrada foi realizada no CachyOS; consulte [VERIFICACAO.md](VERIFICACAO.md) para distinguir testes automatizados de testes em hardware.
@@ -48,7 +48,7 @@ Na [última release](https://github.com/eritongrnascimento-svg/GPU-PRO/releases/
 
 ```sh
 sha256sum --check --ignore-missing SHA256SUMS.txt
-tar -xzf GPU-PRO-0.5.0-linux-x86_64.tar.gz
+tar -xzf GPU-PRO-0.6.0-linux-x86_64.tar.gz
 cd GPU-PRO
 sh run.sh
 ```
@@ -98,8 +98,11 @@ Consulte [VALIDACAO.md](VALIDACAO.md) para participar da validação em outras G
 
 ## Formatos de instalação
 
-- Ubuntu 24.04 amd64: `sudo apt install ./gpu-pro_0.5.0_ubuntu24.04_amd64.deb`; iniciar com `gpu-pro` ou pelo menu. O helper instalado em `/usr/libexec/gpu-pro/` continua exigindo autenticação para cada ajuste.
-- AppImage x86_64: `chmod +x GPU-PRO-0.5.0-x86_64.AppImage` e executar o arquivo. Precisa de glibc 2.39 ou posterior e driver instalado; se FUSE não estiver disponível, use `--appimage-extract-and-run`. Bibliotecas/avisos podem ser inspecionados com `--appimage-extract`.
-- Executável portátil: `chmod +x GPU-PRO-0.5.0-linux-x86_64.run` e executar. Extrai a pasta GPU-PRO com todos os workers e abre o painel; não exige administrador. Usa bibliotecas do sistema, como o tar.gz.
+- Ubuntu 24.04 amd64: `sudo apt install ./gpu-pro_0.6.0_ubuntu24.04_amd64.deb`; iniciar com `gpu-pro` ou pelo menu. O helper instalado em `/usr/libexec/gpu-pro/` continua exigindo autenticação para cada ajuste.
+- AppImage x86_64: `chmod +x GPU-PRO-0.6.0-x86_64.AppImage` e executar o arquivo. Precisa de glibc 2.39 ou posterior e driver instalado; se FUSE não estiver disponível, use `--appimage-extract-and-run`. Bibliotecas/avisos podem ser inspecionados com `--appimage-extract`.
+- Executável portátil: `chmod +x GPU-PRO-0.6.0-linux-x86_64.run` e executar. Extrai a pasta GPU-PRO com todos os workers e abre o painel; não exige administrador. Usa bibliotecas do sistema, como o tar.gz.
 
 Em Atualizações, consulte drivers, escolha pacote/versão e simule. A instalação abre o gerenciador nativo em terminal, solicita autenticação do sistema e exige confirmação da transação. No Arch/CachyOS também atualiza os demais pacotes para evitar atualização parcial. O GPU-PRO não garante rollback de drivers; reinicie quando o gerenciador indicar.
+
+
+A simulação de drivers Arch/CachyOS requer `bubblewrap` e suporte a namespaces de usuário. APT/DNF usam seus mecanismos nativos de prévia. Consulte [Drivers e sistema](DRIVERS-E-SISTEMA.md) para atualização DEB/AppImage, restauração e preferências de GPU/áudio.

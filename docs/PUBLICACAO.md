@@ -29,14 +29,14 @@ sh tools/package.sh build dist
 bash tools/build-distribution.sh build dist
 ```
 
-Para a versão 0.5.0, os arquivos são:
+Para a versão 0.6.0, os arquivos são:
 
-- `GPU-PRO-0.5.0-linux-x86_64.tar.gz`
-- `GPU-PRO-0.5.0-source.tar.gz`
-- `GPU-PRO-0.5.0-linux-x86_64.run`
-- `GPU-PRO-0.5.0-x86_64.AppImage`
-- `gpu-pro_0.5.0_ubuntu24.04_amd64.deb`
-- `GPU-PRO-0.5.0-dependency-sources.tar.gz` e `GPU-PRO-0.5.0-dependencies.json`
+- `GPU-PRO-0.6.0-linux-x86_64.tar.gz`
+- `GPU-PRO-0.6.0-source.tar.gz`
+- `GPU-PRO-0.6.0-linux-x86_64.run`
+- `GPU-PRO-0.6.0-x86_64.AppImage`
+- `gpu-pro_0.6.0_ubuntu24.04_amd64.deb`
+- `GPU-PRO-0.6.0-dependency-sources.tar.gz` e `GPU-PRO-0.6.0-dependencies.json`
 - `SHA256SUMS.txt`
 
 O TAR contém uma pasta `GPU-PRO/`. A versão do CMake, da aplicação, dos diagnósticos, de `release.json`, do changelog e da tag deve coincidir. Mudanças na carga de benchmark exigem atualizar o identificador do método para preservar comparabilidade. O empacotamento falha se não conseguir obter as fontes correspondentes das bibliotecas incluídas no AppImage.

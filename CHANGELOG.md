@@ -1,5 +1,15 @@
 # Alterações
 
+## 0.6.0
+
+- Seleção de conjuntos completos de drivers e versão instalada separada; prévia de adições/remoções e restauração validada.
+- Atualização pelo painel de AppImage e DEB, com backup e manutenção do link para GitHub.
+- Integrações de pacotes por comandos externos, sem vinculação à libalpm ou a bibliotecas exclusivamente GPL no código original.
+- Especificações Intel ampliadas com dados DRM/i915 e memória compartilhada identificada.
+- Preferência de GPU para novos aplicativos e configuração reversível da sessão KDE Wayland.
+- Alinhamento/restauração de destinos de áudio sem reiniciar serviços nem mover capturas existentes.
+- Ícone gpu-pro.png atualizado; recursos e históricos anteriores preservados.
+
 ## 0.5.0
 
 - Corrigida a saída pela bandeja com a janela já oculta; teste de regressão incluído.

@@ -18,7 +18,7 @@ for directory in src shaders assets docs examples tools packaging .github; do
 done
 # Source package never includes platform-specific binaries or local configuration.
 tar -czf "$output_dir/GPU-PRO-$version-source.tar.gz" -C "$stage" GPU-PRO
-for executable in linux-gpu-control gpu-bench-worker gpu-video-worker gpu-diagnostics gpu-clock-helper; do
+for executable in linux-gpu-control gpu-bench-worker gpu-video-worker gpu-diagnostics gpu-clock-helper gpu-system-worker; do
  [ -x "$build_dir/$executable" ] || { printf 'Executável ausente: %s\n' "$executable" >&2; exit 2; }
  cp "$build_dir/$executable" "$stage/GPU-PRO/bin/"
 done

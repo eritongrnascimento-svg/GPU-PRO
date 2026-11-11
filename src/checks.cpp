@@ -1,4 +1,8 @@
 #include "gpu.h"
+#include "driver_stack.h"
+#include "intel_specs.h"
+#include "system_settings.h"
+#include <i915_drm.h>
 #include "cpu_telemetry.h"
 #include "frame_log.h"
 #include "driver_packages.h"
@@ -40,6 +44,44 @@ int main(int argc, char **argv) {
   check(frames.poll(csv).isEmpty(),"CSV samples never duplicate when no frames arrive");
   write(csv,"fps,frametime\n100,10\n");
   check(frames.poll(csv).size()==1,"CSV truncation resets reader and header");
+  QJsonArray repositoryPackages{
+    QJsonObject{{"manager","pacman"},{"name","linux-cachyos-nvidia-open"},{"version","7.3.3-1"},{"repo","native"},{"depends",QJsonArray{"nvidia-utils=620.70.06"}}},
+    QJsonObject{{"manager","pacman"},{"name","nvidia-utils"},{"version","620.70.06-2"},{"repo","native"}},
+    QJsonObject{{"manager","pacman"},{"name","nvidia-container-toolkit"},{"version","1.0"},{"repo","native"}},
+    QJsonObject{{"manager","pacman"},{"name","linux-other-nvidia-open"},{"version","7.3.3-1"},{"repo","native"},{"depends",QJsonArray{"nvidia-utils=620.70.06"}}}
+  };
+  auto bundles=completeDriverProfiles(repositoryPackages,QJsonArray{QJsonObject{{"name","linux-cachyos"},{"version","7.3.3-1"}}},"NVIDIA");
+  check(bundles.size()==1&&bundles[0].toObject()["targets"].toArray().size()==2,"complete drivers pair module and userspace; exclude containers and uninstalled kernels");
+  repositoryPackages.removeAt(1);check(completeDriverProfiles(repositoryPackages,QJsonArray{QJsonObject{{"name","linux-cachyos"}}},"NVIDIA").isEmpty(),"a module without matching userspace is not offered as a complete driver");
+  QByteArray topology(sizeof(drm_i915_query_topology_info)+4,0);auto *t=reinterpret_cast<drm_i915_query_topology_info*>(topology.data());
+  t->max_slices=1;t->max_subslices=1;t->max_eus_per_subslice=8;t->subslice_offset=1;t->subslice_stride=1;t->eu_offset=2;t->eu_stride=1;t->data[0]=1;t->data[1]=1;t->data[2]=0x3f;
+  check(parseIntelTopology(topology)["executionUnits"].toInt()==6,"Intel counts enabled execution units, not CUDA-equivalent guesses");
+  check(parseIntelTopology(QByteArray(2,0)).isEmpty(),"truncated Intel topology is rejected");
+  auto audio=parseAudioInventory(QJsonArray{QJsonObject{{"name","hdmi"},{"description","Monitor"},{"properties",QJsonObject{{"device.api","alsa"}}}}},QJsonArray{QJsonObject{{"name","hdmi.monitor"}},QJsonObject{{"name","filter-input"},{"properties",QJsonObject{}}}},"Default Sink: hdmi\nDefault Source: filter-input\n","HDA NVIDIA");
+  check(audio["outputs"].toArray().size()==1&&audio["inputs"].toArray().size()==1&&audio["inputs"].toArray()[0].toObject()["virtual"].toBool(),"audio distinguishes virtual input from physical microphone and excludes monitor taps");
+  check(audio["output"]=="hdmi"&&audio["input"]=="filter-input","audio default destinations parsed without renumbering ALSA cards");
+  QString table="Package (2)            Old Version  New Version  Net Change\n\nlegacy                 1.0-1                     -1.0 MiB\nrepo/driver                        2.0-1         1.0 MiB\n\nTotal Installed Size: 1.0 MiB\n";
+  // Fixed columns are derived from the native header; unknown layouts fail closed.
+  int oc=table.indexOf("Old Version"),nc=table.indexOf("New Version"),net=table.indexOf("Net Change");
+  QString header=table.section('\n',0,0),oldRow=QString("legacy").leftJustified(oc)+QString("1.0-1").leftJustified(nc-oc)+QString().leftJustified(net-nc)+"-1.0 MiB",newRow=QString("repo/driver").leftJustified(oc)+QString().leftJustified(nc-oc)+QString("2.0-1").leftJustified(net-nc)+"1.0 MiB";
+  auto parsedPlan=parsePacmanPreview(header+'\n'+oldRow+'\n'+newRow+"\nTotal Installed Size: 1.0 MiB\n",QJsonArray{QJsonObject{{"name","legacy"},{"version","1.0-1"}}});
+  check(parsedPlan["valid"].toBool()&&parsedPlan["add"].toArray().size()==1&&parsedPlan["remove"].toArray().size()==1,"native transaction preview accounts for both additions and removals");
+  check(!parsePacmanPreview(header+'\n'+newRow,QJsonArray{} )["valid"].toBool(),"incomplete native package table never enables installation");
+  QTemporaryDir preference;auto oldDesktop=qgetenv("XDG_CURRENT_DESKTOP"),oldSession=qgetenv("XDG_SESSION_TYPE");qputenv("XDG_CURRENT_DESKTOP","KDE");qputenv("XDG_SESSION_TYPE","wayland");
+  Gpu intel;intel.pci="0000:00:02.0";Gpu nv;nv.pci="0000:01:00.0";
+  auto gpuPlan=gpuSessionPlan({intel,nv},nv.pci,preference.path());
+  check(gpuPlan["valid"].toBool()&&gpuPlan["links"].toArray().size()==2&&gpuPlan["content"].toString().contains("KWIN_DRM_DEVICES"),"session plan preserves both GPUs and uses stable aliases");
+  check(!QFileInfo::exists(gpuPlan["target"].toString()),"building a GPU preference plan never applies it");
+  auto oldConfig=qgetenv("XDG_CONFIG_HOME");qputenv("XDG_CONFIG_HOME",preference.path().toUtf8());
+  auto fixturePlan=gpuPlan;QJsonArray links;
+  for(auto v:gpuPlan["links"].toArray()){auto link=v.toObject();QString fake=preference.filePath(link["path"].toString().section('/',-1)+"-device");write(fake,"fake DRM endpoint for filesystem test");link["target"]=fake;links.append(link);}fixturePlan["links"]=links;
+  QString backup=preference.filePath("backup");
+  check(applyGpuSession(fixturePlan,backup)["valid"].toBool(),"GPU session preference writes only reviewed user configuration with backup");
+  check(restoreGpuSession(backup)["valid"].toBool()&&!QFileInfo::exists(gpuPlan["target"].toString()),"GPU session undo restores absence of a previous preference");
+  write(gpuPlan["target"].toString(),"user-owned unrelated script");
+  check(!applyGpuSession(fixturePlan,backup)["valid"].toBool(),"GPU session setup preserves an unrelated existing user file");
+  qputenv("XDG_CONFIG_HOME",oldConfig);
+  qputenv("XDG_CURRENT_DESKTOP",oldDesktop);qputenv("XDG_SESSION_TYPE",oldSession);
   check(displayMetric({}, "temp") == "N/D", "missing sensor must not be zero");
   check(displayMetric({{"temp", 0}}, "temp") == "0 °C", "zero is a valid reading");
   auto stage = [](double cpu, double gpu) {return QJsonObject{{"valid",true},{"width",1920},{"height",1080},{"sceneResults",QJsonArray{QJsonObject{{"cpuWorkMs",cpu},{"gpuMeanMs",gpu}}}}};};

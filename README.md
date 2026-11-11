@@ -1,4 +1,4 @@
-# GPU-PRO — 0.5.0
+# GPU-PRO — 0.6.0
 
 **Titular: Ériton do Nascimento** · [Instalação](docs/INSTALACAO.md) · [Contribuir](CONTRIBUTING.md) · [Licença source available](LICENSE)
 
@@ -9,6 +9,12 @@ Repositório oficial: https://github.com/eritongrnascimento-svg/GPU-PRO
 Versão inicial para validação da comunidade; AMD/Intel ainda precisam de testes em hardware. Veja os [resultados reais e limites](docs/VERIFICACAO.md).
 
 Desenvolvo o GPU-PRO para oferecer monitoramento e ferramentas de teste MultiGPU no Linux, com backends NVIDIA, AMD e Intel. Neste repositório você encontra o aplicativo em C++20 / Qt 6, os instaladores e as instruções para usar e contribuir. O projeto nasceu de um protótipo Python, mantido separadamente. A coleta de resultados é local e permite colaboração da comunidade; não há servidor, upload automático ou rede neural treinada.
+
+## Licenças das integrações com o sistema
+
+**Não incorporamos nem vinculamos bibliotecas de terceiros exclusivamente GPL ao código original do GPU-PRO.** A manutenção utiliza programas externos fornecidos pela distribuição, como `pacman`, `apt-get`, `dnf`, `pactl` e `bubblewrap`, conforme o backend disponível. Esses programas são executados como processos independentes, pelos seus comandos nativos; não copiamos seu código nem vinculamos a biblioteca `libalpm` ao aplicativo.
+
+O código original mantém a licença [GPU-PRO Source Available License](LICENSE). Isso não significa ausência de dependências livres: Qt é utilizado sob LGPL, outras bibliotecas e runtimes possuem termos próprios, e ferramentas externas podem ter licença GPL. Esses componentes preservam seus direitos e obrigações; as restrições do GPU-PRO não se estendem a eles. O AppImage inclui bibliotecas identificadas no manifesto e nas fontes correspondentes da release. Consulte [NOTICE](NOTICE) e [Licenças](docs/LICENCAS.md).
 
 ## Iniciar
 
@@ -94,7 +100,7 @@ Esse teste é curto e não certifica estabilidade prolongada. Um perfil local s�
 
 ## Compilar
 
-Dependências: CMake 3.22+, compilador C++20, pkg-config, Qt 6 Core/Gui/Widgets/Network/OpenGL/DBus, SQLite3 (API C, sem plugin Qt SQL), libarchive, GTK 3/GDK, Cairo/Pango, X11, Vulkan-Headers/loader e glslangValidator. Para executar codecs: FFmpeg com NVENC/CUDA ou VA-API conforme GPU/driver. Bibliotecas e render nodes do driver precisam estar acessíveis ao usuário.
+Dependências: CMake 3.22+, compilador C++20, pkg-config, Qt 6 Core/Gui/Widgets/Network/OpenGL/DBus, headers libdrm, SQLite3 (API C, sem plugin Qt SQL), libarchive, GTK 3/GDK, Cairo/Pango, X11, Vulkan-Headers/loader e glslangValidator. Para executar codecs: FFmpeg com NVENC/CUDA ou VA-API conforme GPU/driver. Bibliotecas e render nodes do driver precisam estar acessíveis ao usuário.
 
 ```sh
 ./build.sh
@@ -153,7 +159,7 @@ Desde a versão 0.4, a pasta do projeto chama-se **GPU-PRO**, preservando histó
 - Atualizações inclui a opção de fechar para a bandeja e gerenciamento de drivers por APT, pacman, DNF e backend PackageKit da distribuição, com consulta de versões, simulação e confirmação no gerenciador nativo. Não adiciona repositórios externos ou instala automaticamente. Em Arch/CachyOS usa atualização completa do sistema e versão explícita.
 - Novos formatos: `.deb` para Ubuntu 24.04 amd64, AppImage x86_64 e executável portátil `.run`. O `.run` inclui os workers, não exige root e utiliza bibliotecas do sistema. AppImage tem base Ubuntu 24.04/glibc 2.39 ou posterior; não é universal para distribuições antigas. Consulte as fontes correspondentes das dependências incluídas no AppImage, fornecidas junto da release.
 
-AppImage e .deb consultam versões pelo painel e abrem o download oficial correspondente; a substituição desses formatos usa o instalador/arquivo original, após fechar o aplicativo. O atualizador com backup automático da pasta permanece disponível na edição portátil `.tar.gz`/`.run`.
+Na versão 0.4, AppImage e DEB apenas abriam o download oficial. A versão 0.6 acrescenta download, backup e preparação da atualização pelo painel para esses formatos, mantendo o instalador nativo do DEB e a alternativa de acesso ao GitHub. O atualizador de pasta TAR/RUN continua disponível.
 
 A detecção utiliza o gerenciador e os repositórios reais do sistema; PackageKit fornece um backend comum para outras distribuições quando instalado e funcional. NixOS e sistemas imutáveis são reconhecidos como declarativos/deployments e não recebem comandos de instalação imperativa de outra distro. Não existe garantia de instalação automática para qualquer distribuição Linux sem um backend compatível.
 
@@ -165,3 +171,17 @@ A detecção utiliza o gerenciador e os repositórios reais do sistema; PackageK
 - Estilo Fusion/paleta fixos, fundo dos cards repintado integralmente e opção de desligar animações neon em Atualizações.
 - Aviso de responsabilidade no início desta documentação e aceite obrigatório por sessão antes de acessar Overclock. Nenhum ajuste é aplicado pelo aceite.
 - Documentação voltada aos visitantes e colaboradores, com procedimentos e registros históricos preservados.
+
+
+## Novidades da versão 0.6
+
+- Drivers apresentados como conjuntos completos disponíveis nos repositórios, da versão mais antiga à mais nova, com variante Open/proprietária quando aplicável. A versão instalada é exibida separadamente.
+- Prévia com adições, atualizações e remoções. No Arch/CachyOS, a transação é preparada pelo `pacman` externo em um namespace somente de leitura, sem rede, e a confirmação final é recusada automaticamente. A instalação real continua exigindo autenticação e confirmação nativas.
+- Restauração de driver por conjunto anterior preservado; em backends de referência, a versão precisa continuar disponível no repositório e passar por nova simulação. Backups incompletos não equivalem a garantia de rollback.
+- AppImage pode ser atualizado no mesmo arquivo, com backup. DEB é baixado e verificado pelo painel, preservando o pacote oficial anterior e mostrando a simulação APT antes de instalar. O acesso ao GitHub pelo navegador continua disponível.
+- Ficha Intel com consultas DRM/i915 de EUs, clocks expostos e identificação de memória compartilhada quando reconhecida. EUs não são convertidas em CUDA cores. Sensores ausentes não são estimados.
+- Preferência de GPU para aplicativos compatíveis com PRIME iniciados pelo painel; configuração reversível da próxima sessão KDE Wayland quando ambas as GPUs estiverem ativas. Não altera BIOS, cabos ou aplicativos em execução.
+- Alinhamento de destinos padrão de áudio com seleção explícita e restauração, preservando volumes, filtros e conexões atuais. O botão não recupera codecs que falharam antes do ALSA.
+- Novo ícone `gpu-pro.png` no aplicativo e nos pacotes.
+
+Consulte [Drivers, atualização e sistema](docs/DRIVERS-E-SISTEMA.md). As capturas históricas continuam identificadas por versão; novas capturas serão adicionadas separadamente.

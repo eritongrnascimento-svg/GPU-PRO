@@ -123,6 +123,7 @@ void MainWindow::generateFeedback() {
   QJsonObject dependencies;
   for (QString name : {"ffmpeg", "vainfo", "vulkaninfo", "glxinfo", "mangohud", "gamescope"})
     dependencies[name] = !QStandardPaths::findExecutable(name).isEmpty();
+  dependencies["systemWorker"]=QFileInfo(QCoreApplication::applicationDirPath()+"/gpu-system-worker").isExecutable();
   dependencies["graphicsWorker"] =
       QFileInfo::exists(QCoreApplication::applicationDirPath() + "/gpu-bench-worker");
   report["dependencies"] = dependencies;

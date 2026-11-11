@@ -5,7 +5,7 @@ As dependências não são relicenciadas pelo projeto. Drivers e bibliotecas de
 fabricantes não são distribuídos no pacote; são obtidos pelo usuário/distribuição.
 
 Dependências usadas dinamicamente ou fornecidas pelo sistema:
-- Qt 6 Core/Gui/Widgets/Network/OpenGL: licenciamento Qt LGPLv3/GPL/comercial,
+- Qt 6 Core/Gui/Widgets/Network/OpenGL/DBus: licenciamento Qt LGPLv3/GPL/comercial,
   conforme módulo e distribuição. https://www.qt.io/development/open-source-lgpl-obligations
 - GTK3 / GLib / Pango: licenças LGPL conforme os componentes.
   https://www.gtk.org/docs/architecture/
@@ -27,7 +27,7 @@ NVIDIA, GeForce, RTX, AMD, Radeon, Intel, Arc, Vulkan, OpenGL e demais marcas
 pertencem aos respectivos titulares. GPU-PRO não é um produto oficial desses
 fabricantes e não representa homologação ou endosso.
 
-Qt Core/Gui/Widgets/Network/OpenGL, Qt Company Ltd. e colaboradores:
+Qt Core/Gui/Widgets/Network/OpenGL/DBus, Qt Company Ltd. e colaboradores:
 o GPU-PRO utiliza esses módulos através de bibliotecas compartilhadas do sistema,
 sob LGPLv3. A LGPL cobre essas bibliotecas e seu uso; não a licença do código
 original do GPU-PRO. Textos integrais: docs/licenses/LGPL-3.0.txt e GPL-3.0.txt.
@@ -41,3 +41,12 @@ Consulte docs/LICENCAS.md para o escopo da revisão, substituição das bibliote
 acesso às fontes e condições que exigem nova análise antes de empacotar bibliotecas.
 Os textos em docs/licenses/ preservam seus direitos e avisos originais; não são
 relicenciados sob a licença source available do GPU-PRO.
+
+Integrações de manutenção: pacman/apt-get/dnf, pactl e bubblewrap são programas
+externos da distribuição, executados por comandos nativos, não bibliotecas
+vinculadas ao código original. O GPU-PRO não incorpora a libalpm. Essas ferramentas
+não são redistribuídas nos pacotes do aplicativo e mantêm suas próprias licenças.
+Headers DRM/i915 são interfaces de kernel do sistema; os avisos dos headers
+aplicáveis permanecem com seus fornecedores. A inexistência de vinculação a uma
+biblioteca exclusivamente GPL não elimina as condições de LGPL, runtimes e demais
+componentes efetivamente usados.

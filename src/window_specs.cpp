@@ -67,17 +67,19 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
   add("Modelo", g.name);
   add("Fabricante", g.vendor);
   add("Arquitetura", s["architecture"].toString());
-  add("Unidades de processamento",
-      number(s, "gpuCores", g.vendor == "NVIDIA" ? "CUDA cores" : "unidades"));
-  add("Memória dedicada", latest["vramTotal"].isDouble()
+  add("Unidades de processamento",s["executionUnits"].isDouble()?number(s,"executionUnits","EUs (não CUDA cores)"):number(s,"gpuCores",g.vendor=="NVIDIA"?"CUDA cores":"unidades"));
+  if(s["executionUnits"].isDouble())add("Topologia Intel",number(s,"sliceCount","slices")+" · "+number(s,"subsliceCount","subslices"));
+  if(g.vendor=="Intel")add("Diagnóstico Intel",s["intelProbeStatus"].toString());
+  bool integrated=s["integrated"].toBool()||cachedVulkan["integrated"].toBool();
+  add("Memória dedicada", integrated?"Não se aplica · RAM compartilhada":latest["vramTotal"].isDouble()
                               ? number(latest, "vramTotal", "GiB", 1073741824.)
                               : number(s, "memoryBytes", "GiB", 1073741824.));
-  add("Barramento de memória", number(s, "memoryBusWidthBits", "bits"));
-  add("Tipo de memória", "Não informado pelo driver; sem inferência pelo nome do modelo");
+  add("Barramento de memória",integrated?"Compartilhado com a memória do sistema":number(s,"memoryBusWidthBits","bits"));
+  add("Tipo de memória",integrated?"RAM compartilhada (UMA)":s["memoryType"].toString("Não informado pelo driver; sem inferência pelo nome do modelo"));
   add("Clock GPU atual", displayMetric(latest, "clock"));
-  add("Clock memória atual", displayMetric(latest, "memClock"));
+  add("Clock memória atual",integrated?"Não se aplica como clock de VRAM dedicada":displayMetric(latest,"memClock"));
   add("Clock máximo GPU reportado", number(s, "maxGraphicsMHz", "MHz"));
-  add("Clock máximo memória reportado", number(s, "maxMemoryMHz", "MHz"));
+  add("Clock máximo memória reportado",integrated?"Não se aplica como clock de VRAM dedicada":number(s,"maxMemoryMHz","MHz"));
   add("Potência atual · somente leitura", displayMetric(latest, "power"));
   add("Limite de potência · bloqueado para escrita", number(latest, "powerLimit", "W", 1000));
   add("Temperatura GPU", displayMetric(latest, "temp"));
@@ -94,9 +96,9 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
         values.join(" · ") + " · " + fan["rpmMeaning"].toString());
   }
   add("Interface PCIe atual",
-      s["pcieSpeed"].toString() + " · x" + s["pcieWidth"].toVariant().toString());
+      integrated?"Não se aplica · GPU integrada":s["pcieSpeed"].toString() + " · x" + s["pcieWidth"].toVariant().toString());
   add("Interface PCIe máxima",
-      s["pcieMaxSpeed"].toString() + " · x" + s["pcieMaxWidth"].toVariant().toString());
+      integrated?"Não se aplica · GPU integrada":s["pcieMaxSpeed"].toString() + " · x" + s["pcieMaxWidth"].toVariant().toString());
   add("Driver", g.driver + " " + s["driverVersion"].toString());
   add("VBIOS", s["vbios"].toString());
   add("Identificador PCI", g.pci + " · " + g.deviceId);
@@ -116,6 +118,7 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
     auto v = cachedVulkan;
     add("Vulkan", v["Vulkan API"].toString(v["Vulkan"].toString()));
     add("Dispositivo Vulkan", v["Vulkan device"].toString());
+    if(v["integrated"].toBool()&&v["hostVisibleHeapBytes"].isDouble())add("Heap compartilhado reportado",number(v,"hostVisibleHeapBytes","GiB · capacidade do driver, não VRAM dedicada",1073741824.));
     add("Ray tracing · extensão", v["Ray tracing pipeline extension"].toString());
     QString extensions = v["Vulkan extensions"].toString();
     add("Vulkan Video decode · extensão",

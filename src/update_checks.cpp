@@ -51,5 +51,24 @@ int main(int argc, char **argv) {
   candidate=package(temp.path(),files,"/tmp"); error.clear(); check(!manager.installArchive(candidate,sha(candidate),"0.4.0",error),"reject archive symlinks");
   candidate=package(temp.path(),files); error.clear(); check(!manager.installArchive(candidate,sha(candidate),"0.5.0",error),"reject mismatched release manifest");
   error.clear(); check(!manager.restore(temp.path(),error),"reject unrelated backup paths");
+  QString imagePath=temp.path()+"/GPU-PRO.AppImage",incoming=temp.path()+"/candidate.AppImage";
+  QByteArray oldImage(1024,'o'),newImage(2048,'n');
+  newImage.replace(0,4,QByteArray("\x7f" "ELF",4));newImage[4]=2;newImage[5]=1;newImage[19]=0;newImage.replace(8,3,QByteArray("AI\x02",3));newImage[18]=62;
+  put(imagePath,oldImage);put(incoming,newImage);QFile::setPermissions(imagePath,QFileDevice::ReadOwner|QFileDevice::WriteOwner|QFileDevice::ExeOwner);
+  UpdateManager imageManager(temp.path(),temp.path()+"/image-data");imageManager.setFormat("appimage",imagePath);
+  error.clear();check(!imageManager.installImage(incoming,QByteArray(64,'0'),"0.6.0",error)&&read(imagePath)==oldImage,"AppImage checksum refusal leaves current binary intact");
+  error.clear();check(imageManager.installImage(incoming,sha(incoming),"0.6.0",error),"AppImage atomic update with complete backup");
+  check(read(imagePath)==newImage&&(QFile::permissions(imagePath)&QFileDevice::ExeOwner),"AppImage replaced and remains executable");
+  error.clear();check(imageManager.restore({},error)&&read(imagePath)==oldImage,"AppImage backup restores previous executable");
+  put(incoming,"not-an-AppImage");error.clear();check(!imageManager.installImage(incoming,sha(incoming),"0.6.0",error)&&read(imagePath)==oldImage,"reject a non-AppImage despite matching checksum");
+  UpdateManager otherImage(temp.path(),temp.path()+"/image-data");otherImage.setFormat("appimage",temp.path()+"/different.AppImage");error.clear();check(!otherImage.restore({},error),"AppImage backup cannot overwrite a different installation");
+  QString staged;error.clear();check(!imageManager.stageDeb(incoming,sha(incoming),"0.6.0",staged,error),"reject non-DEB before asking for administrative installation");
+  if(QFileInfo("/usr/bin/dpkg-deb").isExecutable()) {
+    QString tree=temp.path()+"/deb-tree",deb=temp.path()+"/sample.deb";
+    put(tree+"/DEBIAN/control","Package: gpu-pro\nVersion: 0.6.0\nArchitecture: amd64\nMaintainer: Test <test@example.invalid>\nDescription: Offline package fixture\n");
+    QProcess build;build.start("/usr/bin/dpkg-deb",{"--build","--root-owner-group",tree,deb});build.waitForFinished(10000);
+    error.clear();check(build.exitCode()==0&&imageManager.stageDeb(deb,sha(deb),"0.6.0",staged,error),"verified DEB is staged without installing or invoking authentication");
+    check(read(staged)==read(deb),"staged DEB preserves downloaded content");error.clear();check(!imageManager.stageDeb(deb,sha(deb),"9.9.9",staged,error),"DEB version mismatch is refused before administrative action");
+  }
   return errors?1:0;
 }

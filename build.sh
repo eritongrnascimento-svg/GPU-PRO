@@ -7,7 +7,7 @@ for tool in cmake c++ pkg-config glslangValidator; do
   exit 2
  fi
 done
-for package in Qt6Widgets Qt6Network Qt6OpenGL Qt6DBus gtk+-3.0 pangocairo sqlite3 libarchive; do
+for package in Qt6Widgets Qt6Network Qt6OpenGL Qt6DBus gtk+-3.0 pangocairo sqlite3 libarchive libdrm; do
  if ! pkg-config --exists "$package"; then
   printf 'Pacote de desenvolvimento ausente: %s\n' "$package" >&2
   exit 2

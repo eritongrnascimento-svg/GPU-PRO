@@ -28,7 +28,7 @@ int main(int argc, char **argv) {
   if(hadTheme)qputenv("QT_QPA_PLATFORMTHEME",originalTheme);else qunsetenv("QT_QPA_PLATFORMTHEME");
   QCoreApplication::setOrganizationName("LinuxGPUControl");
   QCoreApplication::setApplicationName("LinuxGPUControl");
-  QCoreApplication::setApplicationVersion("0.5.0");
+  QCoreApplication::setApplicationVersion("0.6.0");
   QCommandLineParser parser;
   parser.setApplicationDescription(
       "GPU-PRO — painel MultiGPU Linux");

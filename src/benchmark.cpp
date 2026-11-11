@@ -78,6 +78,11 @@ QJsonObject vulkanSpecifications(const Gpu &g) {
       {"Vulkan maxImageDimension2D", int(p.limits.maxImageDimension2D)},
       {"Vulkan maxComputeWorkGroupInvocations", int(p.limits.maxComputeWorkGroupInvocations)},
       {"Vulkan timestampPeriod ns", p.limits.timestampPeriod}};
+  o["integrated"]=p.deviceType==VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
+  VkPhysicalDeviceMemoryProperties memory{};i.functions()->vkGetPhysicalDeviceMemoryProperties(dev,&memory);
+  quint64 hostHeap=0;
+  for(uint32_t m=0;m<memory.memoryTypeCount;++m)if(memory.memoryTypes[m].propertyFlags&VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)hostHeap=qMax(hostHeap,quint64(memory.memoryHeaps[memory.memoryTypes[m].heapIndex].size));
+  o["hostVisibleHeapBytes"]=double(hostHeap);
   uint32_t n = 0;
   i.functions()->vkEnumerateDeviceExtensionProperties(dev, nullptr, &n, nullptr);
   QList<VkExtensionProperties> ext(n);

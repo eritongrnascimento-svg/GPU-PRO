@@ -13,7 +13,7 @@ jobs:
         run: |
           sudo sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake pkg-config qt6-base-dev libqt6opengl6-dev qt6-wayland libgtk-3-dev libx11-dev libvulkan-dev glslang-tools libsqlite3-dev libarchive-dev dpkg-dev makeself patchelf file desktop-file-utils libfuse2t64
+          sudo apt-get install -y build-essential cmake pkg-config qt6-base-dev libqt6opengl6-dev qt6-wayland libgtk-3-dev libx11-dev libvulkan-dev libdrm-dev glslang-tools libsqlite3-dev libarchive-dev dpkg-dev makeself patchelf file desktop-file-utils libfuse2t64
       - name: Atualizar bibliotecas do ambiente de build
         run: python3 tools/refresh-build-libraries.py
       - name: Compilar e testar

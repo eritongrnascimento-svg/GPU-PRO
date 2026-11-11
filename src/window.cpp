@@ -86,9 +86,9 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   repository = std::make_unique<Repository>(offline ? QString(":memory:")
                                                     : configRoot() + "/results.sqlite");
   resize(1240, 900);
-  setWindowIcon(QIcon(":/assets/gpu.png"));
+  setWindowIcon(QIcon(":/assets/gpu-pro.png"));
   setMinimumSize(980, 700);
-  setWindowTitle("GPU-PRO · 0.5.0");
+  setWindowTitle("GPU-PRO · 0.6.0");
   if (!offline)
     overlayConfig = OverlayConfig::fromJson(
         QJsonDocument::fromJson(readText(configRoot() + "/overlay.json").toUtf8()).object());
@@ -187,7 +187,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
     });
   }
   sb->addStretch();
-  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.5 · "
+  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.6 · "
                       "validação comunitária"));
   main->addWidget(sidebar);
   main->addLayout(right, 1);
@@ -476,7 +476,9 @@ void MainWindow::setInventory(QList<Gpu> list) {
     gpuSelect->addItem(g.name + " · " + g.pci);
   if (gpus.isEmpty())
     gpuSelect->addItem("Nenhuma GPU DRM disponível");
-  chooseGpu(0);
+  int preferred=0;QString saved=QSettings().value("graphics/preferredPci").toString();
+  for(int n=0;n<gpus.size();++n)if(gpus[n].pci==saved)preferred=n;
+  gpuSelect->setCurrentIndex(preferred);chooseGpu(preferred);
   emit configureOverlay(overlayConfig.json());
 }
 void MainWindow::chooseGpu(int index) {
@@ -851,7 +853,12 @@ void MainWindow::launchProfile() {
     args << arg.toString();
   args.prepend(exe);
   QProcess game;
-  game.setProcessEnvironment(nativeEnvironment());
+  auto gameEnv=nativeEnvironment();QString preferred=QSettings().value("graphics/preferredPci").toString();
+  for(auto g:gpus)if(!preferred.isEmpty()&&g.pci==preferred) {
+    if(g.vendor=="NVIDIA"){gameEnv.insert("__NV_PRIME_RENDER_OFFLOAD","1");gameEnv.insert("__GLX_VENDOR_LIBRARY_NAME","nvidia");gameEnv.insert("__VK_LAYER_NV_optimus","NVIDIA_only");}
+    else {gameEnv.insert("DRI_PRIME","pci-"+QString(g.pci).replace(':','_').replace('.','_'));gameEnv.remove("__NV_PRIME_RENDER_OFFLOAD");gameEnv.remove("__GLX_VENDOR_LIBRARY_NAME");gameEnv.remove("__VK_LAYER_NV_optimus");}
+  }
+  game.setProcessEnvironment(gameEnv);
   game.setProgram(savedProfile + "/launch.sh");
   game.setArguments(args);
   game.setWorkingDirectory(info.absolutePath());
@@ -1324,7 +1331,7 @@ void MainWindow::previewScrollBottom() {
   }
 }
 bool MainWindow::checkInterface() {
-  for (auto file : {":/LICENSE", ":/NOTICE", ":/docs/licenses/LGPL-3.0.txt", ":/docs/licenses/GPL-3.0.txt"})
+  for (auto file : {":/assets/gpu-pro.png", ":/LICENSE", ":/NOTICE", ":/docs/licenses/LGPL-3.0.txt", ":/docs/licenses/GPL-3.0.txt"})
     if (!QFileInfo::exists(file)) return false;
   if (!offline || pages->count() != 10 || navigation.size() != 10 || gpuTabs->count() != 2 || benchmarkTabs->count() != 4) return false;
   resize(980, 700); pages->setCurrentIndex(2); QApplication::processEvents();
@@ -1360,7 +1367,7 @@ void MainWindow::benchmarkCheck(QString path) {
 
 void MainWindow::showFromTray() { showNormal(); raise(); activateWindow(); }
 void MainWindow::setupTray() {
-  tray = new QSystemTrayIcon(QIcon(":/assets/gpu.png"), this);
+  tray = new QSystemTrayIcon(QIcon(":/assets/gpu-pro.png"), this);
   tray->setToolTip("GPU-PRO · Monitoramento MultiGPU");
   auto *menu = new QMenu(this);
   auto *open = menu->addAction("Mostrar GPU-PRO");

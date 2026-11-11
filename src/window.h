@@ -107,6 +107,8 @@ class MainWindow : public QMainWindow {
   QProcess driverTerminal;
   bool driverBusy = false;
   QWidget *driversControls();
+  QWidget *systemControls();
+  void startNativeTransaction(QStringList,std::function<void(int)>);
   QSlider *coreOffset, *memOffset;
   QLineEdit *coreEntry, *memEntry;
   QPushButton *applyCore, *applyMem;

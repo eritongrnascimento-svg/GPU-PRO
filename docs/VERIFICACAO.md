@@ -1,5 +1,14 @@
 # Registro de validação do GPU-PRO
 
+## Versão 0.6.0
+
+- Sete verificações locais ampliadas para conjuntos completos de drivers, parsing integral de adições/remoções, contagem de EUs Intel com fixtures, configuração/desfazer da sessão em diretórios temporários, classificação de áudio virtual/físico, atualização/restauração AppImage e validação/staging DEB sem instalação.
+- Consulta real aos índices CachyOS encontrou 11 conjuntos NVIDIA completos antes do filtro de arquitetura na interface, em vez da lista de componentes avulsos.
+- Simulação real de troca para NVIDIA 580 Open: sete pacotes a adicionar/reinstalar e seis a remover. Realizada pelo pacman externo em namespace sem rede, com sistema somente de leitura e confirmação final recusada. Nenhum driver foi trocado.
+- Não há vinculação à biblioteca libalpm. A integração utiliza programas nativos externos.
+- Troca efetiva de drivers, roteamento real de áudio e preferência real da sessão não foram aplicados no CachyOS durante esta atualização. Intel física, ambas as GPUs ativas e comportamento posterior ao reboot ainda exigem validação controlada.
+
+
 ## Versão 0.5.0
 
 - Sete verificações locais: núcleo/CPU/CSV, rejeição de escrita de tensão/potência, atualização/backup/restauração, layout, saída de janela oculta e interações de HUD/estilo/aceite.

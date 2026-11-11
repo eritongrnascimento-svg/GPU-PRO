@@ -4,7 +4,7 @@
 QString deviceKey(const Gpu &g) { return g.vendor + "/" + g.deviceId + "/" + g.pci; }
 QJsonObject publicGpu(const Gpu &g) {
   QJsonObject o{{"name", g.name}, {"vendor", g.vendor}, {"deviceId", g.deviceId}};
-  for (auto key : {"architecture", "memoryBytes", "memoryBusWidthBits", "gpuCores", "driverVersion",
+  for (auto key : {"driver", "integrated", "executionUnits", "subsliceCount", "sliceCount", "memoryType", "intelProbeStatus", "topologySource", "minGraphicsMHz", "architecture", "memoryBytes", "memoryBusWidthBits", "gpuCores", "driverVersion",
                    "vbios", "subsystemVendor", "subsystemDevice", "maxGraphicsMHz", "maxMemoryMHz"})
     if (g.specs.contains(key))
       o[key] = g.specs[key];

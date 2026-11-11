@@ -1,3 +1,4 @@
+#include "intel_specs.h"
 #include "gpu.h"
 #include <cmath>
 #include <sys/stat.h>
@@ -281,6 +282,10 @@ QList<Gpu> GpuBackend::enumerate() {
       g.name = n["name"].toString(g.name);
       g.nvIndex = n["nvIndex"].toInt(-1);
       g.uuid = n["uuid"].toString();
+    }
+    if(g.vendor=="Intel") {
+      auto specs=intelSpecifications(g);
+      for(auto it=specs.begin();it!=specs.end();++it)g.specs[it.key()]=it.value();
     }
     // pci.ids, when installed, provides marketing names without invoking a
     // shell.

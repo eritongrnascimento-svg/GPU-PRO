@@ -14,7 +14,7 @@ jobs:
       - name: Dependências
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential cmake pkg-config qt6-base-dev libqt6opengl6-dev libgtk-3-dev libx11-dev libvulkan-dev glslang-tools libsqlite3-dev libarchive-dev
+          sudo apt-get install -y build-essential cmake pkg-config qt6-base-dev libqt6opengl6-dev libgtk-3-dev libx11-dev libvulkan-dev libdrm-dev glslang-tools libsqlite3-dev libarchive-dev
       - name: Compilar
         run: BUILD_JOBS=2 sh ./build.sh
       - name: Verificações sem GPU
