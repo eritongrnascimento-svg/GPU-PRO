@@ -33,6 +33,18 @@ Prévia offline, sem inicializar a GPU:
 
 Escolha o formato adequado ao seu sistema na [última release](https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest). Os pacotes oficiais usam Linux x86_64 e base Ubuntu 24.04; o AppImage exige glibc 2.39 ou posterior. TAR/RUN e DEB utilizam bibliotecas do sistema. Se houver incompatibilidade de ABI, Qt ou glibc, compile com `build.sh`. O projeto não distribui drivers NVIDIA/AMD/Intel, e bibliotecas de um fabricante não devem ser copiadas para sistemas de outro.
 
+## Capturas de tela
+
+GPU-PRO 0.6.0 — capturas de 11/11/2026, apresentadas da mais antiga para a mais recente.
+
+| 01 · Monitor de recursos · 11:36:30 | 02 · Especificações da GPU · 11:36:49 |
+|---|---|
+| [![Monitor de recursos](docs/capturas/v0.6.0/01-20261111-113630.png)](docs/capturas/v0.6.0/01-20261111-113630.png) | [![Especificações da GPU](docs/capturas/v0.6.0/02-20261111-113649.png)](docs/capturas/v0.6.0/02-20261111-113649.png) |
+| 03 · Recursos 3D e filtros · 11:37:03 | 04 · GamerMonitor e overlay · 11:37:12 |
+| [![Recursos 3D e filtros por jogo](docs/capturas/v0.6.0/03-20261111-113703.png)](docs/capturas/v0.6.0/03-20261111-113703.png) | [![GamerMonitor e overlay](docs/capturas/v0.6.0/04-20261111-113712.png)](docs/capturas/v0.6.0/04-20261111-113712.png) |
+
+[**Ver as oito capturas em ordem, incluindo monitores, overclock, benchmark e atualizações →**](docs/capturas/v0.6.0/README.md)
+
 ## Organização da interface
 
 - **GPU**, primeiro menu: Monitor de recursos e Especificações, com cards neon animados.
@@ -184,4 +196,4 @@ A detecção utiliza o gerenciador e os repositórios reais do sistema; PackageK
 - Alinhamento de destinos padrão de áudio com seleção explícita e restauração, preservando volumes, filtros e conexões atuais. O botão não recupera codecs que falharam antes do ALSA.
 - Novo ícone `gpu-pro.png` no aplicativo e nos pacotes.
 
-Consulte [Drivers, atualização e sistema](docs/DRIVERS-E-SISTEMA.md). As capturas históricas continuam identificadas por versão; novas capturas serão adicionadas separadamente.
+Consulte [Drivers, atualização e sistema](docs/DRIVERS-E-SISTEMA.md). A [galeria atualizada](docs/capturas/v0.6.0/README.md) apresenta as oito capturas da versão 0.6.0 em ordem cronológica. As capturas anteriores permanecem identificadas como históricas.
