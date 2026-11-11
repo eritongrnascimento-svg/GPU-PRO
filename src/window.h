@@ -120,6 +120,12 @@ class MainWindow : public QMainWindow {
   QJsonArray displayOutputs;
   bool displayBusy = false;
   QSystemTrayIcon *tray = nullptr;
+  QTimer trayAnimationTimer;
+  QList<QIcon> trayFrames;
+  QAction *trayMotion = nullptr;
+  QColor brandingAccent;
+  int trayFrame = 0;
+  void updateBranding(QColor accent);
   QCheckBox *keepInTray = nullptr;
   bool explicitQuit = false;
   bool overclockAccepted = false;
@@ -179,6 +185,8 @@ class MainWindow : public QMainWindow {
   void applyDisplay();
 
 public:
+  Q_INVOKABLE void activateExistingInstance() { showFromTray(); }
+
   explicit MainWindow(bool preview = false);
   ~MainWindow();
   void clockCheck(QString path);

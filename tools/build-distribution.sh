@@ -16,7 +16,7 @@ install -m755 "$build_dir/gpu-clock-helper" "$debroot/usr/libexec/gpu-pro/"
 printf '#!/bin/sh\nexec /usr/lib/gpu-pro/bin/linux-gpu-control "$@"\n' > "$debroot/usr/bin/gpu-pro"
 chmod 755 "$debroot/usr/bin/gpu-pro"
 cp "$project_dir/packaging/gpu-pro.desktop" "$debroot/usr/share/applications/"
-cp "$project_dir/packaging/gpu-pro.svg" "$debroot/usr/share/icons/hicolor/scalable/apps/gpu-pro.svg"
+cp "$project_dir/packaging/gpu-pro.svg" "$debroot/usr/share/icons/hicolor/scalable/apps/gpu-pro-brand-v061.svg"
 mkdir -p "$debroot/usr/share/pixmaps"
 cp "$project_dir/assets/gpu-pro.png" "$debroot/usr/share/pixmaps/gpu-pro.png"
 cp -R "$project_dir/docs" "$project_dir/LICENSE" "$project_dir/NOTICE" "$project_dir/README.md" "$debroot/usr/share/doc/gpu-pro/"
@@ -36,6 +36,17 @@ Homepage: https://github.com/eritongrnascimento-svg/GPU-PRO
 Description: Monitoramento e benchmarks MultiGPU Linux
  Interface Qt para NVIDIA, AMD e Intel, overlay e ferramentas de benchmark.
 CONTROL
+# Refresh shared menu/icon caches when a native DEB is configured. No user files are touched.
+cat > "$debroot/DEBIAN/postinst" <<'POSTINST'
+#!/bin/sh
+set -e
+if [ "$1" = configure ]; then
+ if command -v gtk-update-icon-cache >/dev/null 2>&1; then gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true; fi
+ if command -v update-desktop-database >/dev/null 2>&1; then update-desktop-database -q /usr/share/applications || true; fi
+fi
+exit 0
+POSTINST
+chmod 755 "$debroot/DEBIAN/postinst"
 dpkg-deb --root-owner-group --build "$debroot" "$output_dir/gpu-pro_${version}_ubuntu24.04_amd64.deb"
 dpkg-deb --info "$output_dir/gpu-pro_${version}_ubuntu24.04_amd64.deb"
 # A single executable launcher containing all workers, using host libraries.
@@ -49,12 +60,12 @@ mkdir -p "$appdir/usr/bin" "$appdir/usr/share/applications" "$appdir/usr/share/i
 for binary in linux-gpu-control gpu-bench-worker gpu-video-worker gpu-diagnostics gpu-clock-helper gpu-system-worker; do install -m755 "$build_dir/$binary" "$appdir/usr/bin/"; done
 cp "$project_dir/packaging/gpu-pro.desktop" "$appdir/usr/share/applications/"
 sed -i 's/^Exec=gpu-pro$/Exec=linux-gpu-control/' "$appdir/usr/share/applications/gpu-pro.desktop"
-cp "$project_dir/packaging/gpu-pro.svg" "$appdir/usr/share/icons/hicolor/scalable/apps/gpu-pro.svg"
+cp "$project_dir/packaging/gpu-pro.svg" "$appdir/usr/share/icons/hicolor/scalable/apps/gpu-pro-brand-v061.svg"
 cp -R "$project_dir/docs" "$project_dir/LICENSE" "$project_dir/NOTICE" "$project_dir/README.md" "$appdir/usr/share/doc/gpu-pro/"
 export APPIMAGE_EXTRACT_AND_RUN=1 QMAKE=/usr/bin/qmake6 EXTRA_PLATFORM_PLUGINS=libqoffscreen.so
 export PATH="$stage/tools:$PATH"
 args=(); for binary in "$appdir"/usr/bin/*; do args+=(--executable "$binary"); done
-"$stage/tools/linuxdeploy-x86_64.AppImage" --appdir "$appdir" "${args[@]}" --desktop-file "$appdir/usr/share/applications/gpu-pro.desktop" --icon-file "$appdir/usr/share/icons/hicolor/scalable/apps/gpu-pro.svg" --exclude-library='libstdc++.so.6' --exclude-library='libgcc_s.so.1' --plugin qt
+"$stage/tools/linuxdeploy-x86_64.AppImage" --appdir "$appdir" "${args[@]}" --desktop-file "$appdir/usr/share/applications/gpu-pro.desktop" --icon-file "$appdir/usr/share/icons/hicolor/scalable/apps/gpu-pro-brand-v061.svg" --exclude-library='libstdc++.so.6' --exclude-library='libgcc_s.so.1' --plugin qt
 # Include notices and retrieve exact corresponding source packages for bundled libraries.
 python3 "$project_dir/tools/dependency-sources.py" "$appdir" "$output_dir" "$version" "$stage/tools"
 export ARCH=x86_64 OUTPUT="$output_dir/GPU-PRO-$version-x86_64.AppImage"

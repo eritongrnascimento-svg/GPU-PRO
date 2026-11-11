@@ -1,5 +1,14 @@
 # Registro de validação do GPU-PRO
 
+## Versão 0.6.1
+
+- Nove verificações locais aprovadas, preservando a suíte anterior e acrescentando ativação/recuperação de instância única e transparência/cores dos ícones.
+- O teste de instância única inicia processos separados em pasta temporária, confirma a resposta da instância existente, encerra o dono de teste e verifica a recuperação e o isolamento entre sessões. Requer permissão para sockets locais; no ambiente de desenvolvimento com sandbox essa verificação foi executada fora da restrição de rede.
+- Teste adicional com o executável real e o AppImage, em configuração/sessão temporárias, confirmou que as duas segundas aberturas ativam o painel existente e encerram sem manter outra instância. Apenas o processo de teste foi encerrado.
+- A interface offline valida que mostrar uma janela oculta preserva seu estado maximizado. Saída da bandeja e interações de estilo continuam cobertas.
+- Renderização dos ícones conferida em verde, vermelho e azul, incluindo tamanhos 16/24/32 px. A variação dos quadros do halo e a transparência externa são verificadas sem sensores ou alterações da GPU.
+- Comportamento de foco/decoração e animação efetiva da bandeja dependem do compositor e ainda precisam ser observados na sessão gráfica do usuário. Nenhuma instância antiga do usuário foi encerrada à força; não houve instalação de driver, ajuste de clocks ou mudança de áudio nesta atualização.
+
 ## Versão 0.6.0
 
 - Sete verificações locais ampliadas para conjuntos completos de drivers, parsing integral de adições/remoções, contagem de EUs Intel com fixtures, configuração/desfazer da sessão em diretórios temporários, classificação de áudio virtual/físico, atualização/restauração AppImage e validação/staging DEB sem instalação.

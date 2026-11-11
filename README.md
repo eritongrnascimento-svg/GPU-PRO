@@ -1,4 +1,4 @@
-# GPU-PRO — 0.6.0
+# GPU-PRO — 0.6.1
 
 **Titular: Ériton do Nascimento** · [Instalação](docs/INSTALACAO.md) · [Contribuir](CONTRIBUTING.md) · [Licença source available](LICENSE)
 
@@ -32,6 +32,15 @@ Prévia offline, sem inicializar a GPU:
 ```
 
 Escolha o formato adequado ao seu sistema na [última release](https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest). Os pacotes oficiais usam Linux x86_64 e base Ubuntu 24.04; o AppImage exige glibc 2.39 ou posterior. TAR/RUN e DEB utilizam bibliotecas do sistema. Se houver incompatibilidade de ABI, Qt ou glibc, compile com `build.sh`. O projeto não distribui drivers NVIDIA/AMD/Intel, e bibliotecas de um fabricante não devem ser copiadas para sistemas de outro.
+
+## Novidades da versão 0.6.1
+
+- Ícone fornecido para o projeto no menu; janela com fundo externo transparente e contorno neon na cor da GPU selecionada.
+- Monograma **GP** animado na bandeja, com opção para pausar o halo.
+- Segundo clique no menu mostra o painel já aberto, inclusive quando está oculto, evitando abrir outra instância.
+- Identidade de ícone própria e atualização de caches no DEB para corrigir o ícone antigo do menu.
+
+Consulte [Ícones, bandeja e instância única](docs/IDENTIDADE-E-INSTANCIA.md), incluindo o comportamento de atalhos fixados e a transição a partir de versões anteriores. As capturas abaixo pertencem à versão 0.6.0; serão substituídas quando novas imagens estiverem disponíveis.
 
 ## Capturas de tela
 

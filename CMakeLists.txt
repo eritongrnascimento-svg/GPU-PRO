@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.22)
-project(LinuxGPUControl VERSION 0.6.0 LANGUAGES CXX)
+project(LinuxGPUControl VERSION 0.6.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_AUTOMOC ON)
@@ -30,7 +30,7 @@ endforeach()
 add_custom_target(shaders DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/city.vert.spv ${CMAKE_CURRENT_BINARY_DIR}/city.frag.spv ${COMPUTE_SPV})
 add_library(gpu-core STATIC src/gpu.cpp src/gpu.h src/model.cpp src/model.h src/cpu_telemetry.cpp src/cpu_telemetry.h src/frame_log.cpp src/frame_log.h src/repository.cpp src/repository.h src/driver_packages.cpp src/driver_packages.h src/driver_stack.cpp src/driver_stack.h src/intel_specs.cpp src/intel_specs.h src/system_settings.cpp src/system_settings.h)
 target_link_libraries(gpu-core PUBLIC Qt6::Core Qt6::DBus PkgConfig::DRM ${SQLITE_TARGET} ${CMAKE_DL_LIBS})
-add_executable(linux-gpu-control src/main.cpp src/window.cpp src/window.h src/service.cpp src/service.h src/overlay.cpp src/benchmark.cpp src/benchmark.h src/codec.cpp src/codec.h src/codec_suite.cpp src/codec_suite.h src/window_tests.cpp src/window_specs.cpp src/window_feedback.cpp src/neon_card.cpp src/neon_card.h src/window_updates.cpp src/window_drivers.cpp src/window_system.cpp src/update_manager.cpp src/update_manager.h)
+add_executable(linux-gpu-control src/main.cpp src/branding.cpp src/branding.h src/single_instance.cpp src/single_instance.h src/window.cpp src/window.h src/service.cpp src/service.h src/overlay.cpp src/benchmark.cpp src/benchmark.h src/codec.cpp src/codec.h src/codec_suite.cpp src/codec_suite.h src/window_tests.cpp src/window_specs.cpp src/window_feedback.cpp src/neon_card.cpp src/neon_card.h src/window_updates.cpp src/window_drivers.cpp src/window_system.cpp src/update_manager.cpp src/update_manager.h)
 qt_add_resources(linux-gpu-control bench-shaders PREFIX /shaders BASE ${CMAKE_CURRENT_BINARY_DIR}
   FILES ${CMAKE_CURRENT_BINARY_DIR}/city.vert.spv ${CMAKE_CURRENT_BINARY_DIR}/city.frag.spv ${COMPUTE_SPV})
 qt_add_resources(linux-gpu-control branding PREFIX / FILES assets/gpu-pro.png docs/AVISO-DE-RESPONSABILIDADE.md LICENSE NOTICE docs/licenses/LGPL-3.0.txt docs/licenses/GPL-3.0.txt docs/licenses/LGPL-2.1.txt)
@@ -75,3 +75,10 @@ set_tests_properties(tray-hidden-exit PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=of
 
 add_test(NAME hud-style-risk-interactions COMMAND linux-gpu-control --interaction-check)
 set_tests_properties(hud-style-risk-interactions PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen;QT_STYLE_OVERRIDE=kvantum" TIMEOUT 10)
+
+add_executable(instance-checks src/instance_checks.cpp src/single_instance.cpp src/single_instance.h)
+target_link_libraries(instance-checks PRIVATE Qt6::Core Qt6::Network)
+add_test(NAME single-instance-activation-recovery COMMAND instance-checks)
+set_tests_properties(single-instance-activation-recovery PROPERTIES TIMEOUT 15)
+add_test(NAME branding-transparency-colors COMMAND linux-gpu-control --branding-check)
+set_tests_properties(branding-transparency-colors PROPERTIES ENVIRONMENT "QT_QPA_PLATFORM=offscreen" TIMEOUT 10)

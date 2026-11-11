@@ -1,4 +1,5 @@
 #include "window.h"
+#include "branding.h"
 #include "driver_packages.h"
 #include <cmath>
 #include <sys/stat.h>
@@ -86,9 +87,9 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   repository = std::make_unique<Repository>(offline ? QString(":memory:")
                                                     : configRoot() + "/results.sqlite");
   resize(1240, 900);
-  setWindowIcon(QIcon(":/assets/gpu-pro.png"));
+  setWindowIcon(Branding::windowIcon(QColor("#76b900")));
   setMinimumSize(980, 700);
-  setWindowTitle("GPU-PRO · 0.6.0");
+  setWindowTitle("GPU-PRO · 0.6.1");
   if (!offline)
     overlayConfig = OverlayConfig::fromJson(
         QJsonDocument::fromJson(readText(configRoot() + "/overlay.json").toUtf8()).object());
@@ -460,6 +461,7 @@ void MainWindow::applyTheme() {
   Q_UNUSED(vendor);
 
   QString c = selected >= 0 && selected < gpus.size() ? gpus[selected].accent() : "#76b900";
+  updateBranding(QColor(c));
   setStyleSheet(QString(R"(
  QWidget#contentPage{background:#0a0a0e;} QScrollBar:vertical{background:#14141b;width:12px;margin:0;} QScrollBar::handle:vertical{background:#464657;min-height:32px;border-radius:5px;} QScrollBar::add-line:vertical,QScrollBar::sub-line:vertical{height:0;} QTableCornerButton::section{background:#1c1c22;border:0;} QMainWindow,QStackedWidget{background:#0a0a0e;} QWidget{color:#e0e0e0;font-family:'Noto Sans',sans-serif;font-size:12px;} QFrame#sidebar{background:#121214;border-right:1px solid #242426;} QLabel#brand{color:%1;} QPushButton#nav{background:transparent;color:#aaa;text-align:left;padding:11px 14px;border:0;border-left:3px solid transparent;font-weight:600;} QPushButton#nav:hover{background:#1b1b20;color:white;} QPushButton#nav[active=true]{background:#1b1b20;color:white;border-left:3px solid %1;} QGroupBox{background:#141418;border:1px solid #29292d;border-radius:8px;margin-top:10px;padding:18px 10px 10px;font-weight:700;color:%1;} QGroupBox::title{subcontrol-origin:margin;left:10px;padding:0 5px;} QComboBox,QSpinBox,QDoubleSpinBox,QLineEdit{background:#1e1e24;border:1px solid #38383e;border-radius:4px;padding:7px;color:white;min-height:18px;} QComboBox QAbstractItemView{background:#202024;selection-background-color:%1;} QPushButton{background:%1;color:#090909;font-weight:700;border:0;border-radius:4px;padding:9px 13px;} QPushButton:disabled{background:#29292d;color:#888;} QPushButton:hover{border:1px solid #aaa;} QPlainTextEdit,QListWidget,QTableWidget{background:#111115;border:1px solid #29292d;color:#ddd;selection-background-color:#343440;} QHeaderView::section{background:#1c1c22;color:#ccc;border:0;padding:7px;} QProgressBar{background:#16161b;border:1px solid #303036;border-radius:4px;text-align:center;min-height:20px;} QProgressBar::chunk{background:%1;} QScrollArea{border:0;background:transparent;} QSlider::groove:horizontal{background:#303039;height:10px;border-radius:5px;} QSlider::sub-page:horizontal{background:%1;border-radius:5px;} QSlider::handle:horizontal{background:#eeeeee;border:2px solid %1;width:20px;margin:-6px 0;border-radius:7px;} QTabWidget::pane{border:1px solid #29292d;} QTabBar::tab{background:#1e1e24;color:#aaa;padding:10px 16px;} QTabBar::tab:selected{color:#fff;border-bottom:3px solid %1;} QCheckBox{spacing:7px;} QToolTip{background:#202024;color:white;border:1px solid #555;}
  )")
@@ -1365,15 +1367,40 @@ void MainWindow::benchmarkCheck(QString path) {
   }); ready->start();
 }
 
-void MainWindow::showFromTray() { showNormal(); raise(); activateWindow(); }
+void MainWindow::showFromTray() {
+  if(isMinimized())setWindowState(windowState() & ~Qt::WindowMinimized);
+  show();raise();activateWindow();
+}
+void MainWindow::updateBranding(QColor accent) {
+  if(brandingAccent==accent)return;
+  brandingAccent=accent;
+  auto art=Branding::windowIcon(accent);setWindowIcon(art);QApplication::setWindowIcon(art);
+  trayFrames.clear();
+  for(int i=0;i<12;++i)trayFrames.append(Branding::trayIcon(accent,.5+.4*std::sin(i*6.283185307/12)));
+  trayFrame=0;if(tray)tray->setIcon(trayFrames.first());
+}
 void MainWindow::setupTray() {
-  tray = new QSystemTrayIcon(QIcon(":/assets/gpu-pro.png"), this);
+  tray = new QSystemTrayIcon(Branding::trayIcon(QColor("#76b900")), this);
   tray->setToolTip("GPU-PRO · Monitoramento MultiGPU");
   auto *menu = new QMenu(this);
   auto *open = menu->addAction("Mostrar GPU-PRO");
   connect(open, &QAction::triggered, this, &MainWindow::showFromTray);
   auto *hideAction = menu->addAction("Ocultar na bandeja");
   connect(hideAction, &QAction::triggered, this, [this] { if (QSystemTrayIcon::isSystemTrayAvailable()) hide(); });
+  trayMotion=menu->addAction("Animar neon do ícone GP");trayMotion->setCheckable(true);
+  trayMotion->setChecked(offline || QSettings().value("appearance/trayNeon",true).toBool());
+  trayAnimationTimer.setInterval(200);
+  connect(&trayAnimationTimer,&QTimer::timeout,this,[this] {
+    if(!tray->isVisible() || trayFrames.isEmpty())return;
+    trayFrame=(trayFrame+1)%trayFrames.size();tray->setIcon(trayFrames[trayFrame]);
+  });
+  connect(trayMotion,&QAction::toggled,this,[this](bool enabled) {
+    if(!offline)QSettings().setValue("appearance/trayNeon",enabled);
+    if(enabled && tray->isVisible())trayAnimationTimer.start();else trayAnimationTimer.stop();
+    if(!enabled && !trayFrames.isEmpty())tray->setIcon(trayFrames.first());
+  });
+  connect(menu,&QMenu::aboutToShow,&trayAnimationTimer,&QTimer::stop);
+  connect(menu,&QMenu::aboutToHide,this,[this]{if(trayMotion->isChecked() && tray->isVisible())trayAnimationTimer.start();});
   menu->addSeparator(); auto *quit = menu->addAction("Sair do GPU-PRO");
   quit->setObjectName("quitFromTray");
   connect(quit, &QAction::triggered, this, [this] {
@@ -1389,12 +1416,15 @@ void MainWindow::setupTray() {
   connect(tray, &QSystemTrayIcon::activated, this, [this](QSystemTrayIcon::ActivationReason reason) {
     if (reason == QSystemTrayIcon::Trigger || reason == QSystemTrayIcon::DoubleClick) showFromTray();
   });
-  if (!offline && QSystemTrayIcon::isSystemTrayAvailable()) tray->show();
+  if (!offline && QSystemTrayIcon::isSystemTrayAvailable()) {tray->show();if(trayMotion->isChecked())trayAnimationTimer.start();}
 }
 
 
 bool MainWindow::checkInteractions() {
   if(!offline || QApplication::style()->objectName().toLower()!="fusion") return false;
+  showMaximized();hide();
+  if(!QMetaObject::invokeMethod(this,"activateExistingInstance",Qt::DirectConnection) || !isVisible() || !isMaximized())return false;
+  showNormal();
   int packets=0;QJsonObject packet;
   auto connection=connect(this,&MainWindow::configureOverlay,this,[&](QJsonObject p){++packets;packet=p;});
   const int width=hudWidth->value()+20;

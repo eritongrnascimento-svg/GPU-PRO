@@ -1,5 +1,13 @@
 # Alterações
 
+## 0.6.1
+
+- Novo ícone fornecido para o projeto; transparência externa e contorno neon dinâmico na janela.
+- Bandeja com monograma GP e halo animado, pausa no menu e preferência para desativar a animação.
+- Instância única por usuário/sessão gráfica, ativação da janela existente e recuperação de trava após encerramento inesperado.
+- Nome de ícone próprio no desktop e atualização de caches no DEB; identidade da aplicação alinhada ao atalho.
+- Prévias e testes offline isolados da instância normal; documentação da integração e das limitações do compositor.
+
 ## 0.6.0
 
 - Seleção de conjuntos completos de drivers e versão instalada separada; prévia de adições/remoções e restauração validada.

@@ -1,5 +1,8 @@
 #include "window.h"
+#include "branding.h"
+#include "single_instance.h"
 #include <cstring>
+#include <cstdio>
 int main(int argc, char **argv) {
   for (int i = 1; i < argc; ++i)
     if (std::strcmp(argv[i], "--overlay-child") == 0)
@@ -12,6 +15,7 @@ int main(int argc, char **argv) {
   QApplication::setDesktopSettingsAware(false);
   QApplication app(argc, argv);
   app.setStyle(QStyleFactory::create("Fusion"));
+  app.setDesktopFileName("gpu-pro");
   QPalette fixed;
   fixed.setColor(QPalette::Window,QColor("#101014"));
   fixed.setColor(QPalette::WindowText,QColor("#eeeeee"));
@@ -28,7 +32,7 @@ int main(int argc, char **argv) {
   if(hadTheme)qputenv("QT_QPA_PLATFORMTHEME",originalTheme);else qunsetenv("QT_QPA_PLATFORMTHEME");
   QCoreApplication::setOrganizationName("LinuxGPUControl");
   QCoreApplication::setApplicationName("LinuxGPUControl");
-  QCoreApplication::setApplicationVersion("0.6.0");
+  QCoreApplication::setApplicationVersion("0.6.1");
   QCommandLineParser parser;
   parser.setApplicationDescription(
       "GPU-PRO — painel MultiGPU Linux");
@@ -36,6 +40,8 @@ int main(int argc, char **argv) {
   parser.addOption({"ui-check", "Verificar abas e alcance da rolagem sem acessar GPU"});
   parser.addOption({"tray-exit-check", "Verificar saída pela bandeja com janela oculta, sem acessar GPU"});
   parser.addOption({"preview-scroll-bottom", "Rolar a página da prévia até o final"});
+  parser.addOption({"render-branding-preview", "Exportar prévia dos ícones sem acessar GPU", "path"});
+  parser.addOption({"branding-check", "Verificar transparência e cores dos ícones sem acessar GPU"});
   parser.addHelpOption();
   parser.addVersionOption();
   parser.addOption({"preview-offline", "Prévia visual com dados fictícios, sem acessar GPU"});
@@ -70,7 +76,33 @@ int main(int argc, char **argv) {
     parser.showHelp(2);
   if ((preview && (parser.isSet("clock-check") || parser.isSet("benchmark-check"))) || (parser.isSet("clock-check") && parser.isSet("benchmark-check")))
     return 2;
+  if(parser.isSet("render-branding-preview"))return Branding::writePreview(parser.value("render-branding-preview"))?0:8;
+  if(parser.isSet("branding-check")) {
+    const auto art=Branding::transparentArtwork();
+    if(art.isNull()||qAlpha(art.pixel(0,0))!=0)return 8;
+    const auto green=Branding::trayIcon(QColor("#76b900")).pixmap(32).toImage();
+    const auto red=Branding::trayIcon(QColor("#ed1c24")).pixmap(32).toImage();
+    const auto pulse=Branding::trayIcon(QColor("#76b900"),0).pixmap(32).toImage();
+    if(green==red||green==pulse||qAlpha(green.pixel(0,0))!=0)return 8;
+    return 0;
+  }
+  std::unique_ptr<SingleInstance> instance;
+  if(!preview) {
+    instance=std::make_unique<SingleInstance>(SingleInstance::runtimeDirectory(),SingleInstance::graphicalSession());
+    auto result=instance->acquire();
+    if(result==SingleInstance::ActivatedExisting) {
+      if(parser.isSet("clock-check") || parser.isSet("benchmark-check")) {
+        std::fputs("GPU-PRO já está aberto; o teste não foi executado nem encaminhado.\n",stderr);return 10;
+      }
+      return 0;
+    }
+    if(result==SingleInstance::Failed){QMessageBox::warning(nullptr,"GPU-PRO",instance->error());return 9;}
+  }
   MainWindow window(preview);
+  if(instance) {
+    QObject::connect(instance.get(),&SingleInstance::activationRequested,&window,[&window] {QMetaObject::invokeMethod(&window,"activateExistingInstance",Qt::QueuedConnection);});
+    if(instance->takePendingActivation())QMetaObject::invokeMethod(&window,"activateExistingInstance",Qt::QueuedConnection);
+  }
   if (parser.isSet("view-report")) {
     if (!window.viewReport(parser.value("view-report")))
       return 2;
