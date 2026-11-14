@@ -20,7 +20,12 @@ QWidget *MainWindow::updatesPage() {
   layout->addLayout(row);
   auto *backup = new QPushButton("Salvar backup da versão atual"); layout->addWidget(backup);
   auto *restore = new QPushButton("Restaurar último backup"); layout->addWidget(restore);
-  auto *releases = new QPushButton("Baixar no GitHub"); layout->addWidget(releases);
+  auto *downloadRow = new QHBoxLayout;
+  auto *releases = new QPushButton("Baixar no GitHub"); downloadRow->addWidget(releases);
+  auto *previousReleases = new QPushButton("Versões anteriores");
+  previousReleases->setObjectName("previousReleasesButton");
+  previousReleases->setToolTip("Abre todas as releases. Escolha a versão e expanda Assets para baixar os pacotes.");
+  downloadRow->addWidget(previousReleases); layout->addLayout(downloadRow);
   auto *restart = new QPushButton("Reiniciar GPU-PRO"); layout->addWidget(restart);
   restart->setEnabled(false);
   auto *details = new QLabel(
@@ -119,7 +124,8 @@ QWidget *MainWindow::updatesPage() {
     QString error; bool ok = manager->restore({}, error);
     state->setText(ok ? "Backup restaurado. Reinicie o GPU-PRO." : error); restart->setEnabled(ok);
   });
-  connect(releases, &QPushButton::clicked, this, [] { QDesktopServices::openUrl(QUrl("https://github.com/eritongrnascimento-svg/GPU-PRO/releases")); });
+  connect(releases, &QPushButton::clicked, this, [] { QDesktopServices::openUrl(QUrl("https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest")); });
+  connect(previousReleases, &QPushButton::clicked, this, [] { QDesktopServices::openUrl(QUrl("https://github.com/eritongrnascimento-svg/GPU-PRO/releases")); });
   connect(manager,&UpdateManager::managedPackageReady,this,[this,manager,state,restart](QString package,QString version,bool restoring){
     if(offline||driverBusy||testActive||nativePackageManager()!="apt")return;
     auto *simulation=new QProcess(this);simulation->setProcessEnvironment(nativeEnvironment());
@@ -147,6 +153,6 @@ QWidget *MainWindow::updatesPage() {
     if(accepted){QProcess::startDetached(executable,{});QCoreApplication::quit();}
   });
 
-  if (offline) for (auto *button : {check, install, backup, restore, releases}) button->setEnabled(false);
+  if (offline) for (auto *button : {check, install, backup, restore, releases, previousReleases}) button->setEnabled(false);
   return root;
 }
