@@ -1,4 +1,5 @@
-# GPU-PRO — 0.6.1
+# GPU-PRO — 0.7.0
+
 
 **Titular: Ériton do Nascimento** · [Instalação](docs/INSTALACAO.md) · [Contribuir](CONTRIBUTING.md) · [Licença source available](LICENSE)
 
@@ -22,7 +23,7 @@ O código original mantém a licença [GPU-PRO Source Available License](LICENSE
 ./run.sh
 ```
 
-Abertura: leitura de sensores apenas. Nada de overclock, tensão, power limit, testes ou HUD é aplicado automaticamente. **Esta versão não possui operação para alterar tensão ou limite de potência**, inclusive no helper privilegiado. A potência continua disponível como leitura.
+Abertura: leitura de sensores apenas. Nada de overclock, tensão, power limit, testes ou HUD é aplicado automaticamente. O painel inclui ajustes manuais de clocks, limite de potência, offset de tensão/undervolt e ventoinhas somente quando o backend reconhece as capacidades do driver. O consumo continua sendo uma leitura distinta do limite de potência. Consulte [controles e suporte](docs/CONTROLES-MANUAIS.md).
 
 Prévia offline, sem inicializar a GPU:
 
@@ -33,7 +34,17 @@ Prévia offline, sem inicializar a GPU:
 
 Escolha o formato adequado ao seu sistema na [última release](https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest). Os pacotes oficiais usam Linux x86_64 e base Ubuntu 24.04; o AppImage exige glibc 2.39 ou posterior. TAR/RUN e DEB utilizam bibliotecas do sistema. Se houver incompatibilidade de ABI, Qt ou glibc, compile com `build.sh`. O projeto não distribui drivers NVIDIA/AMD/Intel, e bibliotecas de um fabricante não devem ser copiadas para sistemas de outro.
 
-## Novidades da versão 0.6.1
+## Novidades da versão 0.7.0
+
+- Overclock manual sem presets, com potência e fans nos backends reconhecidos; offset de tensão/undervolt AMD compatível.
+- FPS atual, 1% low das amostras CSV, média e máxima selecionáveis no painel e HUD; gráfico de frametime no GamerMonitor.
+- Ícones empacotados com transparência e janela sem halo colorido de tema.
+- Versão DEB usa **Baixar no GitHub**; AppImage e portáteis mantêm o atualizador.
+- WSL: leitura NVIDIA via NVML, identificação da GPU física e opção de abrir maximizado. Ajustes da GPU exigem Linux nativo.
+
+Detalhes em [Controles manuais](docs/CONTROLES-MANUAIS.md). As imagens abaixo permanecem da versão 0.6.0, identificadas como tal.
+
+## Histórico: novidades da versão 0.6.1
 
 - Ícone fornecido para o projeto no menu; janela com fundo externo transparente e contorno neon na cor da GPU selecionada.
 - Monograma **GP** animado na bandeja, com opção para pausar o halo.
@@ -117,7 +128,7 @@ Para compilação local, use `build/gpu-clock-helper`. Nenhuma regra polkit perm
 - Teste automático NVIDIA: baseline Vulkan 720p, incremento **máximo de +15 MHz no core**, segunda carga curta e restauração. Não altera memória, tensão, power limit ou ventoinhas. Exige telemetria válida, temperatura inicial abaixo de 60 °C e GPU pouco ocupada.
 - Watchdog no processo privilegiado: leitura a cada ~250 ms, parada a 75 °C / hotspot 95 °C, restauração ao receber STOP, fechar comunicação, perder o proprietário ou atingir 20 s após aplicar. Não há garantia de recuperação após falha de kernel, desligamento ou SIGKILL do próprio watchdog.
 
-Esse teste é curto e não certifica estabilidade prolongada. Um perfil local só é marcado como resultado de teste curto, nunca como homologado pelo fabricante. Referências de outras GPUs não são aplicadas automaticamente. Ainda não há busca automática agressiva, ajuste de tensão ou curva de ventoinha.
+Esse teste é curto e não certifica estabilidade prolongada. Um perfil local só é marcado como resultado de teste curto, nunca como homologado pelo fabricante. Referências de outras GPUs não são aplicadas automaticamente. A página de Overclock não oferece presets nem busca automática. O diagnóstico curto descrito acima permanece apenas na opção explícita de linha de comando. Os novos controles manuais estão documentados em [Controles manuais](docs/CONTROLES-MANUAIS.md); não há editor de curva de ventoinha.
 
 ## Compilar
 
@@ -180,7 +191,7 @@ Desde a versão 0.4, a pasta do projeto chama-se **GPU-PRO**, preservando histó
 - Atualizações inclui a opção de fechar para a bandeja e gerenciamento de drivers por APT, pacman, DNF e backend PackageKit da distribuição, com consulta de versões, simulação e confirmação no gerenciador nativo. Não adiciona repositórios externos ou instala automaticamente. Em Arch/CachyOS usa atualização completa do sistema e versão explícita.
 - Novos formatos: `.deb` para Ubuntu 24.04 amd64, AppImage x86_64 e executável portátil `.run`. O `.run` inclui os workers, não exige root e utiliza bibliotecas do sistema. AppImage tem base Ubuntu 24.04/glibc 2.39 ou posterior; não é universal para distribuições antigas. Consulte as fontes correspondentes das dependências incluídas no AppImage, fornecidas junto da release.
 
-Na versão 0.4, AppImage e DEB apenas abriam o download oficial. A versão 0.6 acrescenta download, backup e preparação da atualização pelo painel para esses formatos, mantendo o instalador nativo do DEB e a alternativa de acesso ao GitHub. O atualizador de pasta TAR/RUN continua disponível.
+Na versão 0.4, AppImage e DEB apenas abriam o download oficial. A versão 0.6 acrescentou download, backup e preparação da atualização pelo painel para esses formatos. Neste checkout, a versão DEB passa a usar **Baixar no GitHub**, por solicitação do mantenedor após falha no download interno; AppImage conserva o fluxo gerenciado. O atualizador de pasta TAR/RUN continua disponível.
 
 A detecção utiliza o gerenciador e os repositórios reais do sistema; PackageKit fornece um backend comum para outras distribuições quando instalado e funcional. NixOS e sistemas imutáveis são reconhecidos como declarativos/deployments e não recebem comandos de instalação imperativa de outra distro. Não existe garantia de instalação automática para qualquer distribuição Linux sem um backend compatível.
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "model.h"
+bool runningInWsl();
 QJsonObject parseAmdOverdrive(const QString &);
 QJsonObject sysfsClockCaps(const Gpu &);
 bool setSysfsClock(const Gpu &, const QString &domain, int mhz, QString &error);
@@ -15,11 +16,15 @@ public:
   template <class F> F fn(const char *name) { return reinterpret_cast<F>(lib.resolve(name)); }
   void *handle(const QString &pci);
   QJsonObject metrics(const Gpu &);
+  QList<Gpu> wslDevices();
   QJsonObject specs(void *h);
   QString diagnostic;
   QJsonObject offsets(void *h);
   bool setOffset(const QString &pci, const QString &domain, int mhz, QString &error);
 };
+QJsonObject amdVoltageOffset(const QString &);
+QJsonObject gpuTuningCaps(const Gpu &, Nvml &);
+bool setGpuTuning(const Gpu &, Nvml &, QString domain, int value, QString &error);
 class GpuBackend {
   Nvml nv;
   QHash<QString, quint64> lastEngines;

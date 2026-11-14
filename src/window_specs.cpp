@@ -66,6 +66,7 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
   };
   add("Modelo", g.name);
   add("Fabricante", g.vendor);
+  if(s["wslReadOnly"].toBool())add("Ambiente",s["telemetryMode"].toString());
   add("Arquitetura", s["architecture"].toString());
   add("Unidades de processamento",s["executionUnits"].isDouble()?number(s,"executionUnits","EUs (não CUDA cores)"):number(s,"gpuCores",g.vendor=="NVIDIA"?"CUDA cores":"unidades"));
   if(s["executionUnits"].isDouble())add("Topologia Intel",number(s,"sliceCount","slices")+" · "+number(s,"subsliceCount","subslices"));
@@ -81,7 +82,7 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
   add("Clock máximo GPU reportado", number(s, "maxGraphicsMHz", "MHz"));
   add("Clock máximo memória reportado",integrated?"Não se aplica como clock de VRAM dedicada":number(s,"maxMemoryMHz","MHz"));
   add("Potência atual · somente leitura", displayMetric(latest, "power"));
-  add("Limite de potência · bloqueado para escrita", number(latest, "powerLimit", "W", 1000));
+  add("Limite de potência · leitura", number(latest, "powerLimit", "W", 1000));
   add("Temperatura GPU", displayMetric(latest, "temp"));
   add("Hotspot", latest["hotspot"].isDouble() ? displayMetric(latest, "hotspot") : latest["hotspotStatus"].toString("Não exposto pelo driver"));
   add("Temperatura da memória", displayMetric(latest, "memoryTemp"));

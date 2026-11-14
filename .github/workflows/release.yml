@@ -1,0 +1,77 @@
+name: Release Linux
+on:
+  push:
+    branches: [main]
+    paths: [release.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gpu-pro-linux-release
+  cancel-in-progress: false
+jobs:
+  packages:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar metadados
+        run: |
+          python3 - <<'PY'
+          import json,re,pathlib
+          data=json.loads(pathlib.Path('release.json').read_text())
+          version=data['version']
+          assert re.fullmatch(r'[0-9]+\.[0-9]+\.[0-9]+',version)
+          assert data['architecture']=='x86_64' and data['channel']=='stable'
+          assert f'VERSION {version}' in pathlib.Path('CMakeLists.txt').read_text()
+          assert f'setApplicationVersion("{version}")' in pathlib.Path('src/main.cpp').read_text()
+          assert pathlib.Path(f'docs/RELEASE-{version}.md').is_file()
+          PY
+      - name: Dependências Ubuntu 24.04
+        run: |
+          sudo sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/ubuntu.sources
+          sudo apt-get update
+          sudo apt-get install -y build-essential cmake pkg-config qt6-base-dev libqt6opengl6-dev qt6-wayland fonts-noto-core libgtk-3-dev libx11-dev libvulkan-dev libdrm-dev glslang-tools libsqlite3-dev libarchive-dev dpkg-dev makeself patchelf file desktop-file-utils libfuse2t64
+          python3 tools/refresh-build-libraries.py
+      - name: Compilar e testar em Linux
+        run: |
+          BUILD_JOBS=2 sh build.sh
+          ctest --test-dir build --output-on-failure
+          file build/linux-gpu-control | grep 'ELF 64-bit LSB.*x86-64'
+      - name: Gerar todos os formatos
+        run: bash tools/build-distribution.sh build dist
+      - name: Conferir pacotes
+        run: |
+          cd dist
+          sha256sum -c SHA256SUMS.txt
+          version=$(python3 -c 'import json;print(json.load(open("../release.json"))["version"])')
+          test "$(dpkg-deb -f "gpu-pro_"$version"_ubuntu24.04_amd64.deb" Architecture)" = amd64
+          test "$(find . -maxdepth 1 -type f | wc -l)" -eq 8
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GPU-PRO-linux-release-packages
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 14
+  publish:
+    needs: packages
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: GPU-PRO-linux-release-packages
+          path: dist
+      - name: Publicar release verificada
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(python3 -c 'import json;print(json.load(open("release.json"))["version"])')
+          if gh release view "v$version" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "A release já existe; não será sobrescrita."
+            exit 1
+          fi
+          (cd dist && sha256sum -c SHA256SUMS.txt)
+          gh release create "v$version" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "GPU-PRO $version" --notes-file "docs/RELEASE-$version.md" --latest

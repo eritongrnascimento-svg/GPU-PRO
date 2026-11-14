@@ -10,6 +10,14 @@ Marque **Uso CPU** e **Temperatura CPU** na lista de métricas. O uso é global,
 
 Temperaturas são lidas de sensores CPU reconhecidos em hwmon, como coretemp, k10temp e zenpower, com fallback para zonas térmicas identificadas como CPU/pacote/SoC. Tdie e pacote têm preferência; quando há canais equivalentes, é exibido o maior valor válido. A origem permanece na telemetria local. Se o kernel não expuser um canal reconhecido, aparece N/D. Não é estimada a temperatura da CPU a partir da GPU.
 
+## FPS atual, 1% low, média e máxima
+
+Selecione **FPS atual (CSV)**, **1% low (amostras CSV)**, **FPS médio (CSV)** e **FPS máximo (CSV)**. A seleção controla as linhas de FPS do GamerMonitor e os campos do HUD. A fonte é o CSV ativo escolhido abaixo, mesmo quando a linha no HUD está desligada. Não é necessário exibir o HUD para acompanhar os valores no painel.
+
+As estatísticas usam as últimas 240 amostras válidas. FPS atual = 1000 / último frametime em ms; média = 1000 × quantidade / soma dos frametimes; máxima = 1000 / menor frametime. O 1% low usa a média dos tempos do 1% mais lento, arredondando a quantidade para cima; só aparece após 100 amostras. Logs por intervalo, como MangoHud log_interval=100, geram **estatísticas das amostras**, não um 1% low por quadro nem resultados de toda a sessão. Para dados por quadro, o produtor precisa gravar cada quadro.
+
+O GamerMonitor também exibe o gráfico em ms. Sem fonte válida ou depois de aproximadamente 3 s sem novidades, FPS fica N/D e o gráfico aguarda dados. Trocar a fonte, truncar o arquivo ou receber outro cabeçalho limpa a série anterior. Nenhum FPS é inferido da utilização da GPU ou do ritmo de atualização da interface.
+
 ## Linha de frametime
 
 A linha representa tempos de quadros em milissegundos. Ative **Linha de frametime** e use **Selecionar CSV** para indicar o arquivo que o jogo está gravando. O leitor reconhece uma coluna chamada `frametime`, aceita somente valores finitos e positivos e acompanha novas linhas completas. Mantém até 240 amostras; não substitui frametime por uso de CPU/GPU ou intervalo de atualização do HUD.

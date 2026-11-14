@@ -16,6 +16,10 @@ public:
       samples.removeFirst();
     update();
   }
+  void setSamples(const QJsonArray &values) {
+    samples.clear(); for(auto v:values) samples.append(v.toDouble()); update();
+  }
+  QString caption = "Tempo GPU por quadro (ms) · últimas 300 amostras";
   void clear() {
     samples.clear();
     update();
@@ -51,6 +55,7 @@ class MainWindow : public QMainWindow {
   QMap<QString, NeonCard *> metricCards;
   QTableWidget *processTable;
   QComboBox *processSelect;
+  HistoryPlot *gameFramePlot = nullptr;
   QLabel *processInfo;
   OverlayConfig overlayConfig;
   QProcess hud;
@@ -91,7 +96,15 @@ class MainWindow : public QMainWindow {
   QByteArray clockOutput;
   QPushButton *trialButton;
   QPushButton *stopTrial;
-  QComboBox *clockPresets;
+  QMap<QString, QJsonObject> sessionTuning;
+  QMap<QString, QSpinBox *> tuningInputs;
+  QMap<QString, QPushButton *> tuningButtons;
+  QMap<QString, QLabel *> tuningLabels;
+  QPushButton *automaticFans = nullptr;
+  QPushButton *restoreTuningButton = nullptr;
+  void buildTuningControls(QVBoxLayout *);
+  void refreshTuningControls(const QJsonObject &);
+  void applyTuning(QString domain, int value);
   QLabel *coreValue, *memValue, *feedbackInfo;
   QMap<QString, QJsonObject> sessionClocks;
   QCheckBox *hudEnabled, *onlyGame, *profileHud, *profileFilters, *profileFsr;
@@ -174,7 +187,6 @@ class MainWindow : public QMainWindow {
   void generateFeedback();
   void importFeedback();
   void refreshFeedback();
-  void refreshClockPresets();
   void startClockTrial();
   void handleClockLine(QByteArray);
   void finishClockTrial();
@@ -187,6 +199,7 @@ class MainWindow : public QMainWindow {
 public:
   Q_INVOKABLE void activateExistingInstance() { showFromTray(); }
 
+  void showSpecsForCapture() {pages->setCurrentIndex(0);gpuTabs->setCurrentIndex(1);}
   explicit MainWindow(bool preview = false);
   ~MainWindow();
   void clockCheck(QString path);

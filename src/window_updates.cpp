@@ -4,6 +4,7 @@
 QWidget *MainWindow::updatesPage() {
   auto *root = page("GPU-PRO · Atualizações e backup");
   auto *layout = qobject_cast<QVBoxLayout *>(root->layout());
+  const bool debInstall = qEnvironmentVariable("APPIMAGE").isEmpty() && QCoreApplication::applicationDirPath().startsWith("/usr/lib/gpu-pro/");
   bool managed = !qEnvironmentVariable("APPIMAGE").isEmpty() || QCoreApplication::applicationDirPath().startsWith("/usr/lib/gpu-pro/");
   auto *info = new QLabel("Versão instalada: " + QCoreApplication::applicationVersion() +
       "\nCanal estável: eritongrnascimento-svg/GPU-PRO · GitHub Releases\n"
@@ -19,7 +20,7 @@ QWidget *MainWindow::updatesPage() {
   layout->addLayout(row);
   auto *backup = new QPushButton("Salvar backup da versão atual"); layout->addWidget(backup);
   auto *restore = new QPushButton("Restaurar último backup"); layout->addWidget(restore);
-  auto *releases = new QPushButton("Abrir notas e releases oficiais"); layout->addWidget(releases);
+  auto *releases = new QPushButton("Baixar no GitHub"); layout->addWidget(releases);
   auto *restart = new QPushButton("Reiniciar GPU-PRO"); layout->addWidget(restart);
   restart->setEnabled(false);
   auto *details = new QLabel(
@@ -30,6 +31,10 @@ QWidget *MainWindow::updatesPage() {
       "Instalações por gerenciador de pacotes ou compiladas em build/ devem ser atualizadas pelo mesmo método. "
       "Dados de testes ficam preservados no diretório de configuração. O helper root não é atualizado automaticamente.");
   if (managed) details->setText("AppImage: download verificado, backup integral e troca no mesmo caminho gravável pelo usuário. DEB: preserva o pacote oficial anterior, baixa a atualização e mostra a simulação APT antes de solicitar autenticação no gerenciador nativo. A opção de abrir o GitHub continua disponível. Dados de testes permanecem no diretório de configuração; reinicie após atualizar.");
+  if (debInstall) {
+    install->hide(); backup->hide(); restore->hide();
+    details->setText("Versão DEB: use Baixar no GitHub para obter o pacote oficial e instale-o pelo gerenciador de pacotes do sistema. O download interno de DEB está desativado. Seus resultados e configurações permanecem preservados.");
+  }
   details->setWordWrap(true); layout->addWidget(details);
   layout->addWidget(driversControls());
   layout->addWidget(systemControls());
@@ -93,10 +98,11 @@ QWidget *MainWindow::updatesPage() {
     if (!offline && !testActive) manager->check();
   });
   connect(manager, &UpdateManager::message, this, [state](QString message) { state->setText(message); });
-  connect(manager, &UpdateManager::checked, this, [install, this](QString, bool available) { install->setEnabled(available && !offline); });
-  connect(install, &QPushButton::clicked, this, [this, manager, allowed, install, managed] {
+  connect(manager, &UpdateManager::checked, this, [install, this, debInstall](QString, bool available) { install->setEnabled(available && !offline && !debInstall); });
+  connect(install, &QPushButton::clicked, this, [this, manager, allowed, install, debInstall] {
+    if (debInstall) return;
     if (!allowed()) return;
-    if (QMessageBox::question(this, "Atualizar GPU-PRO", "Baixar a release oficial e preservar a versão atual? AppImage será substituído no mesmo caminho; DEB solicitará confirmação no gerenciador nativo após a simulação.") != QMessageBox::Yes) return;
+    if (QMessageBox::question(this, "Atualizar GPU-PRO", "Baixar a release oficial e preservar a versão atual? AppImage será substituído no mesmo caminho; instalações portáteis serão atualizadas após o backup.") != QMessageBox::Yes) return;
     install->setEnabled(false); manager->downloadAndInstall();
   });
   connect(manager, &UpdateManager::finished, this, [restart](bool installed) { restart->setEnabled(installed); });

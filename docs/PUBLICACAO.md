@@ -13,6 +13,8 @@ Publico o GPU-PRO no repositório público **eritongrnascimento-svg/GPU-PRO**, s
 
 O workflow `.github/workflows/build.yml` compila e executa verificações offline. O workflow `.github/workflows/packages.yml`, acionado manualmente, gera os formatos de instalação no Ubuntu 24.04. Ambos têm permissão de leitura do conteúdo; PRs não publicam releases nem executam overclock. Consulte as [execuções públicas](https://github.com/eritongrnascimento-svg/GPU-PRO/actions) para verificar cada commit. Aprovação no CI não substitui testes em GPUs reais.
 
+O workflow **release.yml** recompila e testa em Ubuntu 24.04 quando a versão de release.json muda em main (ou por acionamento manual). Publica a release somente depois de verificar todos os pacotes e os checksums; usa o token temporário do GitHub Actions. Não inclui capturas locais nem modifica a galeria existente.
+
 ## Reproduzir o empacotamento
 
 Em um checkout com as dependências de desenvolvimento instaladas:
@@ -29,14 +31,14 @@ sh tools/package.sh build dist
 bash tools/build-distribution.sh build dist
 ```
 
-Para a versão 0.6.1, os arquivos são:
+Para a versão 0.7.0, os arquivos são:
 
-- `GPU-PRO-0.6.1-linux-x86_64.tar.gz`
-- `GPU-PRO-0.6.1-source.tar.gz`
-- `GPU-PRO-0.6.1-linux-x86_64.run`
-- `GPU-PRO-0.6.1-x86_64.AppImage`
-- `gpu-pro_0.6.1_ubuntu24.04_amd64.deb`
-- `GPU-PRO-0.6.1-dependency-sources.tar.gz` e `GPU-PRO-0.6.1-dependencies.json`
+- `GPU-PRO-0.7.0-linux-x86_64.tar.gz`
+- `GPU-PRO-0.7.0-source.tar.gz`
+- `GPU-PRO-0.7.0-linux-x86_64.run`
+- `GPU-PRO-0.7.0-x86_64.AppImage`
+- `gpu-pro_0.7.0_ubuntu24.04_amd64.deb`
+- `GPU-PRO-0.7.0-dependency-sources.tar.gz` e `GPU-PRO-0.7.0-dependencies.json`
 - `SHA256SUMS.txt`
 
 O TAR contém uma pasta `GPU-PRO/`. A versão do CMake, da aplicação, dos diagnósticos, de `release.json`, do changelog e da tag deve coincidir. Mudanças na carga de benchmark exigem atualizar o identificador do método para preservar comparabilidade. O empacotamento falha se não conseguir obter as fontes correspondentes das bibliotecas incluídas no AppImage.

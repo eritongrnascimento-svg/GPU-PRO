@@ -1,5 +1,21 @@
 # Alterações
 
+## 0.7.0 — 13/11/2026
+
+- Overclock sem presets: clocks manuais, power limit em W, offset independente de tensão/undervolt AMD e ventoinhas conforme suporte do driver. Nenhum ajuste é aplicado ao iniciar.
+- NVIDIA usa NVML para potência e ventoinhas por índice. AMD amdgpu usa hwmon e a interface OD_VDDGFX_OFFSET reconhecida. Intel e interfaces não reconhecidas permanecem indisponíveis. Não implementa curva V/F ou tensão absoluta NVIDIA.
+- Confirmação e autenticação do sistema, limites consultados novamente no helper, confirmação por leitura e tentativa de restauração em falhas. Botão para retornar as ventoinhas ao automático.
+- FPS atual, média, máxima e 1% low das amostras CSV selecionáveis no GamerMonitor e HUD. Janela móvel de até 240 amostras; low exige pelo menos 100. CSV por intervalo não equivale a estatística de cada quadro.
+- Gráfico de frametime no GamerMonitor; coleta independente de habilitar o desenho no HUD. Fonte inativa por mais de 3 s limpa dados; mudança de arquivo ou novo cabeçalho reinicia a série.
+- Ícone PNG e SVG empacotado com o mesmo canal alpha. Ícone de janela/barra sem halo colorido, igual nos três temas. A bandeja GP conserva sua animação.
+- DEB usa o botão Baixar no GitHub; atualização interna de DEB fica desativada na interface. AppImage e TAR/RUN mantêm o atualizador existente.
+- Validação Linux no Ubuntu 26.04 WSL; testes offline não certificam controle físico da GPU nem todos os compositores.
+
+- Correção no WSL: descoberta NVIDIA via NVML sem depender do adaptador DRM vgem; sensores reais e ficha com os dados disponibilizados pelo driver Windows. Escritas bloqueadas no WSL.
+- Lançadores Windows com Wayland e janela maximizada; fontes Noto instaladas no ambiente de teste. Validação ampliada: 12/12 testes e capturas reais de sensores/ficha.
+
+Pacotes oficiais recompilados em Ubuntu 24.04 x86_64; testes locais de WSL no Ubuntu 26.04 são uma validação separada.
+
 ## 0.6.1
 
 - Novo ícone fornecido para o projeto; transparência externa e contorno neon dinâmico na janela.

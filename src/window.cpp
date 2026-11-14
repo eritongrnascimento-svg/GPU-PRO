@@ -49,7 +49,7 @@ void HistoryPlot::paintEvent(QPaintEvent *) {
   for (int i = 1; i < 5; ++i)
     p.drawLine(0, height() * i / 5, width(), height() * i / 5);
   p.setPen(QColor("#999999"));
-  p.drawText(12, 22, "Tempo GPU por quadro (ms) · últimas 300 amostras");
+  p.drawText(12, 22, samples.isEmpty() ? caption + " · aguardando dados" : caption);
   if (samples.size() < 2)
     return;
   double hi = qMax(1., *std::max_element(samples.begin(), samples.end()) * 1.2);
@@ -89,7 +89,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   resize(1240, 900);
   setWindowIcon(Branding::windowIcon(QColor("#76b900")));
   setMinimumSize(980, 700);
-  setWindowTitle("GPU-PRO · 0.6.1");
+  setWindowTitle("GPU-PRO · 0.7.0");
   if (!offline)
     overlayConfig = OverlayConfig::fromJson(
         QJsonDocument::fromJson(readText(configRoot() + "/overlay.json").toUtf8()).object());
@@ -176,7 +176,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   pages->addWidget(scrollPage(updatesPage()));
   QStringList names = {
       "GPU · Monitor e especificações", "Configurações 3D & Filtros", "GamerMonitor & Overlay",
-      "Monitores & Telas", "Overclock · Clocks", "Benchmark",
+      "Monitores & Telas", "Overclock · Manual", "Benchmark",
       "Feedback & Diagnóstico", "Central de Notificações", "Logs de operações", "Atualizações"};
   for (int i = 0; i < names.size(); ++i) {
     auto *b = button(names[i], sb);
@@ -188,7 +188,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
     });
   }
   sb->addStretch();
-  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.6 · "
+  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.7 · "
                       "validação comunitária"));
   main->addWidget(sidebar);
   main->addLayout(right, 1);
@@ -270,8 +270,8 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
                 finishClockTrial();
             } else {
               setTesting(false);
-              notify(code == 0 ? "Clock confirmado pelo driver"
-                               : "Clock não confirmado; consulte os logs");
+              notify(code == 0 ? "Ajuste confirmado pelo driver"
+                               : "Ajuste não confirmado; consulte os logs");
             }
           });
   connect(&clockProcess, &QProcess::errorOccurred, this, [this](QProcess::ProcessError error) {
@@ -313,7 +313,9 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
                     {"memClock", 7000},
                     {"encoder", 0},
                     {"decoder", 0},
-                    {"fan", 35}});
+                    {"fan", 35},
+                    {"fps", 120.0}, {"fpsLow", 74.8}, {"fpsAvg", 112.5}, {"fpsMax", 144.0},
+                    {"frameTimes", QJsonArray{8.3,8.5,8.1,9.0,8.7,12.0,8.2,8.4,9.1,8.6,8.3}}});
   } else {
     qRegisterMetaType<QList<Gpu>>();
     service = new TelemetryService;
@@ -495,8 +497,11 @@ void MainWindow::chooseGpu(int index) {
   refreshSpecs();
   refreshHistories();
   refreshFeedback();
-  refreshClockPresets();
 
+  for (auto *input : tuningInputs) input->setEnabled(false);
+  for (auto *button : tuningButtons) button->setEnabled(false);
+  if (automaticFans) automaticFans->setEnabled(false);
+  if (restoreTuningButton) restoreTuningButton->setEnabled(false);
   coreOffset->setEnabled(false);
   memOffset->setEnabled(false);
   applyCore->setEnabled(false);
@@ -533,13 +538,16 @@ void MainWindow::updateSnapshot(QJsonObject o) {
   if (!gpus.isEmpty() && o["pci"].toString() != gpus.value(selected).pci && !offline)
     return;
   latest = o;
+  if(gameFramePlot) gameFramePlot->setSamples(o["frameTimes"].toArray());
   helperInfo->setText(
       offline ? "Visualização offline: ajustes indisponíveis"
+      : o["wslReadOnly"].toBool() ? "WSL: sensores reais via NVML; ajustes disponíveis somente em Linux nativo"
       : !trustedHelper()
           ? "Ajustes bloqueados: helper não instalado ou permissões inadequadas; consulte README"
       : !o["temp"].isDouble() ? "Ajustes bloqueados: temperatura confiável indisponível"
                               : "Helper de clocks instalado · autenticação do sistema exigida · "
-                                "tensão e power limit bloqueados");
+                                "ajustes conforme suporte do driver");
+  refreshTuningControls(o);
   if (values.contains("fanRpm")) {
     bool hwmon = false;
     for (auto fan : o["fans"].toArray())
@@ -570,6 +578,7 @@ void MainWindow::updateSnapshot(QJsonObject o) {
                              "do dispositivo inteiro");
   int row = 0;
   for (const auto &m : metricDefinitions()) {
+    processTable->setRowHidden(row,m.key.startsWith("fps")&&!overlayConfig.fields.contains(m.key));
     processTable->setItem(row, 0, new QTableWidgetItem(m.label));
     processTable->setItem(row++, 1, new QTableWidgetItem(displayMetric(o, m.key)));
   }
@@ -963,7 +972,7 @@ QWidget *MainWindow::monitor() {
   hudFrametime = new QCheckBox("Linha de frametime (ms, fonte CSV real)");
   hudFrametime->setChecked(overlayConfig.frametimeGraph);
   hudLogFile = new QLineEdit(overlayConfig.frametimeLog);
-  hudLogFile->setPlaceholderText("Log CSV ativo do jogo, com coluna frametime");
+  hudLogFile->setPlaceholderText("FPS e frametime: CSV ativo do jogo, com coluna frametime (ms)");
   auto *browseLog = new QPushButton("Selecionar CSV");
   form->addWidget(hudFrametime,7,0,1,4);
   form->addWidget(hudLogFile,8,0,1,3);
@@ -972,10 +981,12 @@ QWidget *MainWindow::monitor() {
     auto path=QFileDialog::getOpenFileName(this,"Log de frametime do jogo",QDir::homePath(),"CSV (*.csv)");
     if(!path.isEmpty())hudLogFile->setText(path);
   });
-  form->addWidget(label("Mudanças são aplicadas em tempo real. Frametime: selecione um CSV em gravação (MangoHud: log_interval=100). Sem fonte ativa, o gráfico aguarda dados."),9,0,1,4);
+  form->addWidget(label("Mudanças são aplicadas em tempo real. Os campos FPS selecionados aparecem no painel e no HUD. FPS/frametime: selecione um CSV em gravação. Média, máximo e 1% low usam até 240 amostras; low exige 100. Logs por intervalo não equivalem a dados por quadro. Sem fonte ativa, N/D."),9,0,1,4);
   auto *apply = new QPushButton("Aplicar formato e posição");
   form->addWidget(apply, 10, 0, 1, 4);
   l->addWidget(config);
+  gameFramePlot=new HistoryPlot; gameFramePlot->caption="Frametime do jogo (ms) · últimas 240 amostras CSV";
+  gameFramePlot->setMinimumHeight(150); l->addWidget(gameFramePlot);
   l->addWidget(label("X/Y são margens para cantos e deslocamentos para o centro. O HUD não "
                      "captura cliques. Alt+Q alterna sua visibilidade (X11). X11/XWayland é "
                      "necessário; fullscreen e composição dependem do ambiente."));
@@ -1026,6 +1037,8 @@ void MainWindow::saveOverlay() {
   for (const auto &m : metricDefinitions())
     if (hudFields[m.key]->isChecked())
       overlayConfig.fields << m.key;
+  int metricRow=0;
+  for(const auto &m:metricDefinitions()) {if(m.key.startsWith("fps"))processTable->setRowHidden(metricRow,!overlayConfig.fields.contains(m.key));++metricRow;}
   QString error;
   if (!offline && !saveJson(configRoot() + "/overlay.json", overlayConfig.json(), &error))
     notify("Configuração não salva", error);
@@ -1432,9 +1445,13 @@ bool MainWindow::checkInteractions() {
   hudFrametime->setChecked(true);
   hudFields["cpuUsage"]->setChecked(true);
   hudFields["cpuTemp"]->setChecked(true);
+  for(QString key:{"fps","fpsLow","fpsAvg","fpsMax"}) {if(!hudFields.contains(key))return false;hudFields[key]->setChecked(true);}
+  for(auto *input:tuningInputs)if(input->isEnabled())return false;
+  if(!trialButton->isHidden()||!stopTrial->isHidden()||!gameFramePlot)return false;
   QEventLoop loop;QTimer::singleShot(250,&loop,&QEventLoop::quit);loop.exec();
   disconnect(connection);
   if(packets!=1 || packet["width"].toInt()!=width || !packet["frametimeGraph"].toBool() || !packet["fields"].toArray().contains("cpuTemp")) return false;
+  for(QString key:{"fps","fpsLow","fpsAvg","fpsMax"})if(!packet["fields"].toArray().contains(key))return false;
   bool initiallyDisabled=false;
   QTimer::singleShot(0,this,[&]{
     auto *d=findChild<QDialog *>("overclockDisclaimer");

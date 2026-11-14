@@ -32,7 +32,8 @@ int main(int argc, char **argv) {
   if(hadTheme)qputenv("QT_QPA_PLATFORMTHEME",originalTheme);else qunsetenv("QT_QPA_PLATFORMTHEME");
   QCoreApplication::setOrganizationName("LinuxGPUControl");
   QCoreApplication::setApplicationName("LinuxGPUControl");
-  QCoreApplication::setApplicationVersion("0.6.1");
+  QGuiApplication::setDesktopFileName("gpu-pro");
+  QCoreApplication::setApplicationVersion("0.7.0");
   QCommandLineParser parser;
   parser.setApplicationDescription(
       "GPU-PRO — painel MultiGPU Linux");
@@ -42,6 +43,8 @@ int main(int argc, char **argv) {
   parser.addOption({"preview-scroll-bottom", "Rolar a página da prévia até o final"});
   parser.addOption({"render-branding-preview", "Exportar prévia dos ícones sem acessar GPU", "path"});
   parser.addOption({"branding-check", "Verificar transparência e cores dos ícones sem acessar GPU"});
+  parser.addOption({"start-maximized","Abrir a janela maximizada"});
+  parser.addOption({"capture-live","Capturar sensores reais em modo somente leitura e encerrar","path"});
   parser.addHelpOption();
   parser.addVersionOption();
   parser.addOption({"preview-offline", "Prévia visual com dados fictícios, sem acessar GPU"});
@@ -69,6 +72,7 @@ int main(int argc, char **argv) {
   if (parser.isSet("render-hud-preview"))
     return renderOverlayPreview(parser.value("render-hud-preview"), parser.value("hud-layout")) ? 0
                                                                                                 : 1;
+  if(parser.isSet("capture-live")&&(preview||parser.isSet("clock-check")||parser.isSet("benchmark-check")))return 2;
   if (parser.isSet("screenshot") && !preview)
     parser.showHelp(2);
   if ((parser.isSet("export-image") || parser.isSet("export-feedback")) &&
@@ -84,6 +88,16 @@ int main(int argc, char **argv) {
     const auto red=Branding::trayIcon(QColor("#ed1c24")).pixmap(32).toImage();
     const auto pulse=Branding::trayIcon(QColor("#76b900"),0).pixmap(32).toImage();
     if(green==red||green==pulse||qAlpha(green.pixel(0,0))!=0)return 8;
+    for(int size:{16,24,32,64,128}) {
+      const auto windowGreen=Branding::windowIcon(QColor("#76b900")).pixmap(size).toImage();
+      const auto windowRed=Branding::windowIcon(QColor("#ed1c24")).pixmap(size).toImage();
+      const auto windowBlue=Branding::windowIcon(QColor("#168ce8")).pixmap(size).toImage();
+      if(windowGreen.isNull()||windowGreen!=windowRed||windowGreen!=windowBlue)return 8;
+      for(int x=0;x<windowGreen.width();++x)
+        if(qAlpha(windowGreen.pixel(x,0))||qAlpha(windowGreen.pixel(x,windowGreen.height()-1)))return 8;
+      for(int y=0;y<windowGreen.height();++y)
+        if(qAlpha(windowGreen.pixel(0,y))||qAlpha(windowGreen.pixel(windowGreen.width()-1,y)))return 8;
+    }
     return 0;
   }
   std::unique_ptr<SingleInstance> instance;
@@ -117,7 +131,13 @@ int main(int argc, char **argv) {
     window.previewGpu(parser.value("preview-gpu").toInt());
     window.previewSubtab(parser.value("preview-subtab").toInt());
   }
-  window.show();
+  if(parser.isSet("start-maximized"))window.showMaximized();else window.show();
+  if(parser.isSet("capture-live")) {
+    QTimer::singleShot(2500,&app,[&]{
+      if(parser.value("preview-subtab").toInt()==1)window.showSpecsForCapture();
+      QTimer::singleShot(350,&app,[&]{app.exit(window.grab().save(parser.value("capture-live"))?0:3);});
+    });
+  }
   if (parser.isSet("tray-exit-check")) {
     window.hide();
     auto *quit = window.findChild<QAction *>("quitFromTray");

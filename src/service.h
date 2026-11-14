@@ -41,7 +41,7 @@ public slots:
   }
   void overlay(QJsonObject c) {
     auto next=OverlayConfig::fromJson(c);
-    if(next.frametimeLog!=config.frametimeLog || !next.frametimeGraph) {frameTimes={};lastFrame.invalidate();}
+    if(next.frametimeLog!=config.frametimeLog) {frameTimes={};lastFrame.invalidate();frameLog.reset();}
     config=next;
     publish();
   }
@@ -50,6 +50,7 @@ public slots:
     token = t;
   }
   void process(int p) {
+    if(pid!=p) {frameTimes={};lastFrame.invalidate();frameLog.reset();}
     pid = p;
     lastCpu = 0;
     cpuTime.invalidate();

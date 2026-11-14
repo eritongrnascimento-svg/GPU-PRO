@@ -247,6 +247,7 @@ QList<Gpu> GpuBackend::enumerate() {
     QString sys = QFileInfo(drm.filePath(card + "/device")).canonicalFilePath();
     if (sys.isEmpty())
       continue;
+    if(runningInWsl() && !QRegularExpression("^[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}[.][0-7]$").match(QFileInfo(sys).fileName()).hasMatch())continue;
     Gpu g;
     g.sys = sys;
     g.pci = QFileInfo(sys).fileName();
@@ -309,10 +310,26 @@ QList<Gpu> GpuBackend::enumerate() {
     }
     out << g;
   }
+  if(runningInWsl()) {
+    for(const auto &gpu:nv.wslDevices()) {
+      bool found=false;
+      for(auto &native:out)if(native.pci==gpu.pci){native=gpu;found=true;break;}
+      if(!found)out.append(gpu);
+    }
+  }
   return out;
 }
 QJsonObject GpuBackend::sample(const Gpu &g) {
   QJsonObject o = g.vendor == "NVIDIA" ? nv.metrics(g) : QJsonObject{};
+  if(g.specs["wslReadOnly"].toBool()) {
+    const auto s=nv.specs(nv.handle(g.pci));
+    for(auto key:{"powerLimit","powerMin","powerMax"})if(s.contains(key))o[key]=s[key];
+    o["pci"]=g.pci;o["name"]=g.name;o["accent"]=g.accent();
+    o["tuning"]=QJsonObject{};o["wslReadOnly"]=true;
+    o["hotspotStatus"]="Não exposto pela NVML no WSL";
+    o["timestamp"]=QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs);
+    return o;
+  }
   auto read = [&](QString key, QString p, double scale = 1) {
     if (auto n = readNumber(p))
       o[key] = *n / scale;
@@ -394,6 +411,12 @@ QJsonObject GpuBackend::sample(const Gpu &g) {
     for (auto it = c.begin(); it != c.end(); ++it)
       o[it.key()] = it.value();
   }
+  o["tuning"]=gpuTuningCaps(g,nv);
+  if(g.vendor=="AMD" && g.driver=="amdgpu")
+    for(const auto &name:QDir(g.sys+"/hwmon").entryList(QDir::Dirs|QDir::NoDotAndDotDot)) {
+      QString base=g.sys+"/hwmon/"+name+"/";
+      if(readText(base+"name")=="amdgpu") read("voltage",base+"in0_input");
+    }
   o["pci"] = g.pci;
   o["name"] = g.name;
   o["accent"] = g.accent();

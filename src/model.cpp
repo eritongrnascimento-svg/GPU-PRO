@@ -17,7 +17,12 @@ const QList<Metric> &metricDefinitions() {
                                   {"encoder", "Encoder", "%", 1},
                                   {"decoder", "Decoder", "%", 1},
                                   {"cpuUsage", "Uso CPU", "%", 1},
-                                  {"cpuTemp", "Temperatura CPU", "°C", 1}};
+                                  {"cpuTemp", "Temperatura CPU", "°C", 1},
+                                  {"voltage", "Tensão GPU", "mV", 1},
+                                  {"fps", "FPS atual (CSV)", "FPS", 1},
+                                  {"fpsLow", "1% low (amostras CSV)", "FPS", 1},
+                                  {"fpsAvg", "FPS médio (CSV)", "FPS", 1},
+                                  {"fpsMax", "FPS máximo (CSV)", "FPS", 1}};
   return d;
 }
 QString displayMetric(const QJsonObject &obj, const QString &key) {
@@ -25,7 +30,7 @@ QString displayMetric(const QJsonObject &obj, const QString &key) {
     if (m.key == key) {
       if (!obj.value(key).isDouble())
         return "N/D";
-      return QString::number(obj.value(key).toDouble() / m.divisor, 'f', key == "power" ? 1 : 0) +
+      return QString::number(obj.value(key).toDouble() / m.divisor, 'f', (key == "power" || key.startsWith("fps")) ? 1 : 0) +
              " " + m.unit;
     }
   return "N/D";

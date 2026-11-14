@@ -1,10 +1,10 @@
 # Ícones, bandeja e instância única
 
-## Identidade visual — 0.6.1
+## Identidade visual — 0.7.0
 
 O menu utiliza a arte fornecida para o GPU-PRO. O arquivo recebido com extensão `.svg` contém uma imagem WebP; a arte original é preservada em `assets/gpu-pro-original.webp`, convertida sem redesenho em PNG e incluída no SVG de empacotamento. Não é anunciada como um desenho vetorial puro.
 
-A janela utiliza essa mesma arte, removendo em memória apenas o fundo preto conectado ao exterior da imagem. Detalhes pretos fechados dentro do desenho são preservados. O contorno neon acompanha a GPU selecionada: verde NVIDIA, vermelho AMD e azul Intel. A mudança é feita na seleção da GPU; o ícone da janela não fica repintando a interface continuamente.
+O PNG e o SVG empacotado já contêm transparência no fundo preto conectado ao exterior; detalhes pretos fechados dentro do desenho são preservados. A janela e a barra de tarefas usam a mesma arte transparente, sem halo colorido ao redor nos temas NVIDIA, AMD e Intel. As cores dos demais elementos do painel continuam acompanhando a GPU selecionada.
 
 A bandeja utiliza o monograma **GP**, com núcleo legível e halo pulsante suave, aproximadamente cinco quadros por segundo. Os quadros são pré-calculados, sem coleta adicional de sensores e sem piscar entre ligado/desligado. A animação pausa enquanto o menu da bandeja está aberto. **Animar neon do ícone GP**, no menu da bandeja, permite desativá-la; a escolha é salva. Essa preferência é independente da animação dos cards.
 
@@ -12,7 +12,7 @@ O ícone da janela também é disponibilizado ao sistema para a barra de tarefas
 
 ## Ícone antigo no menu
 
-O arquivo `.desktop` mantém sua identidade `gpu-pro`, mas passa a usar o nome de ícone específico `gpu-pro-brand-v061`, evitando reutilizar a entrada visual antiga ou uma substituição genérica do tema. O DEB atualiza os caches compartilhados de ícones e aplicativos quando essas ferramentas estão disponíveis. A sessão pode precisar reler o menu após a instalação; atalhos fixados antigos podem precisar ser removidos e fixados novamente.
+O arquivo `.desktop` mantém sua identidade `gpu-pro`, mas passa a usar o nome de ícone específico `gpu-pro-transparent-v2`, evitando reutilizar a entrada visual antiga ou uma substituição genérica do tema. O DEB atualiza os caches compartilhados de ícones e aplicativos quando essas ferramentas estão disponíveis. A sessão pode precisar reler o menu após a instalação; atalhos fixados antigos podem precisar ser removidos e fixados novamente.
 
 AppImages e instalações portáteis podem depender da integração de atalhos escolhida pelo usuário. O aplicativo não sobrescreve arquivos pessoais de menu para apontar para outra instalação. Atualizar um AppImage não garante substituir um ícone que uma ferramenta externa tenha copiado anteriormente para a pasta pessoal.
 

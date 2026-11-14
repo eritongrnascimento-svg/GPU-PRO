@@ -240,6 +240,10 @@ void MainWindow::setTesting(bool active) {
     trialButton->setEnabled(!active && !offline && helperReady() &&
                             gpus.value(selected).vendor == "NVIDIA");
   if (active) {
+    for (auto *input : tuningInputs) input->setEnabled(false);
+    for (auto *button : tuningButtons) button->setEnabled(false);
+    if (automaticFans) automaticFans->setEnabled(false);
+    if (restoreTuningButton) restoreTuningButton->setEnabled(false);
     telemetryHistory = {};
     applyCore->setEnabled(false);
     applyMem->setEnabled(false);
@@ -657,28 +661,20 @@ QImage MainWindow::renderReport(QString kind, const QJsonObject &r) {
   p.drawText(QRect(45, 880, 1510, 80), Qt::TextWordWrap,
              "Pontuação própria. Compare método, API, preset e cobertura equivalentes. Resultado "
              "de teste não garante estabilidade prolongada. Tensão e limite de potência não são "
-             "alterados por esta versão.");
+             "alterados pelos benchmarks.");
   p.end();
   return image;
 }
 QWidget *MainWindow::energy() {
-  auto *root = page("Overclock · somente clocks");
+  auto *root = page("Overclock · ajustes manuais");
   auto *l = qobject_cast<QVBoxLayout *>(root->layout());
-  l->addWidget(text("Tensão e limite de potência: somente leitura. O executável privilegiado "
-                    "recusa operações para alterar esses parâmetros.",
+  l->addWidget(text("Ajustes manuais conforme as capacidades reais da GPU e do driver. "
+                    "Consumo é uma leitura; power limit é o limite de potência. Undervolt reduz a tensão.",
                     15));
   helperInfo = text("Consultando capacidades e helper de clocks");
   l->addWidget(helperInfo);
   clockInfo = text("Nenhuma alteração aplicada nesta sessão.");
   l->addWidget(clockInfo);
-  clockPresets = new QComboBox;
-  clockPresets->addItem("Original desta sessão");
-  clockPresets->addItem("Candidato curto +15 MHz no core (NVIDIA; ainda não validado)");
-  auto *load = new QPushButton("Carregar candidato nas barras");
-  auto *presets = new QHBoxLayout;
-  presets->addWidget(clockPresets, 1);
-  presets->addWidget(load);
-  l->addLayout(presets);
   auto *card = new QGroupBox("Clocks da GPU selecionada");
   auto *cl = new QVBoxLayout(card);
   coreOffset = new QSlider(Qt::Horizontal);
@@ -738,6 +734,8 @@ QWidget *MainWindow::energy() {
     });
     auto *apply = domain == "core" ? applyCore : applyMem;
     connect(apply, &QPushButton::clicked, this, [this, domain, slider, entry] {
+      bool valid=false;int typed=entry->text().toInt(&valid);
+      if(valid&&entry->hasAcceptableInput())slider->setValue(typed);
       if (!entry->hasAcceptableInput()) {
         notify("Informe uma frequência dentro da faixa mostrada");
         return;
@@ -759,27 +757,13 @@ QWidget *MainWindow::energy() {
                                     domain, QString::number(slider->value())});
     });
   }
-  connect(load, &QPushButton::clicked, this, [this] {
-    auto current = sessionClocks.value(deviceKey(gpus.value(selected)));
-    if (current.isEmpty())
-      return;
-    auto candidate = clockPresets->currentData().toJsonObject();
-    if (!candidate.isEmpty()) {
-      coreOffset->setValue(candidate["coreTested"].toInt());
-      memOffset->setValue(candidate["memoryBefore"].toInt());
-      return;
-    }
-    coreOffset->setValue(
-        current["coreCurrent"].toInt() +
-        (clockPresets->currentIndex() == 1 && gpus.value(selected).vendor == "NVIDIA" ? 15 : 0));
-    memOffset->setValue(current["memCurrent"].toInt());
-  });
-  trialButton = new QPushButton("Validar candidato: baseline → core +15 MHz → restaurar");
+  buildTuningControls(l);
+  trialButton = new QPushButton("Validar candidato: baseline → core +15 MHz → restaurar",root);
   trialButton->setEnabled(false);
-  l->addWidget(trialButton);
-  stopTrial = new QPushButton("Interromper teste e restaurar clock");
+  trialButton->hide(); // Legacy diagnostic remains CLI-only; manual controls in this page.
+  stopTrial = new QPushButton("Interromper teste e restaurar clock",root);
   stopTrial->setEnabled(false);
-  l->addWidget(stopTrial);
+  stopTrial->hide();
   connect(stopTrial, &QPushButton::clicked, this, [this] {
     if (!trialActive)
       return;
@@ -793,12 +777,6 @@ QWidget *MainWindow::energy() {
       graphicsProcess.kill();
   });
   connect(trialButton, &QPushButton::clicked, this, &MainWindow::startClockTrial);
-  l->addWidget(
-      text("Teste curto NVIDIA: duas cargas Vulkan 720p de 6 s medidos, telemetria independente no "
-           "helper, incremento máximo de 15 MHz, parada a 75 °C e restauração em até 20 s após "
-           "aplicar. Não é certificação de estabilidade. AMD/Intel: testes padrão e ajustes "
-           "manuais conforme suporte; sem copiar offsets de outra arquitetura. Nenhum perfil "
-           "genérico é rotulado como homologado pelo fabricante."));
   l->addStretch();
   return root;
 }
@@ -876,7 +854,6 @@ void MainWindow::finishClockTrial() {
                                 : "Restauração não confirmada: verifique a GPU antes de continuar");
 
   refreshFeedback();
-  refreshClockPresets();
   if (!clockCheckFile.isEmpty()) {
     QString error;
     bool saved = saveJson(clockCheckFile, r, &error);
@@ -886,26 +863,6 @@ void MainWindow::finishClockTrial() {
   }
 }
 
-void MainWindow::refreshClockPresets() {
-  if (!clockPresets || !repository)
-    return;
-  QSignalBlocker block(clockPresets);
-  clockPresets->clear();
-  clockPresets->addItem("Original desta sessão");
-  clockPresets->addItem("Candidato curto +15 MHz no core (NVIDIA; ainda não validado)");
-  auto gpu = gpus.value(selected);
-  for (auto v : repository->recent("clock-trial", deviceKey(gpu))) {
-    auto r = v.toObject();
-    auto recorded = r["gpu"].toObject();
-    if (r["valid"].toBool() && r["restored"].toBool() &&
-        recorded["driverVersion"] == gpu.specs["driverVersion"] &&
-        recorded["vbios"] == gpu.specs["vbios"])
-      clockPresets->addItem(QString("Teste curto local · core %1 MHz · %2")
-                                .arg(r["coreTested"].toInt())
-                                .arg(r["timestamp"].toString()),
-                            r);
-  }
-}
 
 void MainWindow::clockCheck(QString path) {
   if (offline)

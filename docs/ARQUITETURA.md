@@ -12,7 +12,7 @@ TelemetryService em QThread → sinais Qt → painel Widgets
 Painel → gpu-bench-worker (usuário) → Vulkan / OpenGL offscreen
        → FFmpeg assíncrono (usuário) → suíte de codecs
        → SQLite (local) → feedback JSON revisado, sem rede
-       → pkexec → gpu-clock-helper (root, somente clocks)
+       → pkexec → gpu-clock-helper (root, operações manuais validadas)
                       └── watchdog independente / restauração no teste curto
 ```
 
@@ -25,6 +25,8 @@ O publicador usa timer de 250 ms; sensores são lidos aproximadamente a cada seg
 Controles são agrupados por debounce de 120 ms e enviados ao serviço sem reiniciar o processo GTK. Frametime usa leitura incremental limitada de CSV com coluna `frametime`; amostras ausentes/antigas não são substituídas por temporização da telemetria. Consulte [OVERLAY.md](OVERLAY.md).
 
 Formato lista/compacto/colunas, largura/fonte/fundo/campos e posicionamento salvos. Âncoras: quatro cantos, superior centralizado, centro ou coordenadas; o cálculo considera monitores com coordenadas negativas e limita a janela à sua área. Índices de monitor podem diferir entre Qt/Wayland e GTK/XWayland; exigem conferência na sessão real.
+
+O helper preserva o nome histórico e também oferece power limit, offset de tensão AMD e ventoinhas quando reconhecidos. Limites são consultados no processo privilegiado; interfaces não reconhecidas são recusadas. O watchdog continua exclusivo do diagnóstico curto; ajustes manuais não são aplicados automaticamente nem possuem esse watchdog. Veja [Controles manuais](CONTROLES-MANUAIS.md).
 
 ## GPU e sensores
 

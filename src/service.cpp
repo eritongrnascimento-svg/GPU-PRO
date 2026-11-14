@@ -16,6 +16,7 @@ void TelemetryService::stop() {
   backend.reset();
 }
 void TelemetryService::publish() {
+  if(!backend)return;
   if (tick++ % 4 == 0) {
     current = selected >= 0 && selected < gpus.size()
                   ? backend->sample(gpus[selected])
@@ -46,10 +47,10 @@ void TelemetryService::publish() {
       lastCpu = 0;
       cpuTime.invalidate();
     }
-    emit snapshot(current);
   }
-  if(config.frametimeGraph) {
+  if(!config.frametimeLog.isEmpty()) {
     const auto incoming=frameLog.poll(config.frametimeLog);
+    if(frameLog.resetDetected) {frameTimes={};lastFrame.invalidate();}
     const qint64 age=QFileInfo(config.frametimeLog).lastModified().msecsTo(QDateTime::currentDateTime());
     if(!incoming.isEmpty() && age>=0 && age<=3000) {
       for(auto v:incoming) {frameTimes.append(v);if(frameTimes.size()>240)frameTimes.removeFirst();}
@@ -57,6 +58,11 @@ void TelemetryService::publish() {
     }
     if(!lastFrame.isValid() || lastFrame.elapsed()>3000) frameTimes={};
   }
+  for(auto key:{"fps","fpsLow","fpsAvg","fpsMax"}) current.remove(key);
+  const auto fps=frameMetrics(frameTimes);
+  for(auto it=fps.begin();it!=fps.end();++it) current[it.key()]=it.value();
+  current["frameTimes"]=frameTimes;
+  emit snapshot(current);
   if (port > 0 && udp) {
     QJsonObject state = {
         {"version", 1}, {"token", token}, {"metrics", current}, {"config", config.json()}, {"frameTimes",frameTimes}};

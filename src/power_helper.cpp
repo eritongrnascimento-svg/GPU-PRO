@@ -1,4 +1,4 @@
-// Clock-only helper. There are no voltage or power-limit writes in this executable.
+// Linux helper: validated clocks, power, independent AMD voltage offset and fan controls.
 #include "gpu.h"
 #include <cerrno>
 #include <csignal>
@@ -23,10 +23,13 @@ int main(int argc, char **argv) {
       !QRegularExpression("^[0-9a-f]{4}:[0-9a-f]{2}:[0-9a-f]{2}\\.[0-7]$")
            .match(args[1])
            .hasMatch())
-    return fail("Esperado: PCI core|mem|trial-core MHz [PID]");
+    return fail("Esperado: PCI core|mem|trial-core|power|voltageOffset|fanN|fans-auto valor [PID]");
+  if(runningInWsl())return fail("WSL oferece somente leitura; ajustes exigem Linux nativo compatível");
   QString domain = args[2];
-  if (domain != "core" && domain != "mem" && domain != "trial-core")
-    return fail("Operação proibida: somente clocks. Tensão e potência bloqueadas.");
+  bool tuning=domain=="power"||domain=="voltageOffset"||domain=="fans-auto"||QRegularExpression("^fan(?:[0-9]|1[0-5])$").match(domain).hasMatch();
+  if (domain != "core" && domain != "mem" && domain != "trial-core" && !tuning)
+    return fail("Operação não reconhecida");
+  if((domain=="trial-core")!=(args.size()==5))return fail("Argumentos inválidos para a operação");
   if (geteuid() != 0)
     return fail("Autorize o helper de clocks pelo pkexec do sistema");
   bool ok = false;
@@ -49,6 +52,20 @@ int main(int argc, char **argv) {
     return fail("Outro ajuste está em andamento nesta GPU");
   Nvml nv;
   QString error;
+  if(tuning) {
+    if(domain=="fans-auto") {
+      if(value!=-1)return fail("Restauração automática exige -1");
+      auto caps=gpuTuningCaps(gpu,nv);bool found=false,all=true;QStringList failures;
+      for(auto it=caps.begin();it!=caps.end();++it)if(it.key().startsWith("fan")) {found=true;if(!setGpuTuning(gpu,nv,it.key(),-1,error)){all=false;failures<<it.key()+": "+error;}}
+      if(!found||!all)return fail("Retorno automático não confirmado: "+failures.join("; "));
+    } else {
+      auto sample=backend.sample(gpu);
+      if(!sample["temp"].isDouble()||sample["temp"].toDouble()>=80)return fail("Temperatura ausente ou >=80 °C; ajuste recusado");
+      if(!setGpuTuning(gpu,nv,domain,value,error))return fail(error);
+    }
+    message("APPLIED",{{"domain",domain},{"value",value},{"voltageWritten",domain=="voltageOffset"},{"powerLimitWritten",domain=="power"}});
+    return 0;
+  }
   if (domain != "trial-core") {
     bool applied = gpu.vendor == "NVIDIA" ? nv.setOffset(gpu.pci, domain, value, error)
                                           : setSysfsClock(gpu, domain, value, error);

@@ -20,12 +20,12 @@ A restauração passa novamente pelo resolvedor e pelo gerenciador nativo. Módu
 
 Nos backends que registram referências de versões, a versão anterior precisa continuar disponível no repositório e passar na simulação; uma referência não é um arquivo de backup nem uma garantia de disponibilidade futura. Atualizar o driver carregado pode exigir reinicialização. Não são usados instaladores `.run` de fabricantes ou repositórios adicionados sem solicitação.
 
-## Atualizar DEB e AppImage pelo painel
+## Atualizar o aplicativo
 
 **Verificar atualizações** consulta a release oficial. **Baixar, salvar backup e instalar atualização** baixa o formato correspondente e confere seu SHA-256.
 
 - **AppImage:** exige arquivo normal em pasta gravável pelo usuário. Salva uma cópia integral e substitui o arquivo no mesmo caminho; a execução atual termina com a versão carregada anteriormente. Reinicie pelo painel. Restaurar último backup repõe o arquivo anterior.
-- **DEB em sistema APT:** valida nome `gpu-pro`, arquitetura e versão do pacote, preserva o DEB oficial da versão atual e mostra a simulação APT. A instalação é feita no gerenciador nativo com autenticação. Se não conseguir preservar a versão anterior ou se a execução não corresponder ao pacote instalado, não prossegue. Reinicie antes de uma nova operação. O backup pode ser reinstalado pelo painel ou manualmente pelo APT.
+- **DEB:** o botão **Baixar no GitHub** abre as releases oficiais para baixar o pacote. Instale-o pelo gerenciador de pacotes do sistema. A interface não inicia o download/backup/instalação interna de DEB nesta revisão; a rotina anterior permanece no código para auditoria e testes.
 - **Pacote convertido para outro gerenciador:** não recebe transação APT forçada. Use seu gerenciador ou o AppImage oficial.
 - **TAR/RUN:** preservam o atualizador de pasta com backup/restauração existente. Builds locais continuam sendo recompilados.
 

@@ -161,7 +161,17 @@ QIcon build(QColor c, qreal pulse, bool compact) {
   return icon;
 }
 } // namespace
-QIcon Branding::windowIcon(QColor accent) { return build(accent, .8, false); }
+QIcon Branding::windowIcon(QColor) {
+  QIcon icon;const auto art=transparentArtwork();
+  for(int size:{16,22,24,32,48,64,128,256}) {
+    QImage canvas(size,size,QImage::Format_ARGB32_Premultiplied);canvas.fill(Qt::transparent);
+    QPainter p(&canvas);p.setRenderHint(QPainter::SmoothPixmapTransform);
+    QSize fit=art.size();fit.scale(qRound(size*.90),qRound(size*.90),Qt::KeepAspectRatio);
+    p.drawImage(QRect(QPoint((size-fit.width())/2,(size-fit.height())/2),fit),art);p.end();
+    icon.addPixmap(QPixmap::fromImage(canvas));
+  }
+  return icon;
+}
 QIcon Branding::trayIcon(QColor accent, qreal pulse) {
   return build(accent, qBound(0., pulse, 1.), true);
 }
@@ -177,7 +187,7 @@ bool Branding::writePreview(const QString &path) {
   for (auto c : {QColor("#76b900"), QColor("#ed1c24"), QColor("#168ce8")}) {
     int x = 25 + i * 350;
     p.drawText(x, 30, QStringList{"NVIDIA", "AMD", "Intel"}[i]);
-    p.drawImage(x, 48, compose(180, c, .8, false));
+    p.drawPixmap(x, 48, Branding::windowIcon(c).pixmap(180));
     p.drawImage(x + 185, 70, compose(100, c, .8, true));
     p.drawText(x, 265, "Janela / barra de tarefas");
     p.drawText(x, 293, "Bandeja: GP / halo animado");
