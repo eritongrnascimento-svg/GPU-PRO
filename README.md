@@ -1,8 +1,8 @@
 # GPU-PRO — 0.7.0
 
-[![Versões anteriores](https://img.shields.io/badge/Downloads-Vers%C3%B5es_anteriores-blue?style=for-the-badge)](https://github.com/eritongrnascimento-svg/GPU-PRO/releases)
+[![Versões anteriores](https://img.shields.io/badge/Downloads-Vers%C3%B5es_anteriores-blue?style=for-the-badge)](https://github.com/eritongrnascimento-svg/GPU-PRO/blob/main/docs/VERSOES-ANTERIORES.md)
 
-Escolha a versão desejada e abra **Assets** para baixar os pacotes anteriores.
+Veja os pacotes antigos organizados por versão e clique diretamente no formato desejado.
 
 
 **Titular: Ériton do Nascimento** · [Instalação](docs/INSTALACAO.md) · [Contribuir](CONTRIBUTING.md) · [Licença source available](LICENSE)

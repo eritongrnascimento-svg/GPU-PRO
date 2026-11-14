@@ -24,7 +24,7 @@ QWidget *MainWindow::updatesPage() {
   auto *releases = new QPushButton("Baixar no GitHub"); downloadRow->addWidget(releases);
   auto *previousReleases = new QPushButton("Versões anteriores");
   previousReleases->setObjectName("previousReleasesButton");
-  previousReleases->setToolTip("Abre todas as releases. Escolha a versão e expanda Assets para baixar os pacotes.");
+  previousReleases->setToolTip("Lista os pacotes antigos por versão, com links diretos para download.");
   downloadRow->addWidget(previousReleases); layout->addLayout(downloadRow);
   auto *restart = new QPushButton("Reiniciar GPU-PRO"); layout->addWidget(restart);
   restart->setEnabled(false);
@@ -125,7 +125,7 @@ QWidget *MainWindow::updatesPage() {
     state->setText(ok ? "Backup restaurado. Reinicie o GPU-PRO." : error); restart->setEnabled(ok);
   });
   connect(releases, &QPushButton::clicked, this, [] { QDesktopServices::openUrl(QUrl("https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest")); });
-  connect(previousReleases, &QPushButton::clicked, this, [] { QDesktopServices::openUrl(QUrl("https://github.com/eritongrnascimento-svg/GPU-PRO/releases")); });
+  connect(previousReleases, &QPushButton::clicked, this, [] { QDesktopServices::openUrl(QUrl("https://github.com/eritongrnascimento-svg/GPU-PRO/blob/main/docs/VERSOES-ANTERIORES.md")); });
   connect(manager,&UpdateManager::managedPackageReady,this,[this,manager,state,restart](QString package,QString version,bool restoring){
     if(offline||driverBusy||testActive||nativePackageManager()!="apt")return;
     auto *simulation=new QProcess(this);simulation->setProcessEnvironment(nativeEnvironment());
