@@ -220,6 +220,7 @@ QWidget *MainWindow::bottleneckPage() {
 }
 void MainWindow::setTesting(bool active) {
   testActive = active;
+  if(cpuBenchStart)cpuBenchStart->setEnabled(!active&&!offline);
   gpuSelect->setEnabled(!active);
   if (bottleneckResolution) bottleneckResolution->setEnabled(!active);
   if (graphicsApi) {
@@ -454,7 +455,9 @@ void MainWindow::presentRecord(QString kind, const QJsonObject &r) {
         << QString("CPU: %1 ms · GPU: %2 ms · limite CPU: %3% da capacidade GPU; limite GPU: %4% da capacidade CPU.")
           .arg(r["highCpuMs"].toDouble(),0,'f',2).arg(r["highGpuMs"].toDouble(),0,'f',2)
           .arg(r["cpuLossPct"].toDouble(),0,'f',1).arg(r["gpuLossPct"].toDouble(),0,'f',1)
-        << "Estimativa com sobreposição ideal; não representa perda real de FPS em um jogo.";
+        << QString("GPU limitada pela CPU: %1 FPS estimados abaixo do potencial da GPU (%2 FPS). CPU limitada pela GPU: %3 FPS estimados abaixo do potencial de entrega da CPU (%4 FPS).")
+          .arg(r["gpuLostFps"].toDouble(),0,'f',1).arg(r["gpuPotentialFps"].toDouble(),0,'f',1).arg(r["cpuLostFps"].toDouble(),0,'f',1).arg(r["cpuPotentialFps"].toDouble(),0,'f',1)
+        << QString("FPS previstos desta carga: %1. É um modelo sintético de sobreposição ideal, não uma perda medida em qualquer jogo.").arg(r["modelFps"].toDouble(),0,'f',1);
     } else lines << r["classification"].toString()
         << QString("Registro anterior: GPU 720p / 1440p %1 / %2 ms · CPU %3 ms")
           .arg(r["lowGpuMs"].toDouble(),0,'f',2).arg(r["highGpuMs"].toDouble(),0,'f',2).arg(r["highCpuMs"].toDouble(),0,'f',2);

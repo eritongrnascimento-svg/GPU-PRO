@@ -12,3 +12,11 @@ SHA256SUMS.txt
 
 __pycache__/
 *.pyc
+
+# Windows: saídas de compilação
+/windows/build-*/
+/windows/**/bin/
+/windows/**/obj/
+/*.obj
+/*.lib
+/*.exp

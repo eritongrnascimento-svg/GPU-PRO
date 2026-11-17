@@ -11,7 +11,7 @@ QJsonObject publicGpu(const Gpu &g) {
   return o;
 }
 namespace {
-const QSet<QString> fields = {"id",
+const QSet<QString> fields = {"id", "platform", "gpuLossFromCpuPct", "cpuLossFromGpuPct", "gpuLostFps", "cpuLostFps",
                               "kind",
                               "valid",
                               "partial",

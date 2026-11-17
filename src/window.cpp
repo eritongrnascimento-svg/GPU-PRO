@@ -174,14 +174,16 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   });
   pages->addWidget(scrollPage(lp));
   pages->addWidget(scrollPage(updatesPage()));
+  pages->addWidget(scrollPage(cpuPage()));
   QStringList names = {
       "GPU · Monitor e especificações", "Configurações 3D & Filtros", "GamerMonitor & Overlay",
       "Monitores & Telas", "Overclock · Manual", "Benchmark",
-      "Feedback & Diagnóstico", "Central de Notificações", "Logs de operações", "Atualizações"};
+      "Feedback & Diagnóstico", "Central de Notificações", "Logs de operações", "Atualizações", "CPU · Monitor e cálculos"};
   for (int i = 0; i < names.size(); ++i) {
     auto *b = button(names[i], sb);
     b->setObjectName("nav");
     navigation << b;
+    if(i==10){sb->removeWidget(b);sb->insertWidget(sb->indexOf(navigation[0])+1,b);}
     connect(b, &QPushButton::clicked, this, [this, i] {
       if(i==4 && !confirmOverclock()) return;
       pages->setCurrentIndex(i);
@@ -538,6 +540,7 @@ void MainWindow::updateSnapshot(QJsonObject o) {
   if (!gpus.isEmpty() && o["pci"].toString() != gpus.value(selected).pci && !offline)
     return;
   latest = o;
+  updateCpu(o);
   if(gameFramePlot) gameFramePlot->setSamples(o["frameTimes"].toArray());
   helperInfo->setText(
       offline ? "Visualização offline: ajustes indisponíveis"
@@ -1348,7 +1351,7 @@ void MainWindow::previewScrollBottom() {
 bool MainWindow::checkInterface() {
   for (auto file : {":/assets/gpu-pro.png", ":/LICENSE", ":/NOTICE", ":/docs/licenses/LGPL-3.0.txt", ":/docs/licenses/GPL-3.0.txt"})
     if (!QFileInfo::exists(file)) return false;
-  if (!offline || pages->count() != 10 || navigation.size() != 10 || gpuTabs->count() != 2 || benchmarkTabs->count() != 4) return false;
+  if (!offline || pages->count() != 11 || navigation.size() != 11 || gpuTabs->count() != 2 || benchmarkTabs->count() != 4) return false;
   resize(980, 700); pages->setCurrentIndex(2); QApplication::processEvents();
   auto *scroll = qobject_cast<QScrollArea *>(pages->currentWidget());
   if (!scroll || scroll->verticalScrollBar()->maximum() <= 0) return false;

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup>
+<OutputType>WinExe</OutputType><TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion><RootNamespace>GpuPro.Windows</RootNamespace>
+<Platforms>x64</Platforms><PlatformTarget>x64</PlatformTarget><RuntimeIdentifier>win-x64</RuntimeIdentifier>
+<UseWinUI>true</UseWinUI><WindowsPackageType>None</WindowsPackageType><WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+<!-- Sem isto o publish não sem pacote MSIX omite GpuPro.WinUI.pri, App.xbf e MainWindow.xbf e a janela não abre. -->
+<EnableMsixTooling>true</EnableMsixTooling>
+<SelfContained>true</SelfContained><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
+<ApplicationManifest>app.manifest</ApplicationManifest><ApplicationIcon>Assets/gpu-pro.ico</ApplicationIcon>
+<AssemblyName>GPU-PRO</AssemblyName><Version>0.8.0</Version><Product>GPU-PRO</Product><Company>GPU-PRO</Company><Copyright>Ériton do Nascimento</Copyright>
+<NativeBuild>$(MSBuildThisFileDirectory)../build-workers/Release/</NativeBuild>
+</PropertyGroup><ItemGroup><PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" /></ItemGroup>
+<!-- Núcleo nativo, executores de teste e Qt gerados por CMake (windows/build-windows.ps1). -->
+<ItemGroup>
+<Content Include="$(NativeBuild)gpupro-native.dll;$(NativeBuild)gpu-*-worker.exe;$(NativeBuild)Qt6*.dll" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/>
+<Content Include="$(NativeBuild)platforms/*.dll;$(NativeBuild)imageformats/*.dll;$(NativeBuild)tls/*.dll;$(NativeBuild)networkinformation/*.dll;$(NativeBuild)generic/*.dll" Link="$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName('%(FullPath)'))))/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/>
+<Content Include="Assets/*" CopyToOutputDirectory="PreserveNewest"/>
+</ItemGroup>
+<Target Name="GpuProCopyXbf" AfterTargets="Publish"><Copy SourceFiles="$(ProjectDir)$(IntermediateOutputPath)App.xbf;$(ProjectDir)$(IntermediateOutputPath)MainWindow.xbf" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true"/></Target>
+</Project>

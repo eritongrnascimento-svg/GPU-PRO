@@ -11,7 +11,7 @@ sh "$project_dir/tools/package.sh" "$build_dir" "$output_dir"
 # Debian package uses system libraries; the helper remains a separately authenticated executable.
 debroot="$stage/deb"
 mkdir -p "$debroot/usr/lib/gpu-pro/bin" "$debroot/usr/libexec/gpu-pro" "$debroot/usr/bin" "$debroot/usr/share/applications" "$debroot/usr/share/icons/hicolor/scalable/apps" "$debroot/usr/share/doc/gpu-pro" "$debroot/DEBIAN"
-for binary in linux-gpu-control gpu-bench-worker gpu-video-worker gpu-diagnostics gpu-system-worker; do install -m755 "$build_dir/$binary" "$debroot/usr/lib/gpu-pro/bin/"; done
+for binary in linux-gpu-control gpu-bench-worker gpu-video-worker gpu-diagnostics gpu-system-worker gpu-cpu-worker; do install -m755 "$build_dir/$binary" "$debroot/usr/lib/gpu-pro/bin/"; done
 install -m755 "$build_dir/gpu-clock-helper" "$debroot/usr/libexec/gpu-pro/"
 printf '#!/bin/sh\nexec /usr/lib/gpu-pro/bin/linux-gpu-control "$@"\n' > "$debroot/usr/bin/gpu-pro"
 chmod 755 "$debroot/usr/bin/gpu-pro"
@@ -31,7 +31,7 @@ Priority: optional
 Architecture: amd64
 Maintainer: Ériton do Nascimento <eritongrnascimento-svg@users.noreply.github.com>
 Depends: $depends
-Recommends: ffmpeg, policykit-1, x-terminal-emulator
+Recommends: ffmpeg, pkexec, x-terminal-emulator
 Homepage: https://github.com/eritongrnascimento-svg/GPU-PRO
 Description: Monitoramento e benchmarks MultiGPU Linux
  Interface Qt para NVIDIA, AMD e Intel, overlay e ferramentas de benchmark.
@@ -57,7 +57,7 @@ sh "$output_dir/GPU-PRO-$version-linux-x86_64.run" --check
 python3 "$project_dir/tools/appimage-tools.py" "$stage/tools"
 appdir="$stage/GPU-PRO.AppDir"
 mkdir -p "$appdir/usr/bin" "$appdir/usr/share/applications" "$appdir/usr/share/icons/hicolor/scalable/apps" "$appdir/usr/share/doc/gpu-pro"
-for binary in linux-gpu-control gpu-bench-worker gpu-video-worker gpu-diagnostics gpu-clock-helper gpu-system-worker; do install -m755 "$build_dir/$binary" "$appdir/usr/bin/"; done
+for binary in linux-gpu-control gpu-bench-worker gpu-video-worker gpu-diagnostics gpu-clock-helper gpu-system-worker gpu-cpu-worker; do install -m755 "$build_dir/$binary" "$appdir/usr/bin/"; done
 cp "$project_dir/packaging/gpu-pro.desktop" "$appdir/usr/share/applications/"
 sed -i 's/^Exec=gpu-pro$/Exec=linux-gpu-control/' "$appdir/usr/share/applications/gpu-pro.desktop"
 cp "$project_dir/packaging/gpu-pro.svg" "$appdir/usr/share/icons/hicolor/scalable/apps/gpu-pro-transparent-v2.svg"

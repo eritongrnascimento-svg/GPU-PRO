@@ -5,7 +5,7 @@ void MainWindow::startNativeTransaction(QStringList command, std::function<void(
   if (offline || testActive || driverBusy || displayBusy ||
       clockProcess.state() != QProcess::NotRunning || command.isEmpty())
     return;
-  if (!QStringList{"/usr/bin/pacman", "/usr/bin/apt-get", "/usr/bin/dnf", "/usr/bin/pkcon"}
+  if (!QStringList{"/usr/bin/pacman", "/usr/bin/apt-get", "/usr/bin/dnf", "/usr/bin/pkcon", "/usr/bin/zypper"}
            .contains(command.first()))
     return;
   QString terminal;

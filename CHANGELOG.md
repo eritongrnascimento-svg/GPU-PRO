@@ -1,5 +1,19 @@
 # Alterações
 
+## 0.8.0 (Windows) — em preparação
+
+Primeira versão nativa para Windows (WinUI 3 + núcleo C++ compartilhado com o Linux). Pacote portátil ZIP; detalhes em `docs/WINDOWS.md`.
+
+- Nome GPU-PRO e ícone da barra de tarefas também na barra de título.
+- GPU: cards do monitor se ajustam à janela sem rolagem; ficha técnica no mesmo formato da versão Linux (DXGI, NVML e Vulkan associado pelo LUID: arquitetura, unidades, barramento, clocks máximos, limites de potência, PCIe atual/máximo, VBIOS, ventoinhas, ray tracing e Vulkan Video).
+- Correção: leituras de encoder, decoder, memória compartilhada e uso da GPU (AMD/Intel) pelos contadores do Windows não eram associadas à GPU por diferença de maiúsculas no identificador.
+- Configurações 3D & Filtros: recursos suportados (DXR, DirectX 12 Ultimate, mesh shaders, VRS, shader model, DLSS SR/RR/FG/MFG, NIS, FSR, XeSS); configurações 3D do driver NVIDIA no perfil global (override de DLSS, Image Scaling, V-Sync, quadros pré-renderizados, limite de FPS, energia, filtragem, VRR), com autorização do Windows e confirmação por leitura; Auto HDR, VRR, otimizações para jogos em janela, Modo de Jogo, agendamento de GPU por hardware e GPU por jogo.
+- GamerMonitor & Overlay: HUD com fundo translúcido e desfoque, no jogo ou na área de trabalho; escolha de cada leitura de FPS/frametime, GPU, CPU, memória e disco (leitura/escrita, tempo ativo e temperatura); formato lista, duas colunas ou faixa; cores de fonte, título e gráfico; largura, fonte, fundo, deslocamento, posição e monitor. Página compactada.
+- Monitores & Telas: resolução, frequência e orientação com confirmação de 15 s, escala, HDR, monitor principal, brilho/contraste por DDC/CI e perfil de cor dentro do app.
+- Benchmark de gargalo: resultado em linguagem direta — GPU, CPU e memória perdendo X% de desempenho; memória só perde quando a VRAM transborda para a RAM do sistema.
+- Notificações & Logs: aba única; nenhuma outra aba exibe logs. Log de operações com busca e filtro por categoria, cópia diária em `%LOCALAPPDATA%\GPU-PRO\logs`.
+- Empacotamento reproduzível: `windows/build-windows.ps1` (CMake, windeployqt, dotnet publish, runtime C++, testes, ZIP e SHA-256).
+
 ## 0.7.0 — 13/11/2026
 
 - Overclock sem presets: clocks manuais, power limit em W, offset independente de tensão/undervolt AMD e ventoinhas conforme suporte do driver. Nenhum ajuste é aplicado ao iniciar.

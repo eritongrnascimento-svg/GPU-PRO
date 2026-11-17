@@ -1,7 +1,10 @@
 #include "model.h"
+#include "gpupro_core.h"
 #include <algorithm>
 #include <cmath>
+#ifndef _WIN32
 #include <sys/stat.h>
+#endif
 const QList<Metric> &metricDefinitions() {
   static const QList<Metric> d = {{"usage", "Uso GPU", "%", 1},
                                   {"temp", "Temperatura", "°C", 1},
@@ -160,25 +163,31 @@ QJsonObject estimateBottleneck(const QJsonObject &baseline, const QJsonObject &t
   double cpu = mean(target,"cpuWorkMs"), gpu = mean(target,"gpuMeanMs"), lowCpu = mean(baseline,"cpuWorkMs"), lowGpu = mean(baseline,"gpuMeanMs");
   if (!baseline["valid"].toBool() || !target["valid"].toBool() || cpu <= 0 || gpu <= 0 || lowCpu <= 0 || lowGpu <= 0)
     return {{"kind","bottleneck"},{"valid",false},{"error","Tempos CPU/GPU insuficientes para estimar o gargalo"}};
-  double limit = qMax(cpu,gpu), cpuLoss = 100. * (1. - gpu / limit), gpuLoss = 100. * (1. - cpu / limit);
+  const auto balance=gpp_balance(cpu,gpu);
+  double limit=qMax(cpu,gpu),cpuLoss=balance.gpuLossFromCpuPct,gpuLoss=balance.cpuLossFromGpuPct;
   QString classification = cpuLoss > 15 ? "CPU predominante" : gpuLoss > 15 ? "GPU predominante" : "Carga equilibrada";
   QString summary = QString("%1 em %2×%3: limite estimado de CPU %4% e GPU %5%. Modelo da carga sintética.")
     .arg(classification).arg(target["width"].toInt()).arg(target["height"].toInt()).arg(cpuLoss,0,'f',1).arg(gpuLoss,0,'f',1);
   return {{"kind","bottleneck"},{"valid",true},{"method","resolution-cpu-balance-v3"},{"classification",classification},
     {"confidence","limited-synthetic"},{"lossModel","ideal-overlap-max-cpu-gpu"},{"summary",summary},
     {"width",target["width"]},{"height",target["height"]},{"cpuLossPct",cpuLoss},{"gpuLossPct",gpuLoss},
-    {"gpuPotentialFps",1000./gpu},{"cpuPotentialFps",1000./cpu},{"modelFps",1000./limit},
+    {"gpuLossFromCpuPct",balance.gpuLossFromCpuPct},{"cpuLossFromGpuPct",balance.cpuLossFromGpuPct},
+    {"gpuLostFps",balance.gpuLostFps},{"cpuLostFps",balance.cpuLostFps},{"gpuPotentialFps",1000./gpu},{"cpuPotentialFps",1000./cpu},{"modelFps",1000./limit},
     {"highGpuMs",gpu},{"highCpuMs",cpu},{"lowGpuMs",lowGpu},{"lowCpuMs",lowCpu},{"resolutionGain",gpu/lowGpu},
     {"comparison",QJsonArray{baseline,target}}};
 }
 
 bool rootHelperTrusted(const QString &path) {
+#ifdef _WIN32
+  Q_UNUSED(path);return false;
+#else
   for (QString current = path; current != "/"; current = QFileInfo(current).absolutePath()) {
     struct stat data{};
     if (lstat(QFile::encodeName(current).constData(), &data) || data.st_uid != 0 ||
         (data.st_mode & (S_IWGRP | S_IWOTH)) || S_ISLNK(data.st_mode)) return false;
   }
   return QFileInfo(path).isExecutable();
+#endif
 }
 QString installedClockHelper() {
   for (const auto &path : {QString("/usr/libexec/gpu-pro/gpu-clock-helper"), QString("/usr/local/libexec/linux-gpu-control/gpu-clock-helper")})

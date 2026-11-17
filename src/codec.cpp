@@ -1,17 +1,32 @@
 #include "codec.h"
+#ifdef _WIN32
+#include "windows_devices.h"
+QProcessEnvironment nativeEnvironment(){return QProcessEnvironment::systemEnvironment();}
+#else
 #include "driver_packages.h"
+#endif
 namespace {
 int cudaOrdinal(const QString &pci) {
-  QLibrary cuda("libcuda.so.1");
+  QLibrary cuda(
+#ifdef _WIN32
+    "nvcuda.dll"
+#else
+    "libcuda.so.1"
+#endif
+  );
   if (!cuda.load())
     return -1;
   auto init = reinterpret_cast<int (*)(unsigned)>(cuda.resolve("cuInit"));
+#ifdef _WIN32
+  auto count=reinterpret_cast<int(*)(int*)>(cuda.resolve("cuDeviceGetCount"));auto luid=reinterpret_cast<int(*)(char*,unsigned*,int)>(cuda.resolve("cuDeviceGetLuid"));int n=0;if(!init||!count||!luid||init(0)!=0||count(&n)!=0)return -1;for(int i=0;i<n;i++){LUID id{};unsigned mask=0;if(luid(reinterpret_cast<char*>(&id),&mask,i)==0&&WinDevices::luid(id)==pci.toStdString())return i;}return -1;
+#else
   auto byPci =
       reinterpret_cast<int (*)(int *, const char *)>(cuda.resolve("cuDeviceGetByPCIBusId"));
   int id = -1;
   if (!init || !byPci || init(0) != 0 || byPci(&id, pci.toLatin1().constData()) != 0)
     return -1;
   return id;
+#endif
 }
 } // namespace
 CodecRunner::CodecRunner(QObject *p) : QObject(p) {
@@ -84,7 +99,11 @@ void CodecRunner::start(const Gpu &g, QString c, QString m) {
     fail("FFmpeg não instalado");
     return;
   }
-  if (g.vendor != "NVIDIA" && g.render.isEmpty()) {
+  if (g.vendor != "NVIDIA" && g.render.isEmpty()
+#ifdef _WIN32
+      && g.vendor!="AMD" && g.vendor!="Intel"
+#endif
+  ) {
     fail("GPU sem render node VA-API");
     return;
   }
@@ -110,14 +129,16 @@ void CodecRunner::start(const Gpu &g, QString c, QString m) {
     args << "-f" << "rawvideo" << temp->filePath("source.yuv");
   else {
     QString enc = c == "h264" ? "libx264" : c == "hevc" ? "libx265" : "libsvtav1";
+    if(c=="av1"){QProcess encoders;encoders.setProcessEnvironment(nativeEnvironment());encoders.start("ffmpeg",{"-hide_banner","-encoders"});if(encoders.waitForFinished(5000)){auto list=QString::fromUtf8(encoders.readAllStandardOutput());if(!list.contains("libsvtav1")&&list.contains("libaom-av1"))enc="libaom-av1";}else{encoders.kill();encoders.waitForFinished(1000);}}
     args << "-c:v" << enc << "-threads" << "4";
     if (c == "hevc")
       args << "-x265-params" << "pools=4:frame-threads=2";
-    if (c == "av1")
+    if (enc == "libsvtav1")
       args << "-svtav1-params" << "lp=4";
+    if(enc=="libaom-av1")args<<"-cpu-used"<<"8"<<"-row-mt"<<"1"<<"-crf"<<"45"<<"-b:v"<<"0";
     if (c != "av1")
       args << "-preset" << "ultrafast";
-    else
+    else if(enc=="libsvtav1")
       args << "-preset" << "12";
     args << temp->filePath("source.mkv");
   }
@@ -132,7 +153,13 @@ void CodecRunner::measured() {
   }
   QStringList args;
   QString hw = gpu.vendor == "NVIDIA" ? "cuda" : "vaapi";
+#ifdef _WIN32
+  if(gpu.vendor!="NVIDIA")hw="d3d11va";
+#endif
   QString device = gpu.render;
+#ifdef _WIN32
+  if(gpu.vendor!="NVIDIA")device=gpu.sys;
+#endif
   if (hw == "cuda") {
     int idx = cudaOrdinal(gpu.pci);
     if (idx < 0) {
@@ -141,6 +168,12 @@ void CodecRunner::measured() {
     }
     device = QString::number(idx);
   }
+  QString encoderSuffix=hw=="cuda"?"_nvenc":"_vaapi";
+#ifdef _WIN32
+  if(gpu.vendor=="AMD")encoderSuffix="_amf";
+  if(gpu.vendor=="Intel")encoderSuffix="_qsv";
+  if(gpu.vendor=="Intel"&&mode=="encode"){args<<"-init_hw_device"<<"d3d11va=base:"+device<<"-init_hw_device"<<"qsv=bench@base"<<"-filter_hw_device"<<"bench";}else
+#endif
   args << "-init_hw_device" << hw + "=bench:" + device << "-filter_hw_device"
        << "bench";
   if (mode == "encode") {
@@ -148,7 +181,7 @@ void CodecRunner::measured() {
          << "yuv420p" << "-video_size" << "1920x1080" << "-framerate" << "60"
          << "-i" << temp->filePath("source.yuv") << "-vf"
          << "format=nv12,hwupload" << "-frames:v" << "360" << "-c:v"
-         << codec + (hw == "cuda" ? "_nvenc" : "_vaapi") << "-b:v" << "12M"
+         << codec + encoderSuffix << "-b:v" << "12M"
          << temp->filePath("encoded.mkv");
   } else {
     // Hardware output frames are mandatory; a software fallback cannot satisfy

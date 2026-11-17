@@ -1,24 +1,15 @@
 #include "frame_log.h"
+#include "gpupro_core.h"
 #include <cmath>
 #include <algorithm>
 void FrameLog::reset() {
   file.close(); path.clear(); pending.clear(); column=-1; device=inode=0;
 }
 QJsonObject frameMetrics(const QJsonArray &samples) {
-  QList<double> times;
-  for (auto v:samples) if(v.isDouble() && std::isfinite(v.toDouble()) && v.toDouble()>0) times.append(v.toDouble());
-  if(times.isEmpty()) return {};
-  double current=1000./times.last(), total=0.;
-  for(double t:times) total+=t;
-  std::sort(times.begin(),times.end());
-  QJsonObject result{{"fps",current},{"fpsAvg",1000.*times.size()/total},{"fpsMax",1000./times.first()}};
-  // Require at least 100 samples for a meaningful 1% tail. Interval logs measure samples, not individual frames.
-  if(times.size()>=100) {
-    int n=qMax(1,int(std::ceil(times.size()*.01))); double worst=0.;
-    for(int i=0;i<n;++i) worst+=times[times.size()-1-i];
-    result["fpsLow"]=1000.*n/worst;
-  }
-  return result;
+  QList<double> times;for(auto v:samples)if(v.isDouble())times.append(v.toDouble());
+  const auto stats=gpp_frame_stats(times.constData(),int(times.size()));if(!stats.count)return {};
+  QJsonObject result{{"fps",stats.current},{"fpsAvg",stats.mean},{"fpsMax",stats.maximum}};
+  if(stats.lowAvailable)result["fpsLow"]=stats.low;return result;
 }
 #include <sys/stat.h>
 QJsonArray FrameLog::poll(const QString &requested) {

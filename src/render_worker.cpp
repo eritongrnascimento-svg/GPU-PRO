@@ -1,5 +1,8 @@
 // Isolated graphics workloads. This executable has no GPU-setting write path.
 #include "gpu.h"
+#ifdef _WIN32
+#include "windows_devices.h"
+#endif
 #include <QGuiApplication>
 #include <QImage>
 #include <QOffscreenSurface>
@@ -221,6 +224,10 @@ public:
       vkCheck(vkEnumeratePhysicalDevices(instance, &n, devices.data()), "enumerate");
       int fallback = 0;
       for (auto candidate : devices) {
+#ifdef _WIN32
+        VkPhysicalDeviceIDProperties identity{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ID_PROPERTIES};VkPhysicalDeviceProperties2 identityProps{VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2};identityProps.pNext=&identity;vkGetPhysicalDeviceProperties2(candidate,&identityProps);
+        if(identity.deviceLUIDValid){LUID luid{};memcpy(&luid,identity.deviceLUID,8);if(WinDevices::luid(luid)==gpu.pci.toStdString()){physical=candidate;verification="DXGI-LUID";break;}}
+#endif
         VkPhysicalDeviceProperties props{};
         vkGetPhysicalDeviceProperties(candidate, &props);
         if (props.deviceType == VK_PHYSICAL_DEVICE_TYPE_CPU)
@@ -260,7 +267,7 @@ public:
           verification = "unique-vendor-device";
         }
       }
-      if (!physical || (verification != "DRM-PCI" && fallback != 1))
+      if (!physical || (verification != "DRM-PCI" && verification != "DXGI-LUID" && fallback != 1))
         throw std::runtime_error("GPU Vulkan não identificada inequivocamente");
       VkPhysicalDeviceProperties p{};
       vkGetPhysicalDeviceProperties(physical, &p);

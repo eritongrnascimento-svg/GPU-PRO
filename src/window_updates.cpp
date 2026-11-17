@@ -84,6 +84,7 @@ QWidget *MainWindow::updatesPage() {
   trayNote->setWordWrap(true); behaviorLayout->addWidget(trayNote);
   connect(keepInTray,&QCheckBox::toggled,this,[this](bool checked){if(!offline)QSettings().setValue("ui/keepInTray",checked);});
   layout->addWidget(behavior);
+  layout->addWidget(dependenciesControls());
   layout->addStretch();
   auto *manager = new UpdateManager(QFileInfo(QCoreApplication::applicationDirPath()).dir().absolutePath(), configRoot() + "/updates", this);
   if(!qEnvironmentVariable("APPIMAGE").isEmpty())manager->setFormat("appimage",qEnvironmentVariable("APPIMAGE"));

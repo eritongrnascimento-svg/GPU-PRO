@@ -11,7 +11,7 @@ std::optional<CpuCounters> parseCpuCounters(const QString &text) {
   }
   return c;
 }
-QJsonObject CpuTelemetry::sample(const QString &procStat,const QString &sys) {
+QJsonObject CpuTelemetry::sample(const QString &procStat,const QString &sys,const QString &cpuRoot) {
   QJsonObject out;
   auto now=parseCpuCounters(readText(procStat));
   if(now && previous && now->total>previous->total && now->idle>=previous->idle) {
@@ -19,6 +19,15 @@ QJsonObject CpuTelemetry::sample(const QString &procStat,const QString &sys) {
     if(idle<=total) out["cpuUsage"]=100.*double(total-idle)/double(total);
   }
   previous=now;
+  QJsonArray cores;
+  for(const auto &line:readText(procStat).split('\n')) {
+    auto match=QRegularExpression("^cpu(\\d+)\\s").match(line);if(!match.hasMatch())continue;
+    int id=match.captured(1).toInt();auto counters=parseCpuCounters("cpu "+line.section(' ',1).simplified());if(!counters)continue;
+    QJsonObject c{{"id",id}};if(previousCores.contains(id)){auto old=previousCores[id];auto dt=counters->total-old.total,di=counters->idle-old.idle;if(counters->total>old.total&&counters->idle>=old.idle&&di<=dt)c["usage"]=100.*double(dt-di)/double(dt);}
+    previousCores[id]=*counters;if(auto n=readNumber(cpuRoot+QString("/cpu%1/cpufreq/scaling_cur_freq").arg(id)))if(std::isfinite(*n)&&*n>0)c["mhz"]=*n/1000.;cores.append(c);
+  }
+  out["cpuCores"]=cores;out["cpuLogicalProcessors"]=cores.size();
+  const auto details=cpuDetails(procStat,cpuRoot);for(auto it=details.begin();it!=details.end();++it)out[it.key()]=it.value();
   double temp=-1000; QString source; int priority=-1;
   auto consider=[&](const QString &path,int rank) {
     auto n=readNumber(path); if(!n || !std::isfinite(*n)) return;

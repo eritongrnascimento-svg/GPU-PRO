@@ -121,6 +121,7 @@ class MainWindow : public QMainWindow {
   bool driverBusy = false;
   QWidget *driversControls();
   QWidget *systemControls();
+  QWidget *dependenciesControls();
   void startNativeTransaction(QStringList,std::function<void(int)>);
   QSlider *coreOffset, *memOffset;
   QLineEdit *coreEntry, *memEntry;
@@ -151,6 +152,13 @@ class MainWindow : public QMainWindow {
   void adaptSpecs();
   void queueSpecAdapt();
   QWidget *page(QString title);
+  QMap<QString,QLabel*> cpuValues;
+  QMap<int,NeonCard*> cpuCoreCards;QMap<int,QLabel*> cpuCoreValues;
+  QGridLayout *cpuCoresGrid=nullptr;QComboBox *cpuBenchMode=nullptr;
+  QSpinBox *cpuBenchThreads=nullptr,*cpuBenchSeconds=nullptr;
+  QPushButton *cpuBenchStart=nullptr;QLabel *cpuBenchResult=nullptr;
+  QProcess cpuBenchProcess;QByteArray cpuBenchOutput;
+  QWidget *cpuPage();void updateCpu(const QJsonObject &);
   QWidget *dashboard();
   QWidget *scrollPage(QWidget *content);
   QWidget *updatesPage();

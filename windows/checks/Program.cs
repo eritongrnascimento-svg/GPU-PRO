@@ -1,0 +1,7 @@
+using GpuPro.Windows;
+var directory=Path.Combine(Path.GetTempPath(),"gpupro-checks-"+Guid.NewGuid());Directory.CreateDirectory(directory);string file=Path.Combine(directory,"frames.csv");void Check(bool value,string text){if(!value)throw new Exception(text);}
+File.WriteAllText(file,"Application,ProcessID,MsBetweenPresents\n\"game,one.exe\",42,10\n");var reader=new FrameCsvReader();var result=reader.Read(file);Check(result.Count==1&&Math.Abs(result.Current-100)<.01,"Quoted PresentMon CSV");
+File.AppendAllText(file,string.Concat(Enumerable.Repeat("game.exe,42,20\n",100)));result=reader.Read(file);Check(result.Count==101&&result.LowAvailable==1&&Math.Abs(result.Low-50)<.01,"Incremental 1% low");result=reader.Read(file);Check(result.Count==101,"Do not duplicate samples");
+File.AppendAllText(file,"game.exe,42,25");result=reader.Read(file);Check(result.Count==101,"Partial row must wait");File.AppendAllText(file,"\n");result=reader.Read(file);Check(result.Count==102&&Math.Abs(result.Current-40)<.01,"Partial row completes once");
+File.WriteAllText(file,"fps\n120\n");result=reader.Read(file);Check(result.Count==1&&Math.Abs(result.Current-120)<.01,"Truncation and FPS source");File.SetLastWriteTimeUtc(file,DateTime.UtcNow.AddSeconds(-10));result=reader.Read(file);Check(result.Count==0&&reader.Samples.Length==0,"Stale source clears metrics");
+File.WriteAllText(file,"frametime\nNaN\n-1\n0\n16\n");result=reader.Read(file);Check(result.Count==1,"Reject invalid samples");Console.WriteLine("Windows frame reader: 7 scenarios PASS");

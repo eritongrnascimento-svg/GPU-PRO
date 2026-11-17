@@ -1,0 +1,26 @@
+using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Hosting;
+using Microsoft.UI.Composition;
+using System.Numerics;
+namespace GpuPro.Windows;
+internal sealed class NeonCard:Grid {
+ static readonly HashSet<NeonCard> visible=new();static bool motion=true;
+ internal static bool Motion{get=>motion;set{motion=value;foreach(var c in visible)c.Animate();}}
+ readonly Grid light=new(){IsHitTestVisible=false};
+ CompositionLinearGradientBrush? gradient;CompositionRoundedRectangleGeometry? geometry;ContainerVisual? container;ShapeVisual? edgeVisual,glowVisual;
+ global::Windows.UI.Color accent=global::Windows.UI.Color.FromArgb(255,89,97,116);bool available;
+ internal TextBlock Value{get;}=new(){Text="N/D",FontSize=23,TextWrapping=TextWrapping.Wrap,FontWeight=Microsoft.UI.Text.FontWeights.SemiBold};
+ static SolidColorBrush B(byte a,byte r,byte g,byte b)=>new(global::Windows.UI.Color.FromArgb(a,r,g,b));
+ readonly StackPanel content;readonly TextBlock caption;readonly bool compact;double fitted=-1;
+ // Chamado pelo FitPanel: com cards baixos, reduz fonte e margens para o valor continuar legível.
+ internal void Fit(double height){if(Math.Abs(height-fitted)<1)return;fitted=height;MinHeight=0;double size=height<72?14:height<90?17:height<115?20:compact?18:23;Value.FontSize=Math.Min(size,ValueFontCap);caption.FontSize=height<72?10:compact?11:12;double pad=height<72?6:height<90?8:compact?10:14;content.Margin=new Thickness(height<90?10:compact?12:17,pad,height<90?10:compact?12:17,pad);content.Spacing=height<90?2:compact?4:6;}
+ internal double ValueFontCap{get;set;}=double.MaxValue;
+ internal NeonCard(string label,bool compact=false){this.compact=compact;MinHeight=compact?76:112;content=new StackPanel{Spacing=compact?4:6,Margin=new Thickness(compact?12:17,compact?10:14,compact?12:17,compact?10:15)};caption=new TextBlock{Text=label,FontSize=compact?11:12,Foreground=B(255,174,180,196),TextWrapping=TextWrapping.Wrap};content.Children.Add(caption);content.Children.Add(Value);if(compact)Value.FontSize=18;Children.Add(new Border{Background=B(218,19,22,30),BorderBrush=B(255,43,48,64),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(11),Margin=new Thickness(3),Child=content});Children.Add(light);Loaded+=(s,e)=>{visible.Add(this);InitializeLight();Animate();};Unloaded+=(s,e)=>{visible.Remove(this);gradient?.StopAnimation("RotationAngleInDegrees");};SizeChanged+=(s,e)=>Resize();}
+ void InitializeLight(){if(gradient!=null){Resize();return;}var compositor=ElementCompositionPreview.GetElementVisual(this).Compositor;gradient=compositor.CreateLinearGradientBrush();gradient.MappingMode=CompositionMappingMode.Absolute;foreach(var stop in new[]{0f,.16f,.25f,.31f,.66f,.75f,.81f,1f})gradient.ColorStops.Add(compositor.CreateColorGradientStop(stop,accent));geometry=compositor.CreateRoundedRectangleGeometry();geometry.CornerRadius=new(11,11);geometry.Offset=new(3,3);container=compositor.CreateContainerVisual();glowVisual=compositor.CreateShapeVisual();edgeVisual=compositor.CreateShapeVisual();var glow=compositor.CreateSpriteShape(geometry);glow.StrokeBrush=gradient;glow.StrokeThickness=7;glowVisual.Shapes.Add(glow);glowVisual.Opacity=.13f;var edge=compositor.CreateSpriteShape(geometry);edge.StrokeBrush=gradient;edge.StrokeThickness=1.8f;edgeVisual.Shapes.Add(edge);container.Children.InsertAtTop(glowVisual);container.Children.InsertAtTop(edgeVisual);ElementCompositionPreview.SetElementChildVisual(light,container);Resize();Color();}
+ void Resize(){if(gradient==null||geometry==null||container==null||edgeVisual==null||glowVisual==null)return;var size=new Vector2((float)Math.Max(1,ActualWidth),(float)Math.Max(1,ActualHeight));geometry.Size=Vector2.Max(new Vector2(1),size-new Vector2(6));container.Size=size;edgeVisual.Size=size;glowVisual.Size=size;gradient.StartPoint=Vector2.Zero;gradient.EndPoint=size;gradient.CenterPoint=size/2;}
+ void Animate(){if(gradient==null)return;gradient.StopAnimation("RotationAngleInDegrees");if(!motion){gradient.RotationAngleInDegrees=0;return;}var animation=gradient.Compositor.CreateScalarKeyFrameAnimation();animation.InsertKeyFrame(0,0);animation.InsertKeyFrame(1,360,gradient.Compositor.CreateLinearEasingFunction());animation.Duration=TimeSpan.FromMilliseconds(360/.035);animation.IterationBehavior=AnimationIterationBehavior.Forever;gradient.StartAnimation("RotationAngleInDegrees",animation);}
+ void Color(){if(gradient==null)return;foreach(var stop in gradient.ColorStops){var c=accent;c.A=(byte)((stop.Offset==.25f||stop.Offset==.75f)?(available?230:90):22);stop.Color=c;}}
+ internal void Reading(double? value,string key,global::Windows.UI.Color theme){bool nextAvailable=value.HasValue;double x=value??0,ratio=key switch{"temp" or "cpuTemp"=>(x-40)/40,"hotspot" or "memoryTemp"=>(x-50)/45,"clock"=>x/2400,"memClock"=>x/12000,"fanRpm"=>x/3500,"fan" or "usage" or "cpuUsage" or "encoder" or "decoder"=>x/100,_=>-1};var next=!nextAvailable?global::Windows.UI.Color.FromArgb(255,89,97,116):ratio>.85?global::Windows.UI.Color.FromArgb(255,255,73,108):ratio>.65?global::Windows.UI.Color.FromArgb(255,255,173,66):ratio>.4?global::Windows.UI.Color.FromArgb(255,231,223,88):theme;if(next==accent&&available==nextAvailable)return;accent=next;available=nextAvailable;Color();}
+}
