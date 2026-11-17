@@ -20,3 +20,7 @@ __pycache__/
 /*.obj
 /*.lib
 /*.exp
+
+# Somente locais: histórico do projeto e atalhos de WSL com caminhos pessoais
+/HISTORICO_COMPLETO_GPU-PRO.txt
+/tools/Abrir-GPU-PRO-WSL*.cmd
