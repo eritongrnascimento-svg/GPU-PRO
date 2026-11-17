@@ -5,15 +5,24 @@ usam o mesmo núcleo C++ da versão Linux.
 
 ## Instalação
 
-1. Extraia `GPU-PRO-0.8.0-windows-x64.zip` em uma pasta sua (por exemplo `C:\Programas\GPU-PRO`).
-2. Abra `GPU-PRO.exe`.
+**Instalador (recomendado):** execute `GPU-PRO-0.8.0-windows-x64-setup.exe`. Ele instala para o
+usuário atual, sem precisar de administrador; na primeira tela também é possível instalar para
+todos os usuários. O instalador cria atalhos no menu Iniciar (e, se você quiser, na área de
+trabalho) e registra o GPU-PRO em Aplicativos instalados, por onde ele pode ser desinstalado.
 
-Não há instalador nem serviço. .NET, Windows App SDK, Qt (só para os executores de teste) e o
-runtime C++ do Visual Studio já vêm na pasta. Driver da GPU e Vulkan vêm do fabricante.
+**Portátil:** extraia `GPU-PRO-0.8.0-windows-x64.zip` em uma pasta sua e abra `GPU-PRO.exe`.
+
+Nas duas formas não há serviço em segundo plano. .NET, Windows App SDK, Qt (só para os
+executores de teste) e o runtime C++ do Visual Studio já vêm junto. Driver da GPU e Vulkan vêm do
+fabricante.
 FFmpeg (testes de vídeo) e PresentMon (FPS dos jogos) podem ser instalados em **Atualizações ›
 Instalar dependências** (winget).
 
-Configurações, histórico de testes e logs ficam em `%LOCALAPPDATA%\GPU-PRO`.
+Configurações, histórico de testes e logs ficam em `%LOCALAPPDATA%\GPU-PRO` e são mantidos ao
+desinstalar.
+
+Ao abrir **GamerMonitor & Overlay**, o app exibe o termo de responsabilidade e assunção de riscos
+(`docs/AVISO-OVERLAY.md`). A aba só abre depois do aceite.
 
 ## Abas
 

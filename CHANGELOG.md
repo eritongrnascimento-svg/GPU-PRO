@@ -2,7 +2,9 @@
 
 ## 0.8.0 (Windows) — em preparação
 
-Primeira versão nativa para Windows (WinUI 3 + núcleo C++ compartilhado com o Linux). Pacote portátil ZIP; detalhes em `docs/WINDOWS.md`.
+Primeira versão nativa para Windows (WinUI 3 + núcleo C++ compartilhado com o Linux). Instalador (Inno Setup, por usuário, sem administrador) e pacote portátil ZIP; detalhes em `docs/WINDOWS.md`.
+
+- Termo de responsabilidade e assunção de riscos ao abrir GamerMonitor & Overlay (anti-cheat, regras de jogos e campeonatos, uso indevido), com base no CC arts. 186, 927 e 945, no CDC art. 12, § 3º, III, e art. 14, § 3º, II, e na Lei 9.609/1998; aceite registrado localmente e no log (`docs/AVISO-OVERLAY.md`).
 
 - Nome GPU-PRO e ícone da barra de tarefas também na barra de título.
 - GPU: cards do monitor se ajustam à janela sem rolagem; ficha técnica no mesmo formato da versão Linux (DXGI, NVML e Vulkan associado pelo LUID: arquitetura, unidades, barramento, clocks máximos, limites de potência, PCIe atual/máximo, VBIOS, ventoinhas, ray tracing e Vulkan Video).

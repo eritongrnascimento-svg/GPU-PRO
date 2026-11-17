@@ -8,7 +8,7 @@
   3. dotnet publish da interface WinUI 3 autocontida (.NET 8 + Windows App SDK).
   4. Runtime C++ do Visual Studio (app-local), licenças e avisos de terceiros.
   5. Testes: portable-core-checks e GpuPro.Checks.
-  6. GPU-PRO-<versão>-windows-x64.zip e SHA256SUMS-windows-<versão>.txt em -Output.
+  6. ZIP portátil, instalador (Inno Setup 6, se instalado) e SHA256SUMS-windows-<versão>.txt em -Output.
 
 .EXAMPLE
   ./windows/build-windows.ps1 -QtDir C:\Qt\6.8.3\msvc2022_64 -Glslang C:\glslang\bin\glslang.exe `
@@ -87,10 +87,22 @@ if (-not $SkipTests) {
   dotnet run --project (Join-Path $windows 'checks\GpuPro.Checks.csproj') -c Release; if ($LASTEXITCODE) { throw 'GpuPro.Checks falhou' }
 }
 
-Step 'ZIP e SHA256'
+Step 'ZIP portátil'
 $zip = Join-Path $Output "$name.zip"
 if (Test-Path $zip) { Remove-Item $zip -Force }
 Compress-Archive -Path (Join-Path $stage '*') -DestinationPath $zip -CompressionLevel Optimal
-$hash = (Get-FileHash $zip -Algorithm SHA256).Hash.ToLower()
-"$hash  $name.zip" | Set-Content (Join-Path $Output "SHA256SUMS-windows-$version.txt") -Encoding ascii
-Write-Host "`nPacote: $zip`nSHA256: $hash" -ForegroundColor Cyan
+$packages = @($zip)
+
+$iscc = @($env:GPUPRO_ISCC, (Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6\ISCC.exe'), (Join-Path $env:ProgramFiles 'Inno Setup 6\ISCC.exe')) | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+if ($iscc) {
+  Step 'Instalador (Inno Setup)'
+  & $iscc /Q "/DAppVersion=$version" "/DSourceDir=$stage" "/DOutputDir=$Output" (Join-Path $windows 'installer\GPU-PRO.iss')
+  if ($LASTEXITCODE) { throw 'Falha ao gerar o instalador' }
+  $packages += Join-Path $Output "$name-setup.exe"
+} else { Write-Warning 'Inno Setup 6 não encontrado: instalador não gerado (somente ZIP).' }
+
+Step 'SHA256'
+$sums = foreach ($file in $packages) { "{0}  {1}" -f (Get-FileHash $file -Algorithm SHA256).Hash.ToLower(), (Split-Path $file -Leaf) }
+$sums | Set-Content (Join-Path $Output "SHA256SUMS-windows-$version.txt") -Encoding ascii
+$sums | ForEach-Object { Write-Host $_ -ForegroundColor Cyan }
+Write-Host "`nPacotes em $Output" -ForegroundColor Cyan
