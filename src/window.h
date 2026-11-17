@@ -40,8 +40,21 @@ class MainWindow : public QMainWindow {
   QComboBox *gpuSelect;
   QStackedWidget *pages;
   QList<QPushButton *> navigation;
+  // Notificações & Logs: única aba com mensagens; o log guarda todas as linhas com categoria e
+  // é filtrado por busca/categoria (igual à versão Windows).
   QListWidget *notifications;
   QPlainTextEdit *logs;
+  QStringList logLines;
+  QLineEdit *logSearch = nullptr;
+  QComboBox *logCategory = nullptr;
+  QLabel *logCount = nullptr;
+  QTabWidget *centralTabs = nullptr;
+  void refreshLogView();
+
+public:
+  static QString logCategoryFor(const QString &text, bool notify);
+
+private:
   QLabel *status;
   QMap<QString, QLabel *> values;
   QGridLayout *specGrid = nullptr;
@@ -127,6 +140,9 @@ class MainWindow : public QMainWindow {
   QLineEdit *coreEntry, *memEntry;
   QPushButton *applyCore, *applyMem;
   QLabel *clockInfo;
+  class StabilityChart *stability = nullptr;
+  QLabel *stabilityVerdict = nullptr;
+  void refreshStability();
   QLabel *helperInfo;
   QComboBox *displayChoice;
   QComboBox *modeChoice;
@@ -159,6 +175,11 @@ class MainWindow : public QMainWindow {
   QPushButton *cpuBenchStart=nullptr;QLabel *cpuBenchResult=nullptr;
   QProcess cpuBenchProcess;QByteArray cpuBenchOutput;
   QWidget *cpuPage();void updateCpu(const QJsonObject &);
+  // Aba Sobre (projeto, cafezinho via PIX e versículo) e versículo da barra lateral.
+  QWidget *aboutPage();
+  QLabel *sidebarVerse = nullptr, *aboutVerse = nullptr;
+  QPair<QString, QString> verse;
+  void showVerse(bool another = false);
   QWidget *dashboard();
   QWidget *scrollPage(QWidget *content);
   QWidget *updatesPage();

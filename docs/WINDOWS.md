@@ -21,8 +21,9 @@ Instalar dependências** (winget).
 Configurações, histórico de testes e logs ficam em `%LOCALAPPDATA%\GPU-PRO` e são mantidos ao
 desinstalar.
 
-Ao abrir **GamerMonitor & Overlay**, o app exibe o termo de responsabilidade e assunção de riscos
-(`docs/AVISO-OVERLAY.md`). A aba só abre depois do aceite.
+Ao abrir **Overclock**, o app exibe o termo de responsabilidade e assunção de riscos
+(`docs/AVISO-DE-RESPONSABILIDADE.md`). A aba só abre depois do aceite. O app sempre abre
+centralizado na tela principal.
 
 ## Abas
 
@@ -33,9 +34,10 @@ Ao abrir **GamerMonitor & Overlay**, o app exibe o termo de responsabilidade e a
 | Configurações 3D & Filtros | Recursos que a GPU suporta (DXR, DX12 Ultimate, mesh shaders, VRS, DLSS/FSR/XeSS/NIS). Controles do driver NVIDIA (perfil global). Opções do Windows: Auto HDR, VRR, jogos em janela, Modo de Jogo e agendamento de GPU. GPU por jogo. |
 | GamerMonitor & Overlay | HUD configurável, com FPS e frametime, GPU, CPU, memória e disco. Aparece sobre o jogo ou na área de trabalho, com formato, cores, tamanho, posição e monitor ajustáveis. |
 | Monitores & Telas | Resolução, frequência e orientação, com confirmação de 15 s. Também escala, HDR, monitor principal, brilho/contraste (DDC/CI) e perfil de cor. |
-| Overclock · Manual | Faixas reconhecidas pelo driver. Cada ajuste pede confirmação e autorização do Windows. |
+| Overclock · Manual | Faixas reconhecidas pelo driver. Cada ajuste pede confirmação e autorização do Windows. Gráfico de estabilidade dos últimos 10 minutos (clock, memória, temperatura, potência, ventoinha e uso), com marcas dos ajustes, diagnóstico sob carga e exportação CSV. |
 | Benchmark | Cenas 3D, memória/FLOPS, encoder/decoder e gargalo. O gargalo informa quanto GPU, CPU e memória perdem nesta carga. |
 | Notificações & Logs | Único lugar com mensagens do app: notificações e log de operações, com busca e filtro por categoria. |
+| Sobre | O projeto, links do repositório, o "cafezinho" por PIX (QR e copia e cola) e um versículo sorteado, que também aparece na barra lateral. |
 
 ## O que pede administrador
 

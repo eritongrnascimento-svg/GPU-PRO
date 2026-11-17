@@ -1,4 +1,5 @@
 #include "window.h"
+#include "stability_chart.h"
 #include "branding.h"
 #include "driver_packages.h"
 #include <cmath>
@@ -105,9 +106,17 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   sidebar->setFixedWidth(240);
   auto *sb = new QVBoxLayout(sidebar);
   sb->setContentsMargins(0, 20, 0, 16);
-  auto *brand = label("  ◈  GPU CONTROL", 18);
+  // Marca igual à da versão Windows: ícone do aplicativo + nome GPU-PRO.
+  auto *brandRow = new QHBoxLayout;
+  brandRow->setContentsMargins(18, 0, 12, 0);
+  brandRow->setSpacing(10);
+  auto *brandIcon = new QLabel;
+  brandIcon->setPixmap(Branding::windowIcon(QColor("#76b900")).pixmap(26, 26));
+  brandRow->addWidget(brandIcon);
+  auto *brand = label("GPU-PRO", 18);
   brand->setObjectName("brand");
-  sb->addWidget(brand);
+  brandRow->addWidget(brand, 1);
+  sb->addLayout(brandRow);
   sb->addSpacing(20);
   pages = new QStackedWidget;
   auto *right = new QVBoxLayout;
@@ -153,52 +162,97 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   pages->addWidget(scrollPage(energy()));
   pages->addWidget(benchmarks());
   pages->addWidget(scrollPage(feedbackPage()));
-  auto *np = page("Central de Notificações");
+  // Notificações & Logs (página 7): duas abas, como no Windows. A página 8 fica vazia apenas para
+  // preservar os índices das demais páginas.
+  auto *np = page("Notificações & Logs");
   auto *nl = qobject_cast<QVBoxLayout *>(np->layout());
-  auto *clear = button("Limpar notificações", nl);
-  nl->addWidget(notifications, 1);
-  connect(clear, &QPushButton::clicked, notifications, &QListWidget::clear);
-  pages->addWidget(scrollPage(np));
-  auto *lp = page("Logs de operações");
-  auto *ll = qobject_cast<QVBoxLayout *>(lp->layout());
+  centralTabs = new QTabWidget;
+  auto *noticeTab = new QWidget;
+  auto *noticeLayout = new QVBoxLayout(noticeTab);
+  auto *clear = button("Limpar notificações", noticeLayout);
+  noticeLayout->addWidget(new QLabel("Falhas e avisos que pedem atenção aparecem aqui e também ficam registrados em Logs."));
+  noticeLayout->addWidget(notifications, 1);
+  connect(clear, &QPushButton::clicked, this, [this] { notifications->clear(); log("Notificações limpas."); });
+  centralTabs->addTab(noticeTab, "Notificações");
+  auto *logTab = new QWidget;
+  auto *ll = new QVBoxLayout(logTab);
+  auto *logActions = new QHBoxLayout;
+  auto *exportLogs = button("Exportar logs", logActions);
+  auto *openLogs = button("Abrir pasta de logs", logActions);
+  logActions->addStretch();
+  ll->addLayout(logActions);
+  auto *filters = new QHBoxLayout;
+  logSearch = new QLineEdit;
+  logSearch->setPlaceholderText("Buscar no log: ex.: gargalo, 1920×1080, overclock, falha");
+  logSearch->setClearButtonEnabled(true);
+  logCategory = new QComboBox;
+  logCategory->addItems({"Todas", "Testes", "Gargalo", "Overclock", "HUD & FPS", "Sistema & GPU", "Perfis", "Dependências", "Avisos e erros"});
+  logCount = new QLabel;
+  filters->addWidget(logSearch, 1);
+  filters->addWidget(logCategory);
+  filters->addWidget(logCount);
+  ll->addLayout(filters);
+  ll->addWidget(new QLabel("Todas as operações desta sessão. Cópia diária em " + configRoot() + "/logs."));
   ll->addWidget(logs, 1);
-  auto *exportLogs = button("Exportar logs", ll);
+  connect(logSearch, &QLineEdit::textChanged, this, [this] { refreshLogView(); });
+  connect(logCategory, &QComboBox::currentTextChanged, this, [this] { refreshLogView(); });
+  connect(openLogs, &QPushButton::clicked, this, [] {
+    QDir().mkpath(configRoot() + "/logs");
+    QDesktopServices::openUrl(QUrl::fromLocalFile(configRoot() + "/logs"));
+  });
   connect(exportLogs, &QPushButton::clicked, this, [this] {
     auto path =
-        QFileDialog::getSaveFileName(this, "Salvar logs", QDir::homePath() + "/gpu-control.log");
+        QFileDialog::getSaveFileName(this, "Salvar logs", QDir::homePath() + "/GPU-PRO.log");
     if (path.isEmpty())
       return;
     QString e;
-    if (!writeFile(path, logs->toPlainText().toUtf8(), e))
-      notify("Falha ao exportar", e);
+    if (!writeFile(path, logLines.join('\n').toUtf8(), e))
+      notify("Falha ao exportar logs", e);
+    else
+      log("Logs exportados: " + path);
   });
-  pages->addWidget(scrollPage(lp));
+  centralTabs->addTab(logTab, "Logs de operações");
+  nl->addWidget(centralTabs, 1);
+  pages->addWidget(scrollPage(np));
+  pages->addWidget(new QWidget);
   pages->addWidget(scrollPage(updatesPage()));
   pages->addWidget(scrollPage(cpuPage()));
-  QStringList names = {
-      "GPU · Monitor e especificações", "Configurações 3D & Filtros", "GamerMonitor & Overlay",
-      "Monitores & Telas", "Overclock · Manual", "Benchmark",
-      "Feedback & Diagnóstico", "Central de Notificações", "Logs de operações", "Atualizações", "CPU · Monitor e cálculos"};
-  for (int i = 0; i < names.size(); ++i) {
-    auto *b = button(names[i], sb);
+  pages->addWidget(scrollPage(aboutPage()));
+  // Mesma ordem do menu da versão Windows; cada botão guarda o índice da página que abre.
+  // A página 8 (antigo Logs) não tem botão.
+  const QList<QPair<int, QString>> menu = {
+      {0, "GPU · Monitor e especificações"}, {10, "CPU · Monitor e cálculos"},
+      {1, "Configurações 3D & Filtros"},     {2, "GamerMonitor & Overlay"},
+      {3, "Monitores & Telas"},              {4, "Overclock · Manual"},
+      {5, "Benchmark"},                      {6, "Feedback & Diagnóstico"},
+      {7, "Notificações & Logs"},            {9, "Atualizações"},
+      {11, "Sobre"}};
+  for (const auto &[index, name] : menu) {
+    auto *b = button(name, sb);
     b->setObjectName("nav");
+    b->setProperty("page", index);
     navigation << b;
-    if(i==10){sb->removeWidget(b);sb->insertWidget(sb->indexOf(navigation[0])+1,b);}
-    connect(b, &QPushButton::clicked, this, [this, i] {
-      if(i==4 && !confirmOverclock()) return;
+    connect(b, &QPushButton::clicked, this, [this, i = index] {
+      if (i == 4 && !confirmOverclock()) return;
       pages->setCurrentIndex(i);
     });
   }
+  // Versículo sorteado no espaço livre da barra lateral, logo abaixo do menu (igual ao Windows).
+  sidebarVerse = new QLabel;
+  sidebarVerse->setWordWrap(true);
+  sidebarVerse->setTextFormat(Qt::RichText);
+  sidebarVerse->setContentsMargins(16, 16, 14, 0);
+  sb->addWidget(sidebarVerse);
+  showVerse();
   sb->addStretch();
-  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.7 · "
-                      "validação comunitária"));
+  sb->addWidget(label("   Linux · MultiGPU\n   NVIDIA / AMD / Intel\n   v0.8"));
   main->addWidget(sidebar);
   main->addLayout(right, 1);
   connect(pages, &QStackedWidget::currentChanged, this, [this](int index) {
-    for (int i = 0; i < navigation.size(); ++i) {
-      navigation[i]->setProperty("active", index == i);
-      navigation[i]->style()->unpolish(navigation[i]);
-      navigation[i]->style()->polish(navigation[i]);
+    for (auto *b : navigation) {
+      b->setProperty("active", b->property("page").toInt() == index);
+      b->style()->unpolish(b);
+      b->style()->polish(b);
     }
   });
   connect(gpuSelect, qOverload<int>(&QComboBox::currentIndexChanged), this, &MainWindow::chooseGpu);
@@ -444,24 +498,68 @@ void MainWindow::closeEvent(QCloseEvent *e) {
   codecSuite.cancel();
   QMainWindow::closeEvent(e);
 }
+// Categoria deduzida do texto, mesma regra da versão Windows, para o filtro do log.
+QString MainWindow::logCategoryFor(const QString &text, bool notify) {
+  if (notify || text.startsWith("Falha") || text.contains("ERRO")) return "Avisos e erros";
+  if (text.contains("Gargalo") || text.contains("gargalo")) return "Gargalo";
+  if (text.startsWith("Teste") || text.contains("benchmark", Qt::CaseInsensitive)) return "Testes";
+  if (text.startsWith("Ajuste") || text.contains("Overclock") || text.contains("helper", Qt::CaseInsensitive)) return "Overclock";
+  if (text.startsWith("HUD") || text.contains("Overlay") || text.contains("frametime", Qt::CaseInsensitive)) return "HUD & FPS";
+  if (text.startsWith("Perfil") || text.contains("Gamescope") || text.contains("MangoHud")) return "Perfis";
+  if (text.contains("pacote", Qt::CaseInsensitive) || text.contains("dependênc", Qt::CaseInsensitive) || text.contains("driver", Qt::CaseInsensitive)) return "Dependências";
+  return "Sistema & GPU";
+}
+void MainWindow::refreshLogView() {
+  if (!logs) return;
+  const QString search = logSearch ? logSearch->text().trimmed() : QString();
+  const QString category = logCategory ? logCategory->currentText() : "Todas";
+  QStringList rows;
+  for (const auto &line : logLines)
+    if ((category == "Todas" || line.contains("[" + category + "]")) &&
+        (search.isEmpty() || line.contains(search, Qt::CaseInsensitive)))
+      rows << line;
+  logs->setPlainText(rows.isEmpty() ? (logLines.isEmpty() ? "Nenhuma operação registrada nesta sessão."
+                                                          : "Nenhum registro corresponde ao filtro.")
+                                    : rows.join('\n'));
+  logs->moveCursor(QTextCursor::End);
+  if (logCount) logCount->setText(QString("%1 de %2 registros").arg(rows.size()).arg(logLines.size()));
+  if (centralTabs) centralTabs->setTabText(1, QString("Logs de operações (%1)").arg(logLines.size()));
+}
+static void recordLine(QStringList &lines, const QString &text, bool notify) {
+  const auto now = QDateTime::currentDateTime();
+  const QString line = now.toString("yyyy-MM-dd HH:mm:ss") + " · [" + MainWindow::logCategoryFor(text, notify) + "] · " + QString(text).replace('\n', " · ");
+  lines << line;
+  while (lines.size() > 2000) lines.removeFirst();
+  // Cópia diária, como no Windows (%LOCALAPPDATA%\GPU-PRO\logs).
+  const QString folder = configRoot() + "/logs";
+  QDir().mkpath(folder);
+  QFile file(folder + "/GPU-PRO-" + now.toString("yyyy-MM-dd") + ".log");
+  if (file.open(QIODevice::Append | QIODevice::Text)) file.write((line + '\n').toUtf8());
+}
 void MainWindow::log(QString s) {
-  if (logs)
-    logs->appendPlainText(QDateTime::currentDateTime().toString("[HH:mm:ss] ") + s);
+  if (s.trimmed().isEmpty()) return;
+  recordLine(logLines, s, false);
+  refreshLogView();
+  // Ajustes aplicados ou restaurados viram marcas no gráfico de estabilidade do Overclock.
+  if (stability && logCategoryFor(s, false) == "Overclock" &&
+      (s.contains("aplic", Qt::CaseInsensitive) || s.contains("restaur", Qt::CaseInsensitive) || s.contains("confirm", Qt::CaseInsensitive)))
+    stability->mark(s.section('\n', 0, 0));
 }
 void MainWindow::notify(QString title, QString detail) {
-  log(title + (detail.isEmpty() ? "" : "\n" + detail));
+  recordLine(logLines, title + (detail.isEmpty() ? "" : "\n" + detail), true);
+  refreshLogView();
   if (notifications) {
     notifications->insertItem(0, QDateTime::currentDateTime().toString("HH:mm ") + title + "\n" +
                                      detail);
     if (notifications->count() > 200)
       delete notifications->takeItem(200);
+    if (centralTabs) centralTabs->setTabText(0, QString("Notificações (%1)").arg(notifications->count()));
   }
-  status->setText(title);
 }
 void MainWindow::applyTheme() {
   QString vendor = selected >= 0 && selected < gpus.size() ? gpus[selected].vendor : "GPU";
   if (auto *brand = findChild<QLabel *>("brand"))
-    brand->setText("  ◈  GPU-PRO");
+    brand->setText("GPU-PRO");
   Q_UNUSED(vendor);
 
   QString c = selected >= 0 && selected < gpus.size() ? gpus[selected].accent() : "#76b900";
@@ -540,6 +638,7 @@ void MainWindow::updateSnapshot(QJsonObject o) {
   if (!gpus.isEmpty() && o["pci"].toString() != gpus.value(selected).pci && !offline)
     return;
   latest = o;
+  if (stability) { stability->add(o); refreshStability(); }
   updateCpu(o);
   if(gameFramePlot) gameFramePlot->setSamples(o["frameTimes"].toArray());
   helperInfo->setText(
@@ -1349,9 +1448,10 @@ void MainWindow::previewScrollBottom() {
   }
 }
 bool MainWindow::checkInterface() {
-  for (auto file : {":/assets/gpu-pro.png", ":/LICENSE", ":/NOTICE", ":/docs/licenses/LGPL-3.0.txt", ":/docs/licenses/GPL-3.0.txt"})
+  for (auto file : {":/assets/gpu-pro.png", ":/LICENSE", ":/NOTICE", ":/docs/licenses/LGPL-3.0.txt", ":/docs/licenses/GPL-3.0.txt", ":/docs/AVISO-DE-RESPONSABILIDADE.md"})
     if (!QFileInfo::exists(file)) return false;
-  if (!offline || pages->count() != 11 || navigation.size() != 11 || gpuTabs->count() != 2 || benchmarkTabs->count() != 4) return false;
+  // 12 páginas (índices preservados) e 11 botões: Notificações e Logs são uma aba só, como no Windows.
+  if (!offline || pages->count() != 12 || navigation.size() != 11 || gpuTabs->count() != 2 || benchmarkTabs->count() != 4 || !centralTabs || centralTabs->count() != 2) return false;
   resize(980, 700); pages->setCurrentIndex(2); QApplication::processEvents();
   auto *scroll = qobject_cast<QScrollArea *>(pages->currentWidget());
   if (!scroll || scroll->verticalScrollBar()->maximum() <= 0) return false;

@@ -131,6 +131,14 @@ int main(int argc, char **argv) {
     window.previewGpu(parser.value("preview-gpu").toInt());
     window.previewSubtab(parser.value("preview-subtab").toInt());
   }
+  // Abre sempre centralizado na área útil da tela principal (X11/XWayland; no Wayland nativo o
+  // compositor decide a posição inicial das janelas).
+  if (auto *screen = QGuiApplication::primaryScreen()) {
+    const QRect area = screen->availableGeometry();
+    const QSize size = window.size().boundedTo(area.size());
+    window.resize(size);
+    window.move(area.center() - QPoint(size.width() / 2, size.height() / 2));
+  }
   if(parser.isSet("start-maximized"))window.showMaximized();else window.show();
   if(parser.isSet("capture-live")) {
     QTimer::singleShot(2500,&app,[&]{

@@ -30,14 +30,14 @@ public sealed partial class MainWindow {
   new("CPU","cpuName","Nome da CPU"),new("CPU","cpuUsage","Uso total"),new("CPU","cpuTemp","Temperatura"),new("CPU","cpuClock","Clock médio"),new("CPU","cpuBusiest","Núcleo mais carregado"),new("CPU","cpuCores","Uso por núcleo"),
   new("Memória","ramUsed","RAM usada"),new("Memória","ramPct","RAM %"),new("Memória","ramTotal","RAM total"),new("Memória","commit","Memória confirmada"),new("Memória","gpuShared","Compartilhada com a GPU"),
   new("Disco","diskRead","Leitura"),new("Disco","diskWrite","Escrita"),new("Disco","diskActive","Tempo ativo"),new("Disco","diskTemp","Temperatura")};
- readonly ComboBox monitoredProcess=new(){Header="Jogo / aplicativo",DisplayMemberPath="Label",MinWidth=280};
+ ComboBox monitoredProcess=new(){Header="Jogo / aplicativo",DisplayMemberPath="Label",MinWidth=280};
  HistoryPlot? hudPlot;Process? capture;
  [DllImport("user32.dll")]static extern nint GetForegroundWindow();
  [DllImport("user32.dll")]static extern uint GetWindowThreadProcessId(nint window,out uint pid);
  record ProcessChoice(int Pid,string Label);
  record DiskChoice(string Id,string Label);
  void BuildOverlaySettings(){
-  Detach(monitoredProcess);var c=hudConfig;
+  var c=hudConfig;
   // Página compacta: os mesmos controles em linhas densas e os quatro grupos de leitura lado a lado.
   StackPanel Row(params UIElement[] items){var row=new StackPanel{Orientation=Orientation.Horizontal,Spacing=10};foreach(var i in items){if(i is FrameworkElement f)f.VerticalAlignment=VerticalAlignment.Bottom;row.Children.Add(i);}return row;}
   var toggle=Button(hud==null?"Exibir HUD":"Ocultar HUD",()=>{ToggleHud();BuildPage();});

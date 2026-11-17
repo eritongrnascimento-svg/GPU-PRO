@@ -1,4 +1,5 @@
 #include "window.h"
+#include "stability_chart.h"
 #include <cmath>
 #include <sys/stat.h>
 namespace {
@@ -678,39 +679,80 @@ QWidget *MainWindow::energy() {
   l->addWidget(helperInfo);
   clockInfo = text("Nenhuma alteração aplicada nesta sessão.");
   l->addWidget(clockInfo);
+  // Gráfico detalhado de estabilidade: acompanha o efeito de cada ajuste sob carga.
+  auto *stabilityBox = new QGroupBox("Estabilidade · últimos 10 minutos");
+  auto *sl = new QVBoxLayout(stabilityBox);
+  stability = new StabilityChart;
+  auto *toggles = new QHBoxLayout;
+  for (auto &series : stability->series()) {
+    auto *check = new QCheckBox(series.label);
+    check->setChecked(true);
+    check->setStyleSheet(QString("QCheckBox{color:%1;}").arg(series.color.name()));
+    connect(check, &QCheckBox::toggled, this, [this, key = series.key](bool on) { stability->setSeriesVisible(key, on); });
+    toggles->addWidget(check);
+  }
+  toggles->addStretch();
+  sl->addLayout(toggles);
+  sl->addWidget(stability, 1);
+  stabilityVerdict = text("Sem carga suficiente");
+  stabilityVerdict->setTextFormat(Qt::RichText);
+  stabilityVerdict->setWordWrap(true);
+  sl->addWidget(stabilityVerdict);
+  auto *stabilityActions = new QHBoxLayout;
+  auto *clearStability = new QPushButton("Limpar histórico");
+  auto *exportStability = new QPushButton("Exportar CSV");
+  stabilityActions->addWidget(clearStability);
+  stabilityActions->addWidget(exportStability);
+  stabilityActions->addStretch();
+  sl->addLayout(stabilityActions);
+  sl->addWidget(text("Cada linha usa a própria escala (0–100 % do gráfico). Linhas tracejadas marcam ajustes aplicados ou restaurados. "
+                     "A avaliação considera apenas momentos com uso da GPU ≥ 80 %: variação do clock, quedas abaixo de 93 % da média "
+                     "e a causa provável (temperatura ≥ 83 °C ou potência ≥ 97 % do limite).", 12));
+  connect(clearStability, &QPushButton::clicked, this, [this] { stability->clear(); refreshStability(); log("Histórico de estabilidade limpo."); });
+  connect(exportStability, &QPushButton::clicked, this, [this] {
+    auto path = QFileDialog::getSaveFileName(this, "Exportar estabilidade", QDir::homePath() + "/GPU-PRO-estabilidade.csv", "CSV (*.csv)");
+    if (path.isEmpty()) return;
+    QSaveFile out(path);
+    if (out.open(QIODevice::WriteOnly) && out.write(stability->csv().toUtf8()) >= 0 && out.commit()) log("Estabilidade exportada: " + path);
+    else notify("Falha ao exportar estabilidade", path);
+  });
   auto *card = new QGroupBox("Clocks da GPU selecionada");
-  auto *cl = new QVBoxLayout(card);
+  auto *cl = new QHBoxLayout(card);
+  auto *coreColumn = new QVBoxLayout, *memColumn = new QVBoxLayout;
+  cl->addLayout(coreColumn, 1);
+  cl->addSpacing(18);
+  cl->addLayout(memColumn, 1);
   coreOffset = new QSlider(Qt::Horizontal);
   memOffset = new QSlider(Qt::Horizontal);
   coreEntry = new QLineEdit;
   memEntry = new QLineEdit;
-  coreEntry->setMaximumWidth(160);
-  memEntry->setMaximumWidth(160);
+  coreEntry->setMaximumWidth(110);
+  memEntry->setMaximumWidth(110);
   coreEntry->setPlaceholderText("MHz");
   memEntry->setPlaceholderText("MHz");
   coreValue = text("Core · indisponível", 16);
   memValue = text("Memória · indisponível", 16);
-  applyCore = new QPushButton("Aplicar clock do core");
-  applyMem = new QPushButton("Aplicar clock da memória");
+  applyCore = new QPushButton("Aplicar");
+  applyMem = new QPushButton("Aplicar");
   for (auto *w : {coreOffset, memOffset}) {
     w->setEnabled(false);
     w->setMinimumHeight(30);
   }
   applyCore->setEnabled(false);
   applyMem->setEnabled(false);
-  cl->addWidget(coreValue);
+  // Compacto: núcleo e memória lado a lado, com Aplicar na mesma linha do valor.
+  coreColumn->addWidget(coreValue);
   auto *coreRow = new QHBoxLayout;
   coreRow->addWidget(coreOffset, 1);
   coreRow->addWidget(coreEntry);
-  cl->addLayout(coreRow);
-  cl->addWidget(applyCore);
-  cl->addSpacing(18);
-  cl->addWidget(memValue);
+  coreRow->addWidget(applyCore);
+  coreColumn->addLayout(coreRow);
+  memColumn->addWidget(memValue);
   auto *memRow = new QHBoxLayout;
   memRow->addWidget(memOffset, 1);
   memRow->addWidget(memEntry);
-  cl->addLayout(memRow);
-  cl->addWidget(applyMem);
+  memRow->addWidget(applyMem);
+  memColumn->addLayout(memRow);
   l->addWidget(card);
   for (QString domain : {"core", "mem"}) {
     auto *slider = domain == "core" ? coreOffset : memOffset;
@@ -761,6 +803,8 @@ QWidget *MainWindow::energy() {
     });
   }
   buildTuningControls(l);
+  l->addWidget(stabilityBox);
+  if (offline) { stability->seedDemo(); refreshStability(); }
   trialButton = new QPushButton("Validar candidato: baseline → core +15 MHz → restaurar",root);
   trialButton->setEnabled(false);
   trialButton->hide(); // Legacy diagnostic remains CLI-only; manual controls in this page.
@@ -895,28 +939,64 @@ void MainWindow::clockCheck(QString path) {
 }
 
 
+// Termo de responsabilidade do Overclock (docs/AVISO-DE-RESPONSABILIDADE.md), igual ao da versão
+// Windows: aceite obrigatório ao abrir a aba, "Aceitar" só habilita após marcar a declaração,
+// opção de não exibir novamente na mesma versão do termo e registro em termos.json e no log.
+// Na prévia offline o termo aparece, mas nada é lido nem gravado na configuração.
 bool MainWindow::confirmOverclock() {
-  if(overclockAccepted) return true;
+  constexpr int version = 2;
+  if (overclockAccepted) return true;
+  const QString file = configRoot() + "/termos.json";
+  auto saved = offline ? QJsonObject{} : QJsonDocument::fromJson(readText(file).toUtf8()).object();
+  auto stored = saved["overclock"].toObject();
+  if (stored["version"].toInt() == version && stored["dontShow"].toBool()) return overclockAccepted = true;
   QDialog dialog(this);
   dialog.setObjectName("overclockDisclaimer");
-  dialog.setWindowTitle("Overclock — aviso de riscos e responsabilidade");
-  dialog.resize(660,540);
-  auto *layout=new QVBoxLayout(&dialog);
-  auto *body=new QTextBrowser;
+  dialog.setWindowTitle("Overclock — termo de responsabilidade");
+  dialog.resize(720, 620);
+  auto *layout = new QVBoxLayout(&dialog);
+  auto *body = new QTextBrowser;
   body->setMarkdown(readText(":/docs/AVISO-DE-RESPONSABILIDADE.md"));
-  layout->addWidget(body,1);
-  auto *accept=new QCheckBox("Li, compreendi os riscos e assumo a responsabilidade pelas alterações que realizar.");
+  layout->addWidget(body, 1);
+  auto *accept = new QCheckBox("Li e aceito o termo de responsabilidade e assumo os riscos dos ajustes que realizar");
   accept->setObjectName("acceptOverclockRisk");
+  auto *dontShow = new QCheckBox("Não exibir novamente nesta versão do termo");
   layout->addWidget(accept);
-  auto *buttons=new QDialogButtonBox(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
-  auto *ok=buttons->button(QDialogButtonBox::Ok);
-  ok->setText("Aceitar e acessar Overclock");
-  buttons->button(QDialogButtonBox::Cancel)->setText("Voltar");
+  layout->addWidget(dontShow);
+  auto *buttons = new QDialogButtonBox(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+  auto *ok = buttons->button(QDialogButtonBox::Ok);
+  ok->setText("Aceitar");
+  buttons->button(QDialogButtonBox::Cancel)->setText("Recusar");
   ok->setEnabled(false);
-  connect(accept,&QCheckBox::toggled,ok,&QPushButton::setEnabled);
-  connect(buttons,&QDialogButtonBox::accepted,&dialog,&QDialog::accept);
-  connect(buttons,&QDialogButtonBox::rejected,&dialog,&QDialog::reject);
+  connect(accept, &QCheckBox::toggled, ok, &QPushButton::setEnabled);
+  connect(buttons, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+  connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
   layout->addWidget(buttons);
-  overclockAccepted=dialog.exec()==QDialog::Accepted && accept->isChecked();
-  return overclockAccepted;
+  overclockAccepted = dialog.exec() == QDialog::Accepted && accept->isChecked();
+  if (!overclockAccepted) {
+    log("Termo do Overclock recusado · aba Overclock não aberta");
+    return false;
+  }
+  if (!offline) {
+    saved["overclock"] = QJsonObject{{"version", version},
+                                     {"acceptedAt", QDateTime::currentDateTime().toString(Qt::ISODate)},
+                                     {"dontShow", dontShow->isChecked()}};
+    QDir().mkpath(configRoot());
+    QSaveFile out(file);
+    if (out.open(QIODevice::WriteOnly)) { out.write(QJsonDocument(saved).toJson()); out.commit(); }
+  }
+  log(QString("Termo do Overclock aceito · versão %1").arg(version) +
+      (dontShow->isChecked() ? " · não exibir novamente" : ""));
+  return true;
+}
+
+// Resumo textual do gráfico de estabilidade, colorido pelo estado.
+void MainWindow::refreshStability() {
+  if (!stability || !stabilityVerdict) return;
+  const auto v = stability->verdict();
+  const QString color = v.state == "Estável" ? "#76b900" : v.state == "Oscilação leve" ? "#ffb020" : v.state == "Sem carga suficiente" ? "#a0a0a8" : "#ff5a5f";
+  QString extra;
+  if (v.loadSamples >= 10)
+    extra = QString(" · %1 amostras sob carga · temperatura máx. %2 °C · potência máx. %3 W").arg(v.loadSamples).arg(v.maxTemp, 0, 'f', 0).arg(v.maxPower, 0, 'f', 0);
+  stabilityVerdict->setText(QString("<b style='color:%1'>%2</b> — %3%4").arg(color, v.state, v.detail.toHtmlEscaped(), extra));
 }

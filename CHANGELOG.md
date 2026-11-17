@@ -4,7 +4,11 @@
 
 Primeira versão nativa para Windows (WinUI 3 + núcleo C++ compartilhado com o Linux). Instalador (Inno Setup, por usuário, sem administrador) e pacote portátil ZIP; detalhes em `docs/WINDOWS.md`.
 
-- Termo de responsabilidade e assunção de riscos ao abrir GamerMonitor & Overlay (anti-cheat, regras de jogos e campeonatos, uso indevido), com base no CC arts. 186, 927 e 945, no CDC art. 12, § 3º, III, e art. 14, § 3º, II, e na Lei 9.609/1998; aceite registrado localmente e no log (`docs/AVISO-OVERLAY.md`).
+- Termo de responsabilidade e assunção de riscos (versão 2) ao abrir Overclock, no Windows e no Linux: danos ao equipamento, instabilidade, perda de dados e garantia, com base no CF art. 5º, II, CC arts. 186, 927 e 945, CDC art. 12, § 3º, III, e art. 14, § 3º, II, e Lei 9.609/1998; aceite obrigatório, opção de não exibir novamente na mesma versão, registro local e no log (`docs/AVISO-DE-RESPONSABILIDADE.md`).
+- Overclock: gráfico detalhado de estabilidade (clock, memória, temperatura, potência, ventoinha e uso nos últimos 10 minutos), marcas dos ajustes aplicados, diagnóstico sob carga (Estável / Oscilação leve / Instável, com causa provável: temperatura ou limite de potência) e exportação CSV. Página compactada.
+- Correção: o app fechava sozinho ao trocar de aba (GamerMonitor & Overlay e botão Exibir HUD): controles reaproveitados eram reinseridos antes de o WinUI soltá-los da página anterior. Agora são recriados a cada montagem; validado com 112 trocas de aba e 16 ciclos do HUD.
+- Aba Sobre: projeto, repositório, "cafezinho" por PIX (QR estático no padrão BR Code, gerado por `tools/pix-qr.py`, e copia e cola) e versículo sorteado (Almeida Revista e Corrigida), também exibido no rodapé da barra lateral.
+- A janela sempre abre centralizada na tela principal.
 
 - Nome GPU-PRO e ícone da barra de tarefas também na barra de título.
 - GPU: cards do monitor se ajustam à janela sem rolagem; ficha técnica no mesmo formato da versão Linux (DXGI, NVML e Vulkan associado pelo LUID: arquitetura, unidades, barramento, clocks máximos, limites de potência, PCIe atual/máximo, VBIOS, ventoinhas, ray tracing e Vulkan Video).

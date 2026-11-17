@@ -6,7 +6,8 @@ using System.Text.Json;
 using System.Runtime.InteropServices;
 namespace GpuPro.Windows;
 public sealed partial class MainWindow {
- static readonly string dataRoot=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"GPU-PRO");
+ // GPUPRO_DATA_DIR (opcional) isola configurações, termos e logs em outra pasta, para testes.
+ static readonly string dataRoot=Environment.GetEnvironmentVariable("GPUPRO_DATA_DIR") is {Length:>0} custom?custom:Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"GPU-PRO");
  // Central única: toda mensagem de operação passa por Record(); as que exigem atenção
  // também viram notificação. O log de cada dia é gravado em %LOCALAPPDATA%\GPU-PRO\logs.
  readonly List<string> notices=new();
@@ -19,25 +20,25 @@ public sealed partial class MainWindow {
  static string LogCategory(string text,bool notify){
   if(notify||text.StartsWith("Falha")||text.Contains("ERRO"))return "Avisos e erros";
   if(text.Contains("Gargalo"))return "Gargalo";if(text.StartsWith("Teste"))return "Testes";
-  if(text.StartsWith("Ajuste")||text.StartsWith("Overclock"))return "Overclock";
-  if(text.StartsWith("HUD")||text.Contains("Captura de FPS")||text.StartsWith("Termo do Overlay"))return "HUD & FPS";
+  if(text.StartsWith("Ajuste")||text.StartsWith("Overclock")||text.StartsWith("Termo do Overclock"))return "Overclock";
+  if(text.StartsWith("HUD")||text.Contains("Captura de FPS"))return "HUD & FPS";
   if(text.StartsWith("Perfil")||text.StartsWith("Jogo iniciado"))return "Perfis";
   if(text.StartsWith("winget")||text.StartsWith("Instalação")||text.Contains("FFmpeg")||text.Contains("dependência"))return "Dependências";
   return "Sistema & GPU";
  }
  IEnumerable<string> FilteredLog()=>operations.Where(l=>(logCategory=="Todas"||l.Contains("["+logCategory+"]"))&&(logSearch.Length==0||l.Contains(logSearch,StringComparison.CurrentCultureIgnoreCase)));
  void RefreshLogView(){if(logView==null)return;var rows=FilteredLog().ToList();logView.Text=rows.Count==0?(operations.Count==0?"Nenhuma operação registrada nesta sessão.":"Nenhum registro corresponde ao filtro."):string.Join('\n',rows);if(logCount!=null)logCount.Text=rows.Count+" de "+operations.Count+" registros";}
- readonly TextBox profileName=new(){Header="Nome do perfil",Text="Meu jogo"};
- readonly TextBox profileExe=new(){Header="Executável do jogo"};
- readonly TextBox profileArgs=new(){Header="Argumentos"};
- readonly CheckBox profileOverlay=new(){Content="Exibir HUD ao iniciar",IsChecked=true};
+ TextBox profileName=new(){Header="Nome do perfil",Text="Meu jogo"};
+ TextBox profileExe=new(){Header="Executável do jogo"};
+ TextBox profileArgs=new(){Header="Argumentos"};
+ CheckBox profileOverlay=new(){Content="Exibir HUD ao iniciar",IsChecked=true};
  readonly TextBlock profileState=new(){TextWrapping=TextWrapping.Wrap};
  internal static void AppendLogFile(string line){try{Directory.CreateDirectory(logFolder);File.AppendAllText(LogFile,line+Environment.NewLine);}catch{}}
  void Record(string text,bool notify=false){
   if(string.IsNullOrWhiteSpace(text))return;
   if(text==lastRecord&&!notify)return;lastRecord=text;
   var line=DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")+" · ["+LogCategory(text,notify)+"] · "+text;
-  operations.Add(line);if(operations.Count>2000)operations.RemoveAt(0);AppendLogFile(line);
+  operations.Add(line);if(LogCategory(text,notify)=="Overclock")MarkStability(text);if(operations.Count>2000)operations.RemoveAt(0);AppendLogFile(line);
   if(notify){notices.Insert(0,line);if(notices.Count>200)notices.RemoveAt(notices.Count-1);}
   if(current==10){if(notify&&centralTab==0)BuildPage();else RefreshLogView();}
  }
@@ -62,15 +63,16 @@ public sealed partial class MainWindow {
  void BuildOtherPages(){
   if(current==6)BuildThreeDPage();
   if(current==7)BuildDisplaysPage();
-  if(current==8){body.Children.Add(CardsGrid(("Clock GPU atual","clock"),("Clock memória atual","memClock"),("Consumo atual","power"),("Temperatura GPU","temp"),("Ventoinha atual","fan"),("Tensão GPU","voltage")));var tuning=new StackPanel{Spacing=14};body.Children.Add(tuning);_ = BuildTuning(tuning);}
+  if(current==8){body.Children.Add(CompactCards(6,("Clock GPU","clock"),("Clock memória","memClock"),("Consumo","power"),("Temperatura","temp"),("Ventoinha","fan"),("Tensão","voltage")));var tuning=new StackPanel{Spacing=10};body.Children.Add(tuning);_ = BuildTuning(tuning);BuildStabilitySection();}
   if(current==9)BuildBenchmarkPage();
   if(current==10)BuildCentral();
+  if(current==12)BuildAboutPage();
  }
  void SelectPage(int tag){nav.SelectedItem=nav.MenuItems.Cast<NavigationViewItem>().First(i=>(int)i.Tag==tag);}
  async Task SelectExecutable(){var picker=new global::Windows.Storage.Pickers.FileOpenPicker();WinRT.Interop.InitializeWithWindow.Initialize(picker,hwnd);picker.FileTypeFilter.Add(".exe");var f=await picker.PickSingleFileAsync();if(f!=null)profileExe.Text=f.Path;}
  void SaveProfile(){try{Directory.CreateDirectory(Path.Combine(dataRoot,"profiles"));var path=Path.Combine(dataRoot,"profiles",Guid.NewGuid()+".json");File.WriteAllText(path,JsonSerializer.Serialize(new GameProfile(profileName.Text,profileExe.Text,profileArgs.Text,profileOverlay.IsChecked==true),new JsonSerializerOptions{WriteIndented=true}));Record("Perfil gravado: "+profileName.Text);}catch(Exception e){Record("Perfil: "+e.Message,true);}}
  async Task LoadProfile(){try{var picker=new global::Windows.Storage.Pickers.FileOpenPicker();WinRT.Interop.InitializeWithWindow.Initialize(picker,hwnd);picker.FileTypeFilter.Add(".json");var f=await picker.PickSingleFileAsync();if(f==null)return;var p=JsonSerializer.Deserialize<GameProfile>(File.ReadAllText(f.Path))??throw new InvalidDataException("Perfil inválido");profileName.Text=p.Name;profileExe.Text=p.Executable;profileArgs.Text=p.Arguments;profileOverlay.IsChecked=p.Overlay;Record("Perfil carregado: "+p.Name);}catch(Exception e){Record("Perfil: "+e.Message,true);}}
- async void LaunchProfile(){try{if(!File.Exists(profileExe.Text)||!Path.GetExtension(profileExe.Text).Equals(".exe",StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("Selecione um executável Windows existente.");bool withHud=profileOverlay.IsChecked==true&&hud==null&&await ConfirmOverlayTerms();Process.Start(new ProcessStartInfo(profileExe.Text){Arguments=profileArgs.Text,WorkingDirectory=Path.GetDirectoryName(profileExe.Text),UseShellExecute=false});if(withHud)ToggleHud();Record("Jogo iniciado: "+profileName.Text);}catch(Exception e){Record("Perfil: "+e.Message,true);}}
+ async void LaunchProfile(){try{if(!File.Exists(profileExe.Text)||!Path.GetExtension(profileExe.Text).Equals(".exe",StringComparison.OrdinalIgnoreCase))throw new InvalidOperationException("Selecione um executável Windows existente.");bool withHud=profileOverlay.IsChecked==true&&hud==null;Process.Start(new ProcessStartInfo(profileExe.Text){Arguments=profileArgs.Text,WorkingDirectory=Path.GetDirectoryName(profileExe.Text),UseShellExecute=false});if(withHud)ToggleHud();Record("Jogo iniciado: "+profileName.Text);}catch(Exception e){Record("Perfil: "+e.Message,true);}}
  async Task ExportLogs(){try{var picker=new global::Windows.Storage.Pickers.FileSavePicker{SuggestedFileName="GPU-PRO"};WinRT.Interop.InitializeWithWindow.Initialize(picker,hwnd);picker.FileTypeChoices.Add("Log",new List<string>{".log"});var f=await picker.PickSaveFileAsync();if(f!=null){File.WriteAllLines(f.Path,operations);Record("Logs exportados: "+f.Path);}}catch(Exception e){Record("Falha ao exportar logs: "+e.Message,true);}}
  record GameProfile(string Name,string Executable,string Arguments,bool Overlay);
 }

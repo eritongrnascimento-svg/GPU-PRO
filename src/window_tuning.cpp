@@ -3,19 +3,22 @@ void MainWindow::buildTuningControls(QVBoxLayout *layout) {
   auto *group=new QGroupBox("Potência, tensão e ventoinhas");auto *form=new QVBoxLayout(group);
   auto *explain=new QLabel("O limite de potência define o teto de consumo em W. Undervolt reduz a tensão por um ajuste negativo em mV. Os controles disponíveis variam conforme a placa e o driver. Nada é aplicado ao abrir.");
   explain->setWordWrap(true);form->addWidget(explain);
+  // Compacto: cada controle numa linha (nome, valor, Aplicar) e dois controles por fileira.
+  auto *grid=new QGridLayout;grid->setHorizontalSpacing(18);grid->setVerticalSpacing(6);form->addLayout(grid);int slot=0;
   for(QString domain:QStringList{"power","voltageOffset","fan0","fan1","fan2","fan3","fan4","fan5","fan6","fan7","fan8","fan9","fan10","fan11","fan12","fan13","fan14","fan15"}) {
     QString title=domain=="power"?"Power limit / limite de consumo":domain=="voltageOffset"?"Tensão / undervolt (offset)":"Ventoinha "+QString::number(domain.mid(3).toInt()+1);
     auto *label=new QLabel(title+" · não exposto pelo driver");label->setWordWrap(true);tuningLabels[domain]=label;
-    form->addWidget(label);auto *row=new QHBoxLayout;
+    auto *row=new QHBoxLayout;label->setMinimumWidth(170);row->addWidget(label);
     auto *input=new QSpinBox;input->setRange(0,0);input->setSpecialValueText("N/D");input->setEnabled(false);input->setObjectName("tuning-"+domain);tuningInputs[domain]=input;row->addWidget(input,1);
-    auto *apply=new QPushButton("Aplicar");apply->setEnabled(false);tuningButtons[domain]=apply;row->addWidget(apply);form->addLayout(row);
+    auto *apply=new QPushButton("Aplicar");apply->setEnabled(false);tuningButtons[domain]=apply;row->addWidget(apply);grid->addLayout(row,slot/2,slot%2);++slot;
     connect(apply,&QPushButton::clicked,this,[this,domain,input]{input->interpretText();applyTuning(domain,input->value());});
     // Extra physical fans are shown only when discovered.
     if(domain.startsWith("fan")&&domain!="fan0") {label->hide();input->hide();apply->hide();}
   }
-  automaticFans=new QPushButton("Restaurar controle automático das ventoinhas");automaticFans->setEnabled(false);form->addWidget(automaticFans);
+  auto *restoreRow=new QHBoxLayout;form->addLayout(restoreRow);
+  automaticFans=new QPushButton("Ventoinhas no automático");automaticFans->setEnabled(false);restoreRow->addWidget(automaticFans);
   connect(automaticFans,&QPushButton::clicked,this,[this]{applyTuning("fans-auto",-1);});
-  auto *restore=restoreTuningButton=new QPushButton("Restaurar potência e tensão iniciais desta sessão");restore->setEnabled(false);form->addWidget(restore);
+  auto *restore=restoreTuningButton=new QPushButton("Restaurar potência e tensão iniciais");restore->setEnabled(false);restoreRow->addWidget(restore);restoreRow->addStretch();
   connect(restore,&QPushButton::clicked,this,[this]{
     const auto initial=sessionTuning.value(deviceKey(gpus.value(selected)));
     if(initial.isEmpty())return;
