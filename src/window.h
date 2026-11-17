@@ -104,6 +104,10 @@ private:
   QJsonObject graphicsResult;
   QJsonArray bottleneckStages;
   int bottleneckStage = 0;
+  // Picos de memória durante a fase alvo do gargalo (VRAM, GTT da AMD e RAM do sistema).
+  double bottleneckVramPeak = 0, bottleneckVramTotal = 0, bottleneckGttBase = -1, bottleneckGttPeak = 0, bottleneckRamPeak = 0, bottleneckRamTotal = 0;
+  void trackBottleneckMemory();
+  void addMemoryVerdict(QJsonObject &r);
   QJsonObject trialBaseline, trialGraphics, trialLease;
   bool trialActive = false, trialRestoring = false, trialCancelled = false;
   QByteArray clockOutput;
@@ -123,6 +127,7 @@ private:
   QCheckBox *hudEnabled, *onlyGame, *profileHud, *profileFilters, *profileFsr;
   QComboBox *layoutChoice, *anchorChoice, *monitorChoice, *filterAA, *profileResolution;
   QSpinBox *hudX, *hudY, *hudWidth, *hudFont, *hudOpacity, *fpsLimit;
+  QComboBox *hudMode = nullptr;
   QDoubleSpinBox *sharp;
   QMap<QString, QCheckBox *> hudFields;
   QLineEdit *profileName, *profileExe, *profileArgs;
@@ -224,6 +229,27 @@ private:
   void setTesting(bool);
   void refreshDisplays();
   void applyDisplay();
+  // 3D & Filtros (src/window_3d.cpp).
+  QGridLayout *featureGrid = nullptr;
+  QComboBox *gsFilter = nullptr;
+  QSpinBox *gsSharpness = nullptr;
+  QCheckBox *gsHdr = nullptr, *gsVrr = nullptr, *protonDlss = nullptr, *protonRt = nullptr, *protonHdr = nullptr, *gameMode = nullptr;
+  void buildThreeDFeatures(QVBoxLayout *);
+  void refreshThreeDFeatures();
+  void buildThreeDProfileOptions(QFormLayout *gamescope, QVBoxLayout *proton);
+  void applyThreeDProfileOptions(QStringList &env, QStringList &wrapper, QJsonObject &profile);
+  void loadThreeDProfileOptions(const QJsonObject &);
+  // Ajustes da saída selecionada (src/window_displays.cpp).
+  QComboBox *rotationChoice = nullptr, *scaleChoice = nullptr, *vrrChoice = nullptr, *iccChoice = nullptr;
+  QCheckBox *hdrToggle = nullptr;
+  QPushButton *primaryButton = nullptr;
+  QSlider *brightnessSlider = nullptr, *contrastSlider = nullptr;
+  QLabel *displayExtraInfo = nullptr;
+  QMap<QString, int> ddcDisplays;
+  void buildDisplayExtras(QVBoxLayout *);
+  void updateDisplayExtras();
+  QJsonObject currentDisplay() const;
+  void applyDisplayChange(const QString &exe, const QStringList &args, const QStringList &revert, const QString &what, bool confirm);
 
 public:
   Q_INVOKABLE void activateExistingInstance() { showFromTray(); }

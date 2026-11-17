@@ -17,12 +17,17 @@ struct Metric {
   double divisor;
 };
 const QList<Metric> &metricDefinitions();
+// Leituras do sistema exibidas apenas no HUD (RAM, disco, clock da CPU), igual à versão Windows.
+const QList<Metric> &systemMetricDefinitions();
+const Metric *findMetric(const QString &key);
 QString displayMetric(const QJsonObject &, const QString &key);
 struct OverlayConfig {
   bool enabled = false, onlyGame = false, frametimeGraph = false;
   int monitor = 0, x = 24, y = 24, font = 14, width = 360, opacity = 78;
   QString frametimeLog;
   QString anchor = "top-left", layout = "list";
+  // "game" = sempre no topo sobre o jogo; "desktop" = abaixo das janelas, sobre o papel de parede.
+  QString mode = "game", textColor = "#ebebeb", titleColor = "auto", graphColor = "auto";
   QStringList fields = {"usage", "temp", "vram", "power", "clock", "cpuUsage", "cpuTemp", "fps", "fpsLow", "fpsAvg", "fpsMax"};
   QJsonObject json() const;
   static OverlayConfig fromJson(const QJsonObject &);

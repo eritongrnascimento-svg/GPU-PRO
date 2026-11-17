@@ -28,15 +28,24 @@ const QList<Metric> &metricDefinitions() {
                                   {"fpsMax", "FPS máximo (CSV)", "FPS", 1}};
   return d;
 }
+const QList<Metric> &systemMetricDefinitions() {
+  static const QList<Metric> d = {{"ramUsed", "RAM usada", "GiB", 1073741824}, {"ramPct", "RAM %", "%", 1},
+                                  {"cpuClock", "Clock CPU", "MHz", 1},           {"diskRead", "Disco leitura", "MB/s", 1048576},
+                                  {"diskWrite", "Disco escrita", "MB/s", 1048576}, {"diskActive", "Disco ativo", "%", 1},
+                                  {"diskTemp", "Disco temp", "°C", 1}};
+  return d;
+}
+const Metric *findMetric(const QString &key) {
+  for (const auto *list : {&metricDefinitions(), &systemMetricDefinitions()})
+    for (const auto &m : *list)
+      if (m.key == key) return &m;
+  return nullptr;
+}
 QString displayMetric(const QJsonObject &obj, const QString &key) {
-  for (const auto &m : metricDefinitions())
-    if (m.key == key) {
-      if (!obj.value(key).isDouble())
-        return "N/D";
-      return QString::number(obj.value(key).toDouble() / m.divisor, 'f', (key == "power" || key.startsWith("fps")) ? 1 : 0) +
-             " " + m.unit;
-    }
-  return "N/D";
+  const Metric *m = findMetric(key);
+  if (!m || !obj.value(key).isDouble()) return "N/D";
+  const bool decimal = key == "power" || key.startsWith("fps") || m->unit == "GiB" || m->unit == "MB/s";
+  return QString::number(obj.value(key).toDouble() / m->divisor, 'f', decimal ? 1 : 0) + " " + m->unit;
 }
 QJsonObject OverlayConfig::json() const {
   return {{"enabled", enabled},
@@ -51,6 +60,10 @@ QJsonObject OverlayConfig::json() const {
           {"opacity", opacity},
           {"anchor", anchor},
           {"layout", layout},
+          {"mode", mode},
+          {"textColor", textColor},
+          {"titleColor", titleColor},
+          {"graphColor", graphColor},
           {"fields", QJsonArray::fromStringList(fields)}};
 }
 OverlayConfig OverlayConfig::fromJson(const QJsonObject &o) {
@@ -73,12 +86,20 @@ OverlayConfig OverlayConfig::fromJson(const QJsonObject &o) {
   const QString l = o["layout"].toString();
   if (QStringList{"list", "compact", "columns"}.contains(l))
     c.layout = l;
+  if (o["mode"].toString() == "desktop") c.mode = "desktop";
+  // Cores: "#rrggbb" ou "auto" (cor do fabricante da GPU); qualquer outro valor é ignorado.
+  auto color = [&](const char *key, QString &target) {
+    const QString v = o[key].toString();
+    if (v == "auto" || QRegularExpression("^#[0-9a-fA-F]{6}$").match(v).hasMatch()) target = v;
+  };
+  color("textColor", c.textColor);
+  color("titleColor", c.titleColor);
+  color("graphColor", c.graphColor);
   if (o.contains("fields")) {
     c.fields.clear();
     for (auto v : o["fields"].toArray())
-      for (const auto &m : metricDefinitions())
-        if (v.toString() == m.key && !c.fields.contains(m.key))
-          c.fields << m.key;
+      if (findMetric(v.toString()) && !c.fields.contains(v.toString()))
+        c.fields << v.toString();
   }
   return c;
 }

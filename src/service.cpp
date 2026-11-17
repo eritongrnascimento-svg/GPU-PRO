@@ -1,4 +1,5 @@
 #include "service.h"
+#include "system_metrics.h"
 #include <unistd.h>
 void TelemetryService::start() {
   backend = std::make_unique<GpuBackend>();
@@ -62,6 +63,7 @@ void TelemetryService::publish() {
   const auto fps=frameMetrics(frameTimes);
   for(auto it=fps.begin();it!=fps.end();++it) current[it.key()]=it.value();
   current["frameTimes"]=frameTimes;
+  addSystemMetrics(current);
   emit snapshot(current);
   if (port > 0 && udp) {
     QJsonObject state = {

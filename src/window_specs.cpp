@@ -131,6 +131,7 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
             ? "Exposta; codecs específicos dependem das capabilities"
             : "Não exposta nesta consulta");
   }
+  refreshThreeDFeatures();
   queueSpecAdapt();
 }
 

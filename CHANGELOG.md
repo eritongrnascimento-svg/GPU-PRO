@@ -1,5 +1,18 @@
 # Alterações
 
+## 0.8.0 (Linux) — em preparação
+
+Design igual ao da versão Windows, respeitando as funções do Linux.
+
+- Marca GPU-PRO com ícone, menu na mesma ordem do Windows e aba Sobre (cafezinho por PIX e versículo, também na barra lateral). Janela abre centralizada (X11; no Wayland nativo a posição é do compositor).
+- Notificações & Logs em uma aba só, com busca, filtro por categoria e cópia diária em `~/.config/.../logs`; mensagens não aparecem mais em outras abas nem na barra de status.
+- Overclock: termo de responsabilidade versão 2, gráfico de estabilidade (clock, memória, temperatura, potência, ventoinha e uso; marcas dos ajustes; diagnóstico sob carga; CSV) e página compactada.
+- Gargalo: resultado em "GPU, CPU e memória perdendo X% de desempenho"; memória só perde com a VRAM no limite e o quadro mais lento que o esperado pela resolução (na AMD, o GTT confirma o transbordo para a RAM).
+- Monitores & Telas: além do modo, rotação e monitor principal (xrandr e KDE), escala, HDR, VRR e perfil de cor (KDE Wayland, kscreen-doctor) e brilho/contraste por DDC/CI (ddcutil), com reversão em 15 s para geometria e HDR; um único botão abre as configurações de tela do sistema.
+- 3D & Filtros: recursos suportados pela GPU e bibliotecas instaladas (ray tracing Vulkan/DX12 via VKD3D, DLSS/Frame Generation por arquitetura, FSR, XeSS, Gamescope, vkBasalt, MangoHud, GameMode) e novas opções do perfil: filtro FSR/NIS e nitidez, HDR e VRR no Gamescope; DLSS via DXVK-NVAPI, ray tracing DX12 e HDR no Proton; GameMode.
+- HUD: leituras de RAM, clock da CPU e disco (leitura/escrita, tempo ativo e temperatura NVMe/SATA), cores de fonte, título e gráfico e modo área de trabalho (abaixo das janelas).
+- Correções: títulos com "&" apareciam como "_"; janela do HUD renomeada para "GPU-PRO HUD"; exportação de imagem com "GPU-PRO · Gargalo" em vez de "GPU CONTROL · BOTTLENECK".
+
 ## 0.8.0 (Windows) — em preparação
 
 Primeira versão nativa para Windows (WinUI 3 + núcleo C++ compartilhado com o Linux). Instalador (Inno Setup, por usuário, sem administrador) e pacote portátil ZIP; detalhes em `docs/WINDOWS.md`.

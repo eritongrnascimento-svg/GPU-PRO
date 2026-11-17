@@ -374,10 +374,13 @@ void MainWindow::handleGraphics(QJsonObject r) {
   if (activeKind == "bottleneck" && r["valid"].toBool()) {
     bottleneckStages.append(r);
     if (bottleneckStage++ == 0) {
+      bottleneckVramPeak = bottleneckVramTotal = bottleneckGttPeak = bottleneckRamPeak = bottleneckRamTotal = 0;
+      bottleneckGttBase = latest["gttUsed"].isDouble() ? latest["gttUsed"].toDouble() : -1;
       startGraphics("bottleneck", "Vulkan", bottleneckTarget.width(), bottleneckTarget.height(), 12, 150000);
       return;
     }
     r = estimateBottleneck(bottleneckStages[0].toObject(), bottleneckStages[1].toObject());
+    addMemoryVerdict(r);
   }
   finishTest(r);
 }
@@ -451,7 +454,10 @@ void MainWindow::presentRecord(QString kind, const QJsonObject &r) {
   if (!r["valid"].toBool())
     lines << "Sem pontuação válida · " + r["error"].toString("teste incompleto");
   else if (kind == "bottleneck") {
-    if (r.contains("cpuLossPct")) {
+    if (r.contains("lines")) {
+      for (auto v : r["lines"].toArray()) lines << v.toObject()["title"].toString() + " — " + v.toObject()["detail"].toString();
+      lines << r["verdict"].toString() << r["note"].toString();
+    } else if (r.contains("cpuLossPct")) {
       lines << r["summary"].toString()
         << QString("CPU: %1 ms · GPU: %2 ms · limite CPU: %3% da capacidade GPU; limite GPU: %4% da capacidade CPU.")
           .arg(r["highCpuMs"].toDouble(),0,'f',2).arg(r["highGpuMs"].toDouble(),0,'f',2)
@@ -555,7 +561,7 @@ QImage MainWindow::renderReport(QString kind, const QJsonObject &r) {
   p.setRenderHint(QPainter::Antialiasing);
   p.setPen(QColor(gpus.value(selected).accent()));
   p.setFont(QFont("Sans", 25, QFont::Bold));
-  p.drawText(45, 65, "GPU CONTROL · " + kind.toUpper());
+  p.drawText(45, 65, "GPU-PRO · " + (kind == "graphics" ? QString("Cenas 3D / jogos") : kind == "compute" ? QString("Memória / FLOPS / inteiros") : kind == "video" ? QString("Encoder / Decoder") : kind == "bottleneck" ? QString("Gargalo") : kind));
   p.setPen(Qt::white);
   p.setFont(QFont("Sans", 14));
   p.drawText(45, 110, r["gpu"].toObject()["name"].toString());
@@ -614,7 +620,8 @@ QImage MainWindow::renderReport(QString kind, const QJsonObject &r) {
     y += 36;
   }
   if (kind == "bottleneck") {
-    QString summary = r.contains("cpuLossPct") ? r["summary"].toString() + "\nEstimativa sintética, não perda real em jogos."
+    QString summary = r.contains("lines") ? r["summary"].toString() + "\n" + r["note"].toString()
+      : r.contains("cpuLossPct") ? r["summary"].toString() + "\nEstimativa sintética, não perda real em jogos."
       : QString("Registro anterior · GPU 720p / 1440p: %1 / %2 ms; CPU: %3 ms").arg(r["lowGpuMs"].toDouble()).arg(r["highGpuMs"].toDouble()).arg(r["highCpuMs"].toDouble());
     p.drawText(QRect(45,y,1510,110),Qt::TextWordWrap,summary); y += 120;
   }
@@ -999,4 +1006,74 @@ void MainWindow::refreshStability() {
   if (v.loadSamples >= 10)
     extra = QString(" · %1 amostras sob carga · temperatura máx. %2 °C · potência máx. %3 W").arg(v.loadSamples).arg(v.maxTemp, 0, 'f', 0).arg(v.maxPower, 0, 'f', 0);
   stabilityVerdict->setText(QString("<b style='color:%1'>%2</b> — %3%4").arg(color, v.state, v.detail.toHtmlEscaped(), extra));
+}
+
+// Picos de memória na fase alvo do gargalo, a cada leitura de sensores.
+void MainWindow::trackBottleneckMemory() {
+  if (!testActive || activeKind != "bottleneck" || bottleneckStage != 1) return;
+  if (latest["vram"].isDouble()) bottleneckVramPeak = qMax(bottleneckVramPeak, latest["vram"].toDouble());
+  if (latest["vramTotal"].isDouble()) bottleneckVramTotal = qMax(bottleneckVramTotal, latest["vramTotal"].toDouble());
+  if (latest["gttUsed"].isDouble()) bottleneckGttPeak = qMax(bottleneckGttPeak, latest["gttUsed"].toDouble());
+  qint64 total = 0, available = 0;
+  for (const auto &line : readText("/proc/meminfo").split('\n')) {
+    if (line.startsWith("MemTotal:")) total = line.section(':', 1).trimmed().section(' ', 0, 0).toLongLong() * 1024;
+    if (line.startsWith("MemAvailable:")) available = line.section(':', 1).trimmed().section(' ', 0, 0).toLongLong() * 1024;
+  }
+  if (total > 0) { bottleneckRamTotal = double(total); bottleneckRamPeak = qMax(bottleneckRamPeak, double(total - available)); }
+}
+
+// Mesmo resultado da versão Windows: "GPU/CPU/Memória perdendo X% de desempenho".
+// A memória só perde quando a VRAM está no limite e o quadro fica mais lento que o esperado pela
+// escala de resolução; na AMD, o crescimento do GTT confirma o transbordo para a RAM do sistema.
+void MainWindow::addMemoryVerdict(QJsonObject &r) {
+  if (!r["valid"].toBool()) return;
+  constexpr double GiB = 1073741824.0;
+  const double gpuLoss = r["gpuLossFromCpuPct"].toDouble(), cpuLoss = r["cpuLossFromGpuPct"].toDouble();
+  const double width = r["width"].toDouble(), height = r["height"].toDouble();
+  const double expected = r["lowGpuMs"].toDouble() * (width * height) / (1280.0 * 720.0), measured = r["highGpuMs"].toDouble();
+  const bool dedicated = bottleneckVramTotal > 0;
+  const double growth = bottleneckGttBase >= 0 ? qMax(0.0, bottleneckGttPeak - bottleneckGttBase) : 0;
+  const bool full = dedicated && bottleneckVramPeak >= bottleneckVramTotal * 0.95;
+  const bool spill = full && (bottleneckGttBase < 0 || growth >= 256.0 * 1048576.0);
+  const double memoryLoss = spill && measured > expected ? 100.0 * (1.0 - expected / measured) : 0.0;
+  const bool ramFull = bottleneckRamTotal > 0 && bottleneckRamPeak >= bottleneckRamTotal * 0.95;
+  const QString ram = bottleneckRamTotal > 0 ? QString("RAM pico %1 de %2 GiB").arg(bottleneckRamPeak / GiB, 0, 'f', 1).arg(bottleneckRamTotal / GiB, 0, 'f', 1) +
+                                                   (ramFull ? " · RAM do sistema no limite, o Linux pode usar swap" : "")
+                                             : QString("RAM sem leitura");
+  auto pct = [](double v) { return QString::number(v, 'f', 0) + "%"; };
+  QJsonArray lines;
+  auto line = [&](const QString &part, std::optional<double> loss, const QString &detail) {
+    lines.append(QJsonObject{{"part", part}, {"lossPct", loss ? QJsonValue(*loss) : QJsonValue()},
+                             {"title", loss ? QString("%1 perdendo %2 de desempenho").arg(part, pct(*loss)) : part + " · não se aplica"},
+                             {"detail", detail}});
+  };
+  line("GPU", gpuLoss, gpuLoss < 1 ? "A CPU acompanha a GPU: nada da GPU fica parado nesta carga."
+       : QString("A GPU conseguiria %1 FPS, mas a CPU só prepara %2 FPS. %3 FPS da GPU ficam sem uso.")
+             .arg(r["gpuPotentialFps"].toDouble(), 0, 'f', 0).arg(r["modelFps"].toDouble(), 0, 'f', 0).arg(r["gpuLostFps"].toDouble(), 0, 'f', 0));
+  line("CPU", cpuLoss, cpuLoss < 1 ? "A GPU acompanha a CPU: nada da CPU fica parado nesta carga."
+       : QString("A CPU conseguiria preparar %1 FPS, mas a GPU só desenha %2 FPS. %3 FPS da CPU ficam sem uso.")
+             .arg(r["cpuPotentialFps"].toDouble(), 0, 'f', 0).arg(r["modelFps"].toDouble(), 0, 'f', 0).arg(r["cpuLostFps"].toDouble(), 0, 'f', 0));
+  line("Memória", dedicated ? std::optional<double>(memoryLoss) : std::nullopt,
+       !dedicated ? "GPU sem VRAM dedicada informada; usa a RAM do sistema. " + ram + "."
+       : spill ? QString("A VRAM encheu (%1 de %2 GiB)%3; cada quadro ficou %4 mais lento que o esperado para %5×%6. %7.")
+                     .arg(bottleneckVramPeak / GiB, 0, 'f', 1).arg(bottleneckVramTotal / GiB, 0, 'f', 1)
+                     .arg(growth > 0 ? QString(" e %1 GiB transbordaram para a RAM do sistema").arg(growth / GiB, 0, 'f', 1) : QString())
+                     .arg(pct(memoryLoss)).arg(width).arg(height).arg(ram)
+               : QString("Sem transbordo: VRAM pico %1 de %2 GiB. %3.").arg(bottleneckVramPeak / GiB, 0, 'f', 1).arg(bottleneckVramTotal / GiB, 0, 'f', 1).arg(ram));
+  const double worst = qMax(gpuLoss, qMax(cpuLoss, memoryLoss));
+  const QString verdict = worst < 5 ? "Equilibrado: nenhum componente perde mais de 5% nesta carga."
+                        : worst == gpuLoss ? "Gargalo principal: CPU. A GPU espera pela CPU."
+                        : worst == cpuLoss ? "Gargalo principal: GPU. A CPU espera pela GPU."
+                                           : "Gargalo principal: memória de vídeo. A VRAM não comporta esta resolução.";
+  QStringList titles;
+  for (auto v : lines) titles << v.toObject()["title"].toString();
+  r["method"] = "resolution-cpu-memory-balance-v4";
+  r["memoryLossPct"] = dedicated ? QJsonValue(memoryLoss) : QJsonValue();
+  r["memory"] = QJsonObject{{"vramPeakBytes", bottleneckVramPeak}, {"vramTotalBytes", bottleneckVramTotal}, {"gttGrowthBytes", growth},
+                            {"ramPeakBytes", bottleneckRamPeak}, {"ramTotalBytes", bottleneckRamTotal}, {"spill", spill},
+                            {"expectedGpuMs", expected}, {"measuredGpuMs", measured}};
+  r["lines"] = lines;
+  r["verdict"] = verdict;
+  r["summary"] = titles.join('\n') + '\n' + verdict;
+  r["note"] = QString("Carga sintética do GPU-PRO: referência 1280×720 e alvo %1×%2 com carga fixa de CPU. Não é a perda medida em um jogo específico.").arg(width).arg(height);
 }

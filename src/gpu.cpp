@@ -293,6 +293,8 @@ QJsonObject GpuBackend::sample(const Gpu &g) {
   read("usage", g.sys + "/gpu_busy_percent");
   read("vram", g.sys + "/mem_info_vram_used");
   read("vramTotal", g.sys + "/mem_info_vram_total");
+  // GTT: memória do sistema usada pela GPU; cresce quando a VRAM transborda (gargalo de memória).
+  read("gttUsed", g.sys + "/mem_info_gtt_used");
   for (const auto &h : QDir(g.sys + "/hwmon").entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
     QString base = g.sys + "/hwmon/" + h + "/";
     QJsonArray sensors = o["temperatureSensors"].toArray();

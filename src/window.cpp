@@ -22,7 +22,8 @@ QPushButton *button(QString s, QBoxLayout *l = nullptr) {
   return b;
 }
 QGroupBox *group(QString title, QGridLayout *grid, int row, int col, int span = 1) {
-  auto *g = new QGroupBox(title);
+  // "&" em títulos do Qt vira atalho de teclado; duplicado, aparece como texto.
+  auto *g = new QGroupBox(title.replace("&", "&&"));
   if (grid)
     grid->addWidget(g, row, col, 1, span);
   return g;
@@ -90,7 +91,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   resize(1240, 900);
   setWindowIcon(Branding::windowIcon(QColor("#76b900")));
   setMinimumSize(980, 700);
-  setWindowTitle("GPU-PRO · 0.7.0");
+  setWindowTitle("GPU-PRO · 0.8.0");
   if (!offline)
     overlayConfig = OverlayConfig::fromJson(
         QJsonDocument::fromJson(readText(configRoot() + "/overlay.json").toUtf8()).object());
@@ -590,6 +591,7 @@ void MainWindow::chooseGpu(int index) {
   latest = {};
   cachedVulkan = {};
   telemetryHistory = {};
+  refreshThreeDFeatures();
   for (auto *v : values)
     v->setText("N/D");
   emit selectGpu(index);
@@ -639,6 +641,7 @@ void MainWindow::updateSnapshot(QJsonObject o) {
     return;
   latest = o;
   if (stability) { stability->add(o); refreshStability(); }
+  trackBottleneckMemory();
   updateCpu(o);
   if(gameFramePlot) gameFramePlot->setSamples(o["frameTimes"].toArray());
   helperInfo->setText(
@@ -778,11 +781,9 @@ QWidget *MainWindow::profiles() {
       {"1280x720 → 1920x1080", "1920x1080 → 2560x1440", "2560x1440 → 3840x2160"});
   ul->addRow(profileFsr);
   ul->addRow(profileResolution);
-  auto *tech = group("Recursos dependentes do jogo", grid, 2, 1);
+  auto *tech = group("Proton · DLSS, ray tracing e HDR", grid, 2, 1);
   auto *tl = new QVBoxLayout(tech);
-  tl->addWidget(label("Ray tracing, DLSS, FSR temporal, XeSS, HDR, MSAA e "
-                      "anisotropia dependem do jogo, driver e caminho gráfico. "
-                      "Configure no jogo; não há ativação global garantida."));
+  buildThreeDProfileOptions(ul, tl);
   l->addLayout(grid);
   auto *actions = new QHBoxLayout;
   auto *save = button("Gravar perfil & comando Steam", actions);
@@ -818,9 +819,8 @@ QWidget *MainWindow::profiles() {
     sharp->setValue(p["sharpness"].toDouble(.5));
     filterAA->setCurrentIndex(qBound(0, p["aaIndex"].toInt(), 2));
     profileResolution->setCurrentIndex(qBound(0, p["resolutionIndex"].toInt(), 2));
-    launchText->setPlainText("Perfil carregado: " + path +
-                             "\nGravar cria uma nova cópia e um novo comando de lançamento.");
-    notify("Perfil carregado");
+    loadThreeDProfileOptions(p);
+    log("Perfil carregado: " + path);
   });
   auto *launch = button("Iniciar jogo com perfil", actions);
   l->addLayout(actions);
@@ -840,6 +840,7 @@ QWidget *MainWindow::profiles() {
     load->setEnabled(false);
     launch->setEnabled(false);
   }
+  buildThreeDFeatures(l);
   return p;
 }
 void MainWindow::saveProfile() {
@@ -883,6 +884,8 @@ void MainWindow::saveProfile() {
   }
   if (profileHud->isChecked())
     wrapper << "mangohud" << "--dlsym";
+  QJsonObject extras;
+  applyThreeDProfileOptions(env, wrapper, extras);
   // The wrapper receives literal argv; no user-supplied command is evaluated by
   // a shell.
   QString script = "#!/bin/sh\n";
@@ -916,6 +919,7 @@ void MainWindow::saveProfile() {
       {"gamescopeFsr", profileFsr->isChecked()},
       {"resolutionIndex", profileResolution->currentIndex()},
       {"vkbasalt", profileFilters->isChecked()}};
+  for (auto it = extras.begin(); it != extras.end(); ++it) profile[it.key()] = it.value();
   if (!saveJson(dir + "/profile.json", profile, &error)) {
     notify("Falha ao gravar perfil", error);
     return;
@@ -943,6 +947,10 @@ void MainWindow::launchProfile() {
   }
   if (o["mangohud"].toBool() && QStandardPaths::findExecutable("mangohud").isEmpty()) {
     notify("MangoHud não encontrado");
+    return;
+  }
+  if (gameMode && gameMode->isChecked() && QStandardPaths::findExecutable("gamemoderun").isEmpty()) {
+    notify("GameMode não encontrado");
     return;
   }
   if (profileFsr->isChecked() && QStandardPaths::findExecutable("gamescope").isEmpty()) {
@@ -1061,16 +1069,46 @@ QWidget *MainWindow::monitor() {
   form->addWidget(hudFont, 4, 3);
   form->addWidget(label("Fundo (%)"), 5, 0);
   form->addWidget(hudOpacity, 5, 1);
+  // Igual à versão Windows: onde o HUD aparece e cores da fonte, do título e do gráfico.
+  hudMode = new QComboBox;
+  hudMode->addItem("No jogo · sempre no topo", "game");
+  hudMode->addItem("Área de trabalho · atrás das janelas", "desktop");
+  hudMode->setCurrentIndex(overlayConfig.mode == "desktop" ? 1 : 0);
+  form->addWidget(label("Onde aparece"), 5, 2);
+  form->addWidget(hudMode, 5, 3);
+  connect(hudMode, qOverload<int>(&QComboBox::currentIndexChanged), this, [this] { saveOverlay(); log(QString("HUD: modo ") + (hudMode->currentIndex() == 1 ? "área de trabalho" : "jogo")); });
+  auto *colors = new QHBoxLayout;
+  for (auto [title, target, allowAuto] : std::initializer_list<std::tuple<QString, QString *, bool>>{
+           {"Cor da fonte", &overlayConfig.textColor, false}, {"Cor do título", &overlayConfig.titleColor, true}, {"Cor do gráfico", &overlayConfig.graphColor, true}}) {
+    auto *pick = new QPushButton(title);
+    auto paint = [pick, target] { pick->setStyleSheet(*target == "auto" ? QString() : QString("QPushButton{border-left:14px solid %1;}").arg(*target)); };
+    paint();
+    connect(pick, &QPushButton::clicked, this, [this, pick, target, allowAuto, title, paint] {
+      QColorDialog dialog(*target == "auto" ? QColor("#76b900") : QColor(*target), this);
+      dialog.setWindowTitle(title + (allowAuto ? " · Cancelar volta à cor da GPU" : ""));
+      if (dialog.exec() == QDialog::Accepted) *target = dialog.selectedColor().name();
+      else if (allowAuto) *target = "auto";
+      paint();
+      saveOverlay();
+    });
+    colors->addWidget(pick);
+  }
+  colors->addStretch();
   auto *fieldGrid = new QGridLayout;
   int i = 0;
-  for (const auto &m : metricDefinitions()) {
+  QList<Metric> hudMetrics = metricDefinitions();
+  hudMetrics += systemMetricDefinitions();
+  for (const auto &m : hudMetrics) {
     auto *check = new QCheckBox(m.label);
     check->setChecked(overlayConfig.fields.contains(m.key));
     hudFields[m.key] = check;
     fieldGrid->addWidget(check, i / 4, i % 4);
     ++i;
   }
-  form->addLayout(fieldGrid, 6, 0, 1, 4);
+  auto *choices = new QVBoxLayout;
+  choices->addLayout(colors);
+  choices->addLayout(fieldGrid);
+  form->addLayout(choices, 6, 0, 1, 4);
   hudFrametime = new QCheckBox("Linha de frametime (ms, fonte CSV real)");
   hudFrametime->setChecked(overlayConfig.frametimeGraph);
   hudLogFile = new QLineEdit(overlayConfig.frametimeLog);
@@ -1135,9 +1173,12 @@ void MainWindow::saveOverlay() {
   overlayConfig.opacity = hudOpacity->value();
   overlayConfig.frametimeGraph = hudFrametime->isChecked();
   overlayConfig.frametimeLog = hudLogFile->text().trimmed();
+  overlayConfig.mode = hudMode->currentData().toString();
   overlayConfig.fields.clear();
-  for (const auto &m : metricDefinitions())
-    if (hudFields[m.key]->isChecked())
+  QList<Metric> hudMetrics = metricDefinitions();
+  hudMetrics += systemMetricDefinitions();
+  for (const auto &m : hudMetrics)
+    if (hudFields.contains(m.key) && hudFields[m.key]->isChecked())
       overlayConfig.fields << m.key;
   int metricRow=0;
   for(const auto &m:metricDefinitions()) {if(m.key.startsWith("fps"))processTable->setRowHidden(metricRow,!overlayConfig.fields.contains(m.key));++metricRow;}
@@ -1203,7 +1244,7 @@ QWidget *MainWindow::displays() {
                             .arg(s->refreshRate(), 0, 'f', 2)
                             .arg(s->devicePixelRatio(), 0, 'f', 2)));
   l->addWidget(info);
-  auto *controls = new QGroupBox("Resolução & taxa de atualização");
+  auto *controls = new QGroupBox("Resolução && taxa de atualização");
   auto *form = new QFormLayout(controls);
   displayChoice = new QComboBox;
   modeChoice = new QComboBox;
@@ -1217,9 +1258,8 @@ QWidget *MainWindow::displays() {
   form->addRow(apply);
   form->addRow(displayInfo);
   l->addWidget(controls);
-  l->addWidget(label("Cor, HDR, VRR e áudio não são alterados nesta versão. Gamma não é "
-                     "usado como substituto de saturação. A lista de monitores pertence "
-                     "à sessão gráfica, não exclusivamente à GPU selecionada."));
+  buildDisplayExtras(l);
+  l->addWidget(label("A lista de monitores pertence à sessão gráfica, não exclusivamente à GPU selecionada."));
   l->addStretch();
   connect(refresh, &QPushButton::clicked, this, &MainWindow::refreshDisplays);
   connect(apply, &QPushButton::clicked, this, &MainWindow::applyDisplay);
@@ -1238,7 +1278,8 @@ QWidget *MainWindow::displays() {
   if (offline) {
     refresh->setEnabled(false);
     apply->setEnabled(false);
-  }
+  } else
+    QTimer::singleShot(1500, this, &MainWindow::refreshDisplays);
   return p;
 }
 void MainWindow::refreshDisplays() {
@@ -1294,10 +1335,17 @@ void MainWindow::refreshDisplays() {
                                                 .arg(m["refreshRate"].toDouble(), 0, 'f', 2)},
                                   {"current", id == current}});
                 }
+                // Estado atual exposto pelo libkscreen (chaves ausentes ficam indefinidas).
                 displayOutputs.append(QJsonObject{{"name", o["name"]},
                                                   {"id", o["id"]},
                                                   {"backend", "kscreen-doctor"},
-                                                  {"modes", modes}});
+                                                  {"modes", modes},
+                                                  {"rotation", o["rotation"]},
+                                                  {"scale", o["scale"]},
+                                                  {"primary", o["priority"].toInt() == 1},
+                                                  {"vrrPolicy", o["vrrPolicy"]},
+                                                  {"hdr", o["hdr"]},
+                                                  {"iccProfile", o["iccProfilePath"]}});
               }
             } else {
               QJsonObject output;
@@ -1314,8 +1362,16 @@ void MainWindow::refreshDisplays() {
                 if (!line.startsWith(' ')) {
                   flush();
                   auto parts = line.split(' ', Qt::SkipEmptyParts);
-                  if (parts.size() > 1 && parts[1] == "connected")
-                    output = {{"name", parts[0]}, {"backend", "xrandr"}};
+                  if (parts.size() > 1 && parts[1] == "connected") {
+                    // ex.: DP-1 connected primary 1920x1080+0+0 left (normal left inverted right ...)
+                    QString rotation = "normal";
+                    for (int i = 2; i + 1 < parts.size(); ++i)
+                      if (QRegularExpression("^[0-9]+x[0-9]+\\+").match(parts[i]).hasMatch()) {
+                        if (QStringList{"normal", "left", "inverted", "right"}.contains(parts[i + 1])) rotation = parts[i + 1];
+                        break;
+                      }
+                    output = {{"name", parts[0]}, {"backend", "xrandr"}, {"primary", parts.contains("primary")}, {"rotation", rotation}};
+                  }
                 } else if (!output.isEmpty()) {
                   auto parts = line.trimmed().split(QRegularExpression("\\s+"), Qt::SkipEmptyParts);
                   if (parts.size() > 1 &&

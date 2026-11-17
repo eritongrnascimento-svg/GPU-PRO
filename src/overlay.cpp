@@ -27,6 +27,7 @@ struct Hud {
   bool dirty = true, visible = false;
   int width = 360, height = 220;
   bool stale = false;
+  QString mode = "game";
   Display *hotkeyDisplay = nullptr;
   KeyCode hotkey = 0;
 };
@@ -72,8 +73,10 @@ gboolean draw(GtkWidget *, cairo_t *cr, gpointer data) {
   cairo_close_path(cr);
   cairo_set_source_rgba(cr, .035, .035, .04, c.opacity / 100.);
   cairo_fill(cr);
-  GdkRGBA accent{};
-  gdk_rgba_parse(&accent, h.metrics["accent"].toString("#76b900").toLatin1().constData());
+  GdkRGBA accent{}, text{}, graph{};
+  gdk_rgba_parse(&accent, (c.titleColor == "auto" ? h.metrics["accent"].toString("#76b900") : c.titleColor).toLatin1().constData());
+  gdk_rgba_parse(&graph, (c.graphColor == "auto" ? h.metrics["accent"].toString("#76b900") : c.graphColor).toLatin1().constData());
+  if (!gdk_rgba_parse(&text, c.textColor.toLatin1().constData())) gdk_rgba_parse(&text, "#ebebeb");
   cairo_set_source_rgba(cr, accent.red, accent.green, accent.blue, 1);
   cairo_rectangle(cr, 0, 10, 3, hh - 20);
   cairo_fill(cr);
@@ -85,13 +88,11 @@ gboolean draw(GtkWidget *, cairo_t *cr, gpointer data) {
   label(cr, sub, 14, 14 + f, qMax(9, f - 2), .65, .65, .65, w - 28);
   int i = 0, row = f + 12, top = 2 * f + 28, columns = overlayColumns(c, w);
   for (const auto &key : c.fields) {
-    QString name;
-    for (const auto &m : metricDefinitions())
-      if (m.key == key)
-        name = m.label;
+    const Metric *metric = findMetric(key);
+    const QString name = metric ? metric->label : key;
     int x = 14 + (i % columns) * (w - 24) / columns, y = top + (i / columns) * row;
     QString value = displayMetric(h.metrics, key);
-    label(cr, name + ": " + value, x, y, f, .92, .92, .92, (w - 28) / columns);
+    label(cr, name + ": " + value, x, y, f, text.red, text.green, text.blue, (w - 28) / columns);
     ++i;
   }
   if(c.frametimeGraph) {
@@ -104,7 +105,7 @@ gboolean draw(GtkWidget *, cairo_t *cr, gpointer data) {
     cairo_move_to(cr,left,bottom);cairo_line_to(cr,right,bottom);
     cairo_move_to(cr,left,bottom-height);cairo_line_to(cr,right,bottom-height);cairo_stroke(cr);
     if(samples.size()>1) {
-      cairo_set_source_rgb(cr,accent.red,accent.green,accent.blue);cairo_set_line_width(cr,1.5);
+      cairo_set_source_rgb(cr,graph.red,graph.green,graph.blue);cairo_set_line_width(cr,1.5);
       for(int n=0;n<samples.size();++n) {
         double x=left+(right-left)*n/(samples.size()-1),y=bottom-height*samples[n].toDouble()/maximum;
         if(n==0)cairo_move_to(cr,x,y);else cairo_line_to(cr,x,y);
@@ -113,6 +114,20 @@ gboolean draw(GtkWidget *, cairo_t *cr, gpointer data) {
     }
   }
   return FALSE;
+}
+// Modo jogo: override-redirect e sempre acima. Área de trabalho: janela gerenciada "sempre abaixo",
+// entre o papel de parede e as janelas. A troca acontece com o HUD oculto.
+void applyMode(Hud &h) {
+  h.mode = h.config.mode;
+  const bool game = h.mode == "game";
+  const bool wasVisible = h.visible;
+  gtk_widget_hide(h.window);
+  if (auto *native = gtk_widget_get_window(h.window)) gdk_window_set_override_redirect(native, game);
+  gtk_window_set_keep_above(GTK_WINDOW(h.window), game);
+  gtk_window_set_keep_below(GTK_WINDOW(h.window), !game);
+  h.visible = false;
+  h.dirty = true;
+  (void)wasVisible;
 }
 void reposition(Hud &h) {
   auto c = h.config;
@@ -170,6 +185,7 @@ gboolean tick(gpointer data) {
       auto cfg = o["config"].toObject();
       bool changed = cfg != h.config.json();
       h.config = OverlayConfig::fromJson(cfg);
+      if (h.config.mode != h.mode) applyMode(h);
       if (changed)
         reposition(h);
       h.dirty = true;
@@ -195,7 +211,7 @@ gboolean tick(gpointer data) {
     gtk_widget_queue_draw(h.window);
     h.dirty = false;
   }
-  if (show && g_get_monotonic_time() - h.lastRaise >= 2000000) {
+  if (show && h.mode == "game" && g_get_monotonic_time() - h.lastRaise >= 2000000) {
     auto *w = gtk_widget_get_window(h.window);
     if (w)
       gdk_window_raise(w);
@@ -237,7 +253,7 @@ int overlayChild(int argc, char **argv) {
   socklen_t length = sizeof addr;
   getsockname(h.socket, reinterpret_cast<sockaddr *>(&addr), &length);
   h.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title(GTK_WINDOW(h.window), "Linux GPU Control HUD");
+  gtk_window_set_title(GTK_WINDOW(h.window), "GPU-PRO HUD");
   gtk_window_set_decorated(GTK_WINDOW(h.window), FALSE);
   gtk_window_set_resizable(GTK_WINDOW(h.window), FALSE);
   gtk_window_set_keep_above(GTK_WINDOW(h.window), TRUE);

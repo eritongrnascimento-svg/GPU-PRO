@@ -14,7 +14,7 @@ for file in README.md LICENSE NOTICE CONTRIBUTING.md CHANGELOG.md SECURITY.md CM
  cp "$project_dir/$file" "$stage/GPU-PRO/"
 done
 for directory in src core windows shaders assets docs examples tools packaging .github; do
- if [ "$directory" = windows ]; then mkdir -p "$stage/GPU-PRO/windows"; cp -R "$project_dir/windows/native" "$project_dir/windows/GpuPro.WinUI" "$stage/GPU-PRO/windows/"; find "$stage/GPU-PRO/windows/GpuPro.WinUI" -type d \( -name bin -o -name obj \) -prune -exec rm -rf {} +; else cp -R "$project_dir/$directory" "$stage/GPU-PRO/"; fi
+ if [ "$directory" = windows ]; then mkdir -p "$stage/GPU-PRO/windows"; cp -R "$project_dir/windows/native" "$project_dir/windows/GpuPro.WinUI" "$project_dir/windows/checks" "$project_dir/windows/installer" "$project_dir/windows/build-windows.ps1" "$stage/GPU-PRO/windows/"; find "$stage/GPU-PRO/windows" -type d \( -name bin -o -name obj \) -prune -exec rm -rf {} +; else cp -R "$project_dir/$directory" "$stage/GPU-PRO/"; fi
 done
 # Source package never includes platform-specific binaries or local configuration.
 tar -czf "$output_dir/GPU-PRO-$version-source.tar.gz" -C "$stage" GPU-PRO
