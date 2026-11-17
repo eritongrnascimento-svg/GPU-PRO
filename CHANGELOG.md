@@ -1,6 +1,6 @@
 # Alterações
 
-## 0.8.0 (Linux) — em preparação
+## 0.8.0 (Linux) — 17/11/2026
 
 Design igual ao da versão Windows, respeitando as funções do Linux.
 
@@ -13,7 +13,7 @@ Design igual ao da versão Windows, respeitando as funções do Linux.
 - HUD: leituras de RAM, clock da CPU e disco (leitura/escrita, tempo ativo e temperatura NVMe/SATA), cores de fonte, título e gráfico e modo área de trabalho (abaixo das janelas).
 - Correções: títulos com "&" apareciam como "_"; janela do HUD renomeada para "GPU-PRO HUD"; exportação de imagem com "GPU-PRO · Gargalo" em vez de "GPU CONTROL · BOTTLENECK".
 
-## 0.8.0 (Windows) — em preparação
+## 0.8.0 (Windows) — 17/11/2026
 
 Primeira versão nativa para Windows (WinUI 3 + núcleo C++ compartilhado com o Linux). Instalador (Inno Setup, por usuário, sem administrador) e pacote portátil ZIP; detalhes em `docs/WINDOWS.md`.
 

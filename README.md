@@ -1,4 +1,4 @@
-# GPU-PRO — 0.7.0
+# GPU-PRO — 0.8.0
 
 [![Versões anteriores](https://img.shields.io/badge/Downloads-Vers%C3%B5es_anteriores-blue?style=for-the-badge)](https://github.com/eritongrnascimento-svg/GPU-PRO/blob/main/docs/VERSOES-ANTERIORES.md)
 
@@ -13,7 +13,7 @@ Repositório oficial: https://github.com/eritongrnascimento-svg/GPU-PRO
 
 Versão inicial para validação da comunidade; AMD/Intel ainda precisam de testes em hardware. Veja os [resultados reais e limites](docs/VERIFICACAO.md).
 
-Desenvolvo o GPU-PRO para oferecer monitoramento e ferramentas de teste MultiGPU no Linux, com backends NVIDIA, AMD e Intel. Neste repositório você encontra o aplicativo em C++20 / Qt 6, os instaladores e as instruções para usar e contribuir. O projeto nasceu de um protótipo Python, mantido separadamente. A coleta de resultados é local e permite colaboração da comunidade; não há servidor, upload automático ou rede neural treinada.
+Desenvolvo o GPU-PRO para oferecer monitoramento e ferramentas de teste MultiGPU no Linux e, a partir da 0.8.0, no Windows, com backends NVIDIA, AMD e Intel. Neste repositório você encontra o aplicativo Linux em C++20 / Qt 6, a versão Windows em WinUI 3 sobre o mesmo núcleo C++, os instaladores e as instruções para usar e contribuir. O projeto nasceu de um protótipo Python, mantido separadamente. A coleta de resultados é local e permite colaboração da comunidade; não há servidor, upload automático ou rede neural treinada.
 
 ## Licenças das integrações com o sistema
 
@@ -38,7 +38,25 @@ Prévia offline, sem inicializar a GPU:
 
 Escolha o formato adequado ao seu sistema na [última release](https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest). Os pacotes oficiais usam Linux x86_64 e base Ubuntu 24.04; o AppImage exige glibc 2.39 ou posterior. TAR/RUN e DEB utilizam bibliotecas do sistema. Se houver incompatibilidade de ABI, Qt ou glibc, compile com `build.sh`. O projeto não distribui drivers NVIDIA/AMD/Intel, e bibliotecas de um fabricante não devem ser copiadas para sistemas de outro.
 
-## Novidades da versão 0.7.0
+**Windows 10/11 x64:** baixe `GPU-PRO-0.8.0-windows-x64-setup.exe` (instalador por usuário, sem administrador) ou o portátil `GPU-PRO-0.8.0-windows-x64.zip` na mesma release. Detalhes em [Windows](docs/WINDOWS.md).
+
+## Novidades da versão 0.8.0
+
+Tudo o que mudou depois da 0.7.0. Notas completas em [RELEASE-0.8.0](docs/RELEASE-0.8.0.md) e no [CHANGELOG](CHANGELOG.md).
+
+- **Primeira versão para Windows** (WinUI 3 + núcleo C++ compartilhado): instalador e ZIP portátil, mesmas abas do Linux.
+- **Design unificado:** Linux redesenhado para ficar igual ao Windows, respeitando as funções de cada sistema; nome GPU-PRO e ícone na barra de título; janela sempre centralizada.
+- **Notificações & Logs:** uma aba única com Notificações e Log de operações, busca e filtro por categoria; nenhuma outra aba exibe logs.
+- **Overclock:** termo de responsabilidade (versão 2, com base legal) ao abrir a aba, gráfico detalhado de estabilidade com diagnóstico sob carga e exportação CSV, controles e cards compactados.
+- **Gargalo em linguagem direta:** "GPU / CPU / Memória perdendo X% de desempenho"; memória medida pela VRAM e RAM.
+- **GamerMonitor & Overlay:** HUD translúcido com desfoque, no jogo ou na área de trabalho; FPS e frametime opcional, GPU, CPU, memória e disco (leitura/escrita e temperatura); cores, tamanho, posição e formato configuráveis.
+- **Configurações 3D & Filtros:** recursos suportados pela GPU e pelas bibliotecas instaladas (ray tracing, DLSS, FSR, XeSS, NIS, nitidez, HDR, VRR) e ajustes do driver/perfis.
+- **Monitores & Telas:** resolução, frequência, escala, HDR, monitor principal, brilho/contraste por DDC/CI e perfil de cor dentro do app; um único botão abre as configurações do sistema.
+- **Especificações** completas também no Windows e cards do monitor que se ajustam à janela.
+- **Sobre:** projeto, repositório, cafezinho por PIX e versículo aleatório (também no rodapé do menu).
+- **Correção:** o app Windows podia fechar sozinho ao trocar de aba.
+
+## Histórico: novidades da versão 0.7.0
 
 - Overclock manual sem presets, com potência e fans nos backends reconhecidos; offset de tensão/undervolt AMD compatível.
 - FPS atual, 1% low das amostras CSV, média e máxima selecionáveis no painel e HUD; gráfico de frametime no GamerMonitor.
@@ -46,7 +64,7 @@ Escolha o formato adequado ao seu sistema na [última release](https://github.co
 - Versão DEB usa **Baixar no GitHub**; AppImage e portáteis mantêm o atualizador.
 - WSL: leitura NVIDIA via NVML, identificação da GPU física e opção de abrir maximizado. Ajustes da GPU exigem Linux nativo.
 
-Detalhes em [Controles manuais](docs/CONTROLES-MANUAIS.md). As imagens abaixo permanecem da versão 0.6.0, identificadas como tal.
+Detalhes em [Controles manuais](docs/CONTROLES-MANUAIS.md).
 
 ## Histórico: novidades da versão 0.6.1
 
@@ -55,19 +73,25 @@ Detalhes em [Controles manuais](docs/CONTROLES-MANUAIS.md). As imagens abaixo pe
 - Segundo clique no menu mostra o painel já aberto, inclusive quando está oculto, evitando abrir outra instância.
 - Identidade de ícone própria e atualização de caches no DEB para corrigir o ícone antigo do menu.
 
-Consulte [Ícones, bandeja e instância única](docs/IDENTIDADE-E-INSTANCIA.md), incluindo o comportamento de atalhos fixados e a transição a partir de versões anteriores. As capturas abaixo pertencem à versão 0.6.0; serão substituídas quando novas imagens estiverem disponíveis.
+Consulte [Ícones, bandeja e instância única](docs/IDENTIDADE-E-INSTANCIA.md), incluindo o comportamento de atalhos fixados e a transição a partir de versões anteriores.
 
 ## Capturas de tela
 
-GPU-PRO 0.6.0 — capturas de 11/11/2026, apresentadas da mais antiga para a mais recente.
+GPU-PRO 0.8.0 (Windows) — capturas de 17/11/2026, apresentadas da mais antiga para a mais recente.
 
-| 01 · Monitor de recursos · 11:36:30 | 02 · Especificações da GPU · 11:36:49 |
+| 01 · GPU · Especificações · 13:18:55 | 02 · CPU · Monitor e cálculos · 13:19:05 |
 |---|---|
-| [![Monitor de recursos](docs/capturas/v0.6.0/01-20261111-113630.png)](docs/capturas/v0.6.0/01-20261111-113630.png) | [![Especificações da GPU](docs/capturas/v0.6.0/02-20261111-113649.png)](docs/capturas/v0.6.0/02-20261111-113649.png) |
-| 03 · Recursos 3D e filtros · 11:37:03 | 04 · GamerMonitor e overlay · 11:37:12 |
-| [![Recursos 3D e filtros por jogo](docs/capturas/v0.6.0/03-20261111-113703.png)](docs/capturas/v0.6.0/03-20261111-113703.png) | [![GamerMonitor e overlay](docs/capturas/v0.6.0/04-20261111-113712.png)](docs/capturas/v0.6.0/04-20261111-113712.png) |
+| [![GPU · Especificações](docs/capturas/v0.8.0/01-20261117-131855.png)](docs/capturas/v0.8.0/01-20261117-131855.png) | [![CPU · Monitor e cálculos](docs/capturas/v0.8.0/02-20261117-131905.png)](docs/capturas/v0.8.0/02-20261117-131905.png) |
+| 03 · Configurações 3D & Filtros · 13:19:11 | 04 · GamerMonitor & Overlay · 13:19:16 |
+| [![Configurações 3D & Filtros](docs/capturas/v0.8.0/03-20261117-131911.png)](docs/capturas/v0.8.0/03-20261117-131911.png) | [![GamerMonitor & Overlay](docs/capturas/v0.8.0/04-20261117-131916.png)](docs/capturas/v0.8.0/04-20261117-131916.png) |
+| 05 · Monitores & Telas · 13:19:21 | 06 · Overclock · Manual (antes da compactação) · 13:19:26 |
+| [![Monitores & Telas](docs/capturas/v0.8.0/05-20261117-131921.png)](docs/capturas/v0.8.0/05-20261117-131921.png) | [![Overclock · Manual (antes da compactação)](docs/capturas/v0.8.0/06-20261117-131926.png)](docs/capturas/v0.8.0/06-20261117-131926.png) |
+| 07 · Benchmark · 13:19:32 | 08 · Atualizações · 13:19:49 |
+| [![Benchmark](docs/capturas/v0.8.0/07-20261117-131932.png)](docs/capturas/v0.8.0/07-20261117-131932.png) | [![Atualizações](docs/capturas/v0.8.0/08-20261117-131949.png)](docs/capturas/v0.8.0/08-20261117-131949.png) |
+| 09 · Sobre · cafezinho e versículo · 13:39:14 | 10 · Overclock · estabilidade · 13:39:42 |
+| [![Sobre · cafezinho e versículo](docs/capturas/v0.8.0/09-20261117-133914.png)](docs/capturas/v0.8.0/09-20261117-133914.png) | [![Overclock · estabilidade](docs/capturas/v0.8.0/10-20261117-133942.png)](docs/capturas/v0.8.0/10-20261117-133942.png) |
 
-[**Ver as oito capturas em ordem, incluindo monitores, overclock, benchmark e atualizações →**](docs/capturas/v0.6.0/README.md)
+[**Ver as dez capturas em ordem, com horários →**](docs/capturas/v0.8.0/README.md) · [Galeria anterior (0.6.0)](docs/capturas/v0.6.0/README.md)
 
 ## Organização da interface
 
@@ -220,4 +244,4 @@ A detecção utiliza o gerenciador e os repositórios reais do sistema; PackageK
 - Alinhamento de destinos padrão de áudio com seleção explícita e restauração, preservando volumes, filtros e conexões atuais. O botão não recupera codecs que falharam antes do ALSA.
 - Novo ícone `gpu-pro.png` no aplicativo e nos pacotes.
 
-Consulte [Drivers, atualização e sistema](docs/DRIVERS-E-SISTEMA.md). A [galeria atualizada](docs/capturas/v0.6.0/README.md) apresenta as oito capturas da versão 0.6.0 em ordem cronológica. As capturas anteriores permanecem identificadas como históricas.
+Consulte [Drivers, atualização e sistema](docs/DRIVERS-E-SISTEMA.md). A [galeria da 0.6.0](docs/capturas/v0.6.0/README.md) apresenta as oito capturas daquela versão em ordem cronológica.
