@@ -71,7 +71,7 @@ public sealed partial class MainWindow {
   nvidia.Children.Add(Row4(Button("Aplicar no driver",async()=>await ApplyDriver3D(false)),Button("Restaurar padrões do driver",async()=>await ApplyDriver3D(true))));
   nvidia.Children.Add(Text("Valores gravados no perfil global do driver NVIDIA (valem para todos os jogos sem perfil próprio). O Windows pede autorização de administrador; o app confirma lendo de volta.",11));
  }
- static JsonObject RunDriverWorker(string args){var start=new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory,"gpu-3d-worker.exe"),args){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true};using var p=Process.Start(start)??throw new IOException("gpu-3d-worker não iniciou");var text=p.StandardOutput.ReadToEnd();p.WaitForExit();return JsonNode.Parse(text)?.AsObject()??throw new IOException("Resposta inválida do gpu-3d-worker");}
+ static JsonObject RunDriverWorker(string args){var start=new ProcessStartInfo(Path.Combine(AppContext.BaseDirectory,"gpu-3d-worker.exe"),args){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,StandardOutputEncoding=System.Text.Encoding.UTF8};using var p=Process.Start(start)??throw new IOException("gpu-3d-worker não iniciou");var text=p.StandardOutput.ReadToEnd();p.WaitForExit();return JsonNode.Parse(text)?.AsObject()??throw new IOException("Resposta inválida do gpu-3d-worker");}
  async Task ApplyDriver3D(bool restore){
   var args=new List<string>();
   foreach(var (key,label,options) in driverSettings){if(!driverChoices.TryGetValue(key,out var combo))continue;int idx=combo.SelectedIndex;if(!restore&&idx==(int)combo.Tag)continue;var value=restore?"default":options[Math.Max(0,idx)].Value;

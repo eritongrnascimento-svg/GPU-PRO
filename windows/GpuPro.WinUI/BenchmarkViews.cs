@@ -34,7 +34,7 @@ public sealed partial class MainWindow {
   try{
    Directory.CreateDirectory(Path.Combine(dataRoot,"images"));string id=Guid.NewGuid().ToString(),image=Path.Combine(dataRoot,"images",id+".jpg");
    void Stage(int n,string text){if(workerStatus!=null)workerStatus.Text=$"Teste completo · etapa {n} de 4 · {text}";Record($"Teste completo · etapa {n} de 4 · {text}");}
-   async Task<JsonObject> Save(JsonObject r,string kind){r["id"]=Guid.NewGuid().ToString();r["gpu"]=PublicGpu();r["platform"]="Windows";r["timestamp"]=DateTime.UtcNow.ToString("O");r["kind"]=kind;await Data(new(){["operation"]="save",["device"]=DeviceKey,["record"]=r.DeepClone()});return r;}
+   async Task<JsonObject> Save(JsonObject r,string kind){r["id"]=Guid.NewGuid().ToString();r["gpu"]=PublicGpu();r["platform"]="Windows";r["timestamp"]=DateTime.UtcNow.ToString("O");r["kind"]=kind;await Data(new(){["operation"]="save",["device"]=DeviceKey,["record"]=r.DeepClone()});ShowReport(r,kind=="suite");_ = RefreshHistory(kind);return r;}
    Stage(1,"Cenas 3D · Vulkan 1920×1080 · 30 s");
    var graphics=await Save(await ExecuteWorker("gpu-bench-worker.exe",new[]{"--pci",gpu.Id,"--api","Vulkan","--width","1920","--height","1080","--seconds","30","--cpu-iterations","0","--live-preview",image,"--preview",Path.Combine(dataRoot,"images",id+".png")},image,token),"graphics");
    Stage(2,"Memória e computação da GPU");
@@ -54,7 +54,7 @@ public sealed partial class MainWindow {
    var suite=new JsonObject{["valid"]=true,["method"]="suite-v1",["api"]="Vulkan",["width"]=1920,["height"]=1080,["points"]=total,["categories"]=categories,
     ["methodText"]="Sequência fixa: cenas 3D (Vulkan, 1920×1080, 30 s), memória e computação da GPU, codecs de vídeo (4 resoluções) e de imagem, e processador. A pontuação total é a soma das categorias; cada categoria mostra o próprio método ao abrir o resultado individual.",
     ["parts"]=new JsonObject{["graphics"]=graphics.DeepClone(),["compute"]=compute.DeepClone(),["video"]=codecs.DeepClone(),["cpu"]=cpu.DeepClone()}};
-   suite=await Save(suite,"suite");selectedReport=suite;ShowReport(suite);if(workerProgress!=null)workerProgress.Value=100;
+   suite=await Save(suite,"suite");if(workerProgress!=null)workerProgress.Value=100;
    Record($"Teste completo concluído · {gpu.Name} · {total:N0} pontos · "+string.Join(" · ",categories.Select(c=>c!["name"]+" "+Points(c["points"]).ToString("N0"))));
   }catch(OperationCanceledException){if(workerStatus!=null)workerStatus.Text="Teste completo cancelado. Nenhuma pontuação geral foi registrada.";Record("Teste completo cancelado pelo usuário.");}
   finally{worker=null;workerCancel?.Dispose();workerCancel=null;gpuChoice.IsEnabled=true;benchmark=false;}
