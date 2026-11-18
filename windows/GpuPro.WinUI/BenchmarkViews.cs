@@ -6,7 +6,15 @@ namespace GpuPro.Windows;
 // Teste completo (sequência com pontuação geral, estilo AnTuTu) e resultados simplificados por categoria.
 public sealed partial class MainWindow {
  string videoParts="video,images";
- static long Points(JsonNode? n)=>n is JsonValue v&&v.TryGetValue<double>(out var d)&&double.IsFinite(d)?(long)Math.Round(d):0;
+ // Aceita qualquer número do JSON: valores lidos de um resultado (JsonElement) e valores criados aqui
+ // (long, int, double). Antes só double era lido, e a soma do Teste completo dava 0.
+ static long Points(JsonNode? n){
+  if(n is not JsonValue v)return 0;
+  if(v.TryGetValue<long>(out var l))return l;if(v.TryGetValue<int>(out var i))return i;
+  if(v.TryGetValue<double>(out var d)&&double.IsFinite(d))return (long)Math.Round(d);
+  if(v.TryGetValue<System.Text.Json.JsonElement>(out var e)&&e.ValueKind==System.Text.Json.JsonValueKind.Number&&e.TryGetDouble(out var x))return (long)Math.Round(x);
+  return 0;
+ }
  static string Fmt(double v,string unit)=>v>=100?$"{v:N0} {unit}":v>=10?$"{v:N1} {unit}":$"{v:N2} {unit}";
  static readonly Dictionary<string,string> codecNames=new(){["h264"]="H.264",["hevc"]="HEVC",["av1"]="AV1",["jpeg"]="JPEG",["png"]="PNG",["webp"]="WebP"};
 

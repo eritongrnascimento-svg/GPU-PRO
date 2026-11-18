@@ -12,9 +12,9 @@ concurrency:
 jobs:
   packages:
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Validar metadados
         run: |
           python3 - <<'PY'
@@ -47,7 +47,7 @@ jobs:
           version=$(python3 -c 'import json;print(json.load(open("../release.json"))["version"])')
           test "$(dpkg-deb -f "gpu-pro_"$version"_ubuntu24.04_amd64.deb" Architecture)" = amd64
           test "$(find . -maxdepth 1 -type f | wc -l)" -eq 8
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: GPU-PRO-linux-release-packages
           path: dist/*
@@ -59,8 +59,8 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v6
+      - uses: actions/download-artifact@v6
         with:
           name: GPU-PRO-linux-release-packages
           path: dist

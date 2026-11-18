@@ -9,6 +9,8 @@ Corrige o FPS dos jogos no HUD da 0.8.0 e torna os resultados do Benchmark mais 
 - Benchmark: aba Teste completo (sequência com pontuação total e por categoria); 3D com método resumido, pontuação e FPS mínimo/médio/máximo; memória com transferências CPU ↔ GPU e pontuações de memória e computação; codecs de vídeo em 720p, 1080p, 1440p e 4K e teste de imagens JPEG/PNG/WebP, com pontuação.
 - Notificações & Logs: botão Abrir trecho para cada resultado da busca, com o registro completo e as linhas ao redor.
 - Feedback & Diagnóstico: removidos Importar feedback de amigos e Consultar banco importado.
+- Windows: cor da interface pela GPU selecionada ou conectada (NVIDIA verde, AMD vermelho, Intel azul), sem alterar o tema do Windows; soma do Teste completo corrigida (dava 0 pontos).
+- GitHub Actions: ações em Node.js 24 e tempo limite maior para o empacotamento Linux.
 
 ## 0.8.0 (Linux) — 17/11/2026
 

@@ -13,6 +13,8 @@ Patch da versão 0.8.0 para Linux e Windows, publicado em 18/11/2026. Corrige o 
 | O teste de memória não tinha pontuação nem media transferências entre CPU e GPU. | **Pontuação de memória** (leitura, escrita e cópia na VRAM, envio CPU → GPU e retorno GPU → CPU pelo PCIe, cópia direta na VRAM) e **pontuação de computação** (FP32, FP64 e inteiros). |
 | Os codecs eram medidos só em 1080p, e não havia teste de imagens. | Vídeo H.264, HEVC e AV1, codificação e decodificação por hardware em **720p, 1080p, 1440p e 4K**, com FPS, megapixels por segundo e pontuação; **imagens** JPEG, PNG e WebP (quando disponível) nas mesmas resoluções, com pontuação própria. |
 | A busca no log só filtrava as linhas; registros longos (resultados de testes) ficavam difíceis de ler. | Cada trecho encontrado ganha o botão **Abrir trecho**, que mostra o registro completo, com os resultados formatados e as linhas ao redor, e permite copiá-lo. |
+| **Windows:** o app não usava a cor da GPU em todo lugar. Botões e o nome no topo ficavam sempre verdes, e o indicador do menu, as abas e as caixas de seleção usavam a cor de destaque do Windows. | O app identifica a GPU selecionada ou conectada e usa a cor dela em toda a interface, como no Linux: NVIDIA verde, AMD vermelho, Intel azul. O tema do Windows não é alterado. |
+| **Windows:** o Teste completo somava 0 pontos no total e nas categorias. | Soma corrigida; cada categoria mostra a própria pontuação. |
 | Feedback & Diagnóstico tinha os botões "Importar feedback de amigos" e "Consultar banco importado", fora do uso atual. | Botões removidos. |
 
 ## Novo no Benchmark

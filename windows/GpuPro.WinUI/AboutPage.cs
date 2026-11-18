@@ -19,7 +19,7 @@ public sealed partial class MainWindow {
  void ShowPaneVerse(){
   paneVerse??=new TextBlock{TextWrapping=TextWrapping.Wrap,FontSize=11,Margin=new Thickness(16,12,16,16),Opacity=.85};
   paneVerse.Inlines.Clear();paneVerse.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run{Text="“"+verse.Text+"”",FontStyle=global::Windows.UI.Text.FontStyle.Italic});
-  paneVerse.Inlines.Add(new Microsoft.UI.Xaml.Documents.LineBreak());paneVerse.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run{Text=verse.Reference,Foreground=new SolidColorBrush(theme),FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold});
+  paneVerse.Inlines.Add(new Microsoft.UI.Xaml.Documents.LineBreak());paneVerse.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run{Text=verse.Reference,Foreground=Accent.Fill,FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold});
   nav.PaneFooter=paneVerse;
  }
  void BuildAboutPage(){
@@ -43,7 +43,7 @@ public sealed partial class MainWindow {
   text.Children.Add(Button("Copiar PIX copia e cola",()=>{var data=new global::Windows.ApplicationModel.DataTransfer.DataPackage();data.SetText(code.Length>0?code:"eritongrnascimento@gmail.com");global::Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(data);Record("PIX copia e cola copiado para a área de transferência.");}));
   Grid.SetColumn(text,1);coffee.Children.Add(text);
   body.Children.Add(Tighten(Section("Cafezinho",coffee)));
-  var verseText=new TextBlock{TextWrapping=TextWrapping.Wrap,FontSize=17,FontStyle=global::Windows.UI.Text.FontStyle.Italic};var reference=new TextBlock{Foreground=new SolidColorBrush(theme),FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold};
+  var verseText=new TextBlock{TextWrapping=TextWrapping.Wrap,FontSize=17,FontStyle=global::Windows.UI.Text.FontStyle.Italic};var reference=new TextBlock{Foreground=Accent.Fill,FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold};
   void Fill(){verseText.Text="“"+verse.Text+"”";reference.Text=verse.Reference+" · Almeida Revista e Corrigida";}Fill();
   body.Children.Add(Tighten(Section("Versículo",verseText,reference,Button("Outro versículo",()=>{verse=Verses.Next(verse.Reference);Fill();ShowPaneVerse();}))));
  }

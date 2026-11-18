@@ -32,7 +32,7 @@ public sealed partial class MainWindow {
  void RefreshMatches(List<string> rows){
   if(logMatches==null)return;logMatches.Children.Clear();
   bool show=logSearch.Length>0&&rows.Count>0;logMatches.Visibility=show?Visibility.Visible:Visibility.Collapsed;if(logMatches.Parent is UIElement host)host.Visibility=logMatches.Visibility;if(!show)return;
-  logMatches.Children.Add(new TextBlock{Text=$"Trechos com “{logSearch}”: {rows.Count}"+(rows.Count>30?" · mostrando os 30 mais recentes":""),FontSize=13,Foreground=new SolidColorBrush(theme),FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold});
+  logMatches.Children.Add(new TextBlock{Text=$"Trechos com “{logSearch}”: {rows.Count}"+(rows.Count>30?" · mostrando os 30 mais recentes":""),FontSize=13,Foreground=Accent.Fill,FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold});
   foreach(var line in Enumerable.Reverse(rows).Take(30)){
    var row=new Grid{ColumnSpacing=12};row.ColumnDefinitions.Add(new(){Width=new GridLength(1,GridUnitType.Star)});row.ColumnDefinitions.Add(new(){Width=GridLength.Auto});
    var preview=new TextBlock{Text=LogPreview(line),FontSize=12,FontFamily=new FontFamily("Consolas"),TextTrimming=TextTrimming.CharacterEllipsis,VerticalAlignment=VerticalAlignment.Center};
@@ -46,7 +46,7 @@ public sealed partial class MainWindow {
   int index=operations.IndexOf(line);var panel=new StackPanel{Spacing=6};
   TextBlock Line(string text,double opacity)=>new(){Text=text,FontSize=12,FontFamily=new FontFamily("Consolas"),TextWrapping=TextWrapping.Wrap,IsTextSelectionEnabled=true,Opacity=opacity};
   if(index>0)foreach(var before in operations.Skip(Math.Max(0,index-3)).Take(Math.Min(3,index)))panel.Children.Add(Line(before,.55));
-  panel.Children.Add(new Border{Child=Line(Readable(line),1),Padding=new Thickness(10),BorderBrush=new SolidColorBrush(theme),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(6),Background=Brush(200,24,24,30)});
+  panel.Children.Add(new Border{Child=Line(Readable(line),1),Padding=new Thickness(10),BorderBrush=Accent.Fill,BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(6),Background=Brush(200,24,24,30)});
   if(index>=0)foreach(var after in operations.Skip(index+1).Take(3))panel.Children.Add(Line(after,.55));
   var dialog=new ContentDialog{XamlRoot=Root.XamlRoot,Title="Trecho do log",Content=new ScrollViewer{Content=panel,MaxHeight=520},PrimaryButtonText="Copiar trecho",CloseButtonText="Fechar",DefaultButton=ContentDialogButton.Close};
   if(await dialog.ShowAsync()==ContentDialogResult.Primary){var data=new global::Windows.ApplicationModel.DataTransfer.DataPackage();data.SetText(Readable(line));global::Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(data);}
@@ -83,7 +83,7 @@ public sealed partial class MainWindow {
   RefreshLogView();tabs.Items.Add(new PivotItem{Header="Logs de operações ("+operations.Count+")",Content=logBody});
   tabs.SelectedIndex=centralTab;tabs.SelectionChanged+=(s,e)=>centralTab=tabs.SelectedIndex;body.Children.Add(tabs);
  }
- Border Section(string title,params UIElement[] children){var stack=new StackPanel{Spacing=12,Margin=new Thickness(16)};stack.Children.Add(new TextBlock{Text=title,FontSize=14,Foreground=new SolidColorBrush(theme),FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold});foreach(var child in children)stack.Children.Add(child);return new Border{Child=stack,Background=Brush(190,20,20,24),BorderBrush=Brush(255,41,41,45),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(8)};}
+ Border Section(string title,params UIElement[] children){var stack=new StackPanel{Spacing=12,Margin=new Thickness(16)};stack.Children.Add(new TextBlock{Text=title,FontSize=14,Foreground=Accent.Fill,FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold});foreach(var child in children)stack.Children.Add(child);return new Border{Child=stack,Background=Brush(190,20,20,24),BorderBrush=Brush(255,41,41,45),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(8)};}
  void BuildOtherPages(){
   if(current==6)BuildThreeDPage();
   if(current==7)BuildDisplaysPage();
