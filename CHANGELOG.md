@@ -10,6 +10,7 @@ Corrige o FPS dos jogos no HUD da 0.8.0 e torna os resultados do Benchmark mais 
 - Notificações & Logs: botão Abrir trecho para cada resultado da busca, com o registro completo e as linhas ao redor.
 - Feedback & Diagnóstico: removidos Importar feedback de amigos e Consultar banco importado.
 - Windows: cor da interface pela GPU selecionada ou conectada (NVIDIA verde, AMD vermelho, Intel azul), sem alterar o tema do Windows; soma do Teste completo corrigida (dava 0 pontos).
+- Ficha técnica: uma linha por codec e modo com as resoluções suportadas; no Windows, os codecs repetidos por resolução deixavam a ficha em N/D e fechavam o app.
 - GitHub Actions: ações em Node.js 24 e tempo limite maior para o empacotamento Linux.
 
 ## 0.8.0 (Linux) — 17/11/2026

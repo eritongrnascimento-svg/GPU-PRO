@@ -106,12 +106,38 @@ void MainWindow::refreshSpecs(bool queryVulkan) {
   auto video = repository ? repository->recent("video", deviceKey(g), 1) : QJsonArray{};
   if (video.isEmpty())
     add("Vídeo · H.264 / HEVC / AV1",
-        "Ainda não testado; execute Encoder + Decoder para validar cada caminho por hardware");
+        "Ainda não testado; execute Benchmark › Codecs · vídeo e imagem para validar cada caminho por hardware");
   else
+  {
+    // Uma linha por codec e modo, com as resoluções em que o hardware passou (o teste roda em várias
+    // resoluções desde a 0.8.1).
+    static const QMap<QString, QString> names{{"h264", "H.264"}, {"hevc", "HEVC"}, {"av1", "AV1"}};
+    QStringList order;
+    QMap<QString, QList<QJsonObject>> groups;
     for (auto v : video[0].toObject()["codecResults"].toArray()) {
-      auto c = v.toObject();
-      add(c["codec"].toString().toUpper() + " · " + c["mode"].toString(), c["status"].toString());
+      const auto c = v.toObject();
+      const QString key = c["codec"].toString() + "|" + c["mode"].toString();
+      if (!groups.contains(key)) order << key;
+      groups[key].append(c);
     }
+    for (const auto &key : order) {
+      const auto &rows = groups[key];
+      const QString codec = rows.first()["codec"].toString(), mode = rows.first()["mode"].toString();
+      QList<int> passed;
+      bool allUnsupported = true;
+      for (const auto &c : rows) {
+        if (c["status"].toString() == "passed" && !passed.contains(c["height"].toInt())) passed << c["height"].toInt();
+        if (c["status"].toString() != "unsupported") allUnsupported = false;
+      }
+      std::sort(passed.begin(), passed.end());
+      QStringList sizes;
+      for (int h : passed)
+        if (h > 0) sizes << (h >= 2160 ? QString("4K") : QString("%1p").arg(h));
+      const QString value = !passed.isEmpty() ? "Suportado por hardware" + (sizes.isEmpty() ? QString() : " · " + sizes.join(", "))
+                            : allUnsupported ? "Não suportado pelo hardware ou driver" : "Falhou no teste; confira o Benchmark";
+      add(names.value(codec, codec.toUpper()) + (mode == "decode" ? " · decodificar" : " · codificar"), value);
+    }
+  }
   if (queryVulkan) {
     cachedVulkan = vulkanSpecifications(g);
   }

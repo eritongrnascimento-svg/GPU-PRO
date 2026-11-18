@@ -58,8 +58,8 @@ public sealed partial class MainWindow {
   Add("Driver",vendorDriver.Length+windowsDriver.Length==0?NotReported:string.Join(" · ",new[]{vendorDriver.Length>0?vendor+" "+vendorDriver:"",windowsDriver.Length>0?"Windows "+windowsDriver:""}.Where(x=>x.Length>0)));
   Add("VBIOS",SpecText(s,"vbios"));
   Add("Identificador PCI",SpecText(s,"pciBusId","")is {Length:>0} bus?bus+" · "+SpecText(s,"deviceId",""):SpecText(s,"pciHardwareId"));
-  if(videoCodecs==null||videoCodecs.Count==0)Add("Vídeo · H.264 / HEVC / AV1","Ainda não testado; execute Encoder + Decoder para validar cada caminho por hardware",reading:null);
-  else foreach(var row in videoCodecs){var c=row?.AsObject();if(c==null)continue;Add((c["codec"]?.ToString()??"codec").ToUpperInvariant()+" · "+c["mode"],c["status"]?.ToString()??NotReported);}
+  if(videoCodecs==null||videoCodecs.Count==0)Add("Vídeo · H.264 / HEVC / AV1","Ainda não testado; execute Benchmark › Codecs · vídeo e imagem para validar cada caminho por hardware",reading:null);
+  else foreach(var (label,value) in CodecSummary(videoCodecs))Add(label,value);
   if(s.TryGetProperty("vulkanApi",out _)){
    Add("Vulkan",SpecText(s,"vulkanApi"));Add("Dispositivo Vulkan",SpecText(s,"vulkanDevice"));Add("Driver Vulkan",SpecText(s,"vulkanDriver"));
    if(integrated)Add("Heap compartilhado reportado",SpecNumber(s,"hostVisibleHeapBytes","GiB · capacidade do driver, não VRAM dedicada",1073741824));
@@ -69,11 +69,27 @@ public sealed partial class MainWindow {
   }else Add("Vulkan",SpecText(s,"vulkanStatus","Não exposto pelo driver"));
   return rows;
  }
+ // Uma linha por codec e modo, com as resoluções em que o hardware passou (o teste roda em várias
+ // resoluções desde a 0.8.1; rótulos repetidos inseriam o mesmo card duas vezes e derrubavam o app).
+ static List<(string Label,string Value)> CodecSummary(JsonArray rows){
+  var names=new Dictionary<string,string>{["h264"]="H.264",["hevc"]="HEVC",["av1"]="AV1"};
+  string Short(int h)=>h>=2160?"4K":h>0?h+"p":"";
+  var result=new List<(string,string)>();
+  foreach(var group in rows.Select(r=>r?.AsObject()).Where(r=>r!=null).GroupBy(r=>(r!["codec"]?.ToString()??"codec")+"|"+(r!["mode"]?.ToString()??""))){
+   var first=group.First()!;string codec=first["codec"]?.ToString()??"codec",mode=first["mode"]?.ToString()??"";
+   string label=names.GetValueOrDefault(codec,codec.ToUpperInvariant())+(mode=="decode"?" · decodificar":" · codificar");
+   var passed=group.Where(r=>r!["status"]?.ToString()=="passed").Select(r=>int.TryParse(r!["height"]?.ToString(),out var h)?h:0).Distinct().OrderBy(h=>h).ToList();
+   string value=passed.Count>0?"Suportado por hardware"+(passed.Any(h=>h>0)?" · "+string.Join(", ",passed.Where(h=>h>0).Select(Short)):"")
+    :group.All(r=>r!["status"]?.ToString()=="unsupported")?"Não suportado pelo hardware ou driver":"Falhou no teste; confira o Benchmark";
+   result.Add((label,value));
+  }
+  return result;
+ }
  void RenderSpecs(){
   if(specGrid==null)return;var rows=SpecRows();
   if(rows.Count==0){if(specGrid.Children.Count==0)specGrid.Children.Add(Text("Consultando a ficha técnica da GPU selecionada…"));return;}
-  var labels=rows.Select(r=>r.Label).ToList();
-  if(!labels.SequenceEqual(specOrder)){specGrid.Children.Clear();specOrder.Clear();foreach(var label in labels){if(!specCards.ContainsKey(label)){var card=new NeonCard(label,true);card.Value.FontSize=15;card.ValueFontCap=15;card.Value.IsTextSelectionEnabled=true;specCards[label]=(card,card.Value);}specOrder.Add(label);specGrid.Children.Add(specCards[label].Card);}}
+  rows=rows.GroupBy(r=>r.Label).Select(g=>g.Last()).ToList();var labels=rows.Select(r=>r.Label).ToList();
+  if(!labels.SequenceEqual(specOrder)){specGrid.Children.Clear();specOrder.Clear();foreach(var label in labels){if(!specCards.ContainsKey(label)){var card=new NeonCard(label,true);card.Value.FontSize=15;card.ValueFontCap=15;card.Value.IsTextSelectionEnabled=true;specCards[label]=(card,card.Value);}specOrder.Add(label);var cached=specCards[label].Card;if(cached.Parent is Panel old)old.Children.Remove(cached);specGrid.Children.Add(cached);}}
   foreach(var (label,value,metric,reading) in rows){var (card,text)=specCards[label];
    var visible=value.StartsWith("Não informado")?"N/D":value.StartsWith("Não exposto")||value.StartsWith("Não exposta")?"Não exposto pelo driver":value.StartsWith("Ainda não testado")?"Não testado":value;
    text.Text=visible;ToolTipService.SetToolTip(card,value);card.Reading(reading,metric,theme);}

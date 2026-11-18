@@ -15,6 +15,7 @@ Patch da versão 0.8.0 para Linux e Windows, publicado em 18/11/2026. Corrige o 
 | A busca no log só filtrava as linhas; registros longos (resultados de testes) ficavam difíceis de ler. | Cada trecho encontrado ganha o botão **Abrir trecho**, que mostra o registro completo, com os resultados formatados e as linhas ao redor, e permite copiá-lo. |
 | **Windows:** o app não usava a cor da GPU em todo lugar. Botões e o nome no topo ficavam sempre verdes, e o indicador do menu, as abas e as caixas de seleção usavam a cor de destaque do Windows. | O app identifica a GPU selecionada ou conectada e usa a cor dela em toda a interface, como no Linux: NVIDIA verde, AMD vermelho, Intel azul. O tema do Windows não é alterado. |
 | **Windows:** o Teste completo somava 0 pontos no total e nas categorias. | Soma corrigida; cada categoria mostra a própria pontuação. |
+| **Windows:** depois do novo teste de codecs, a aba Especificações ficava toda N/D e o app fechava sozinho (codecs repetidos por resolução na ficha). | Uma linha por codec e modo, com as resoluções suportadas por hardware; a ficha volta a aparecer e o app não fecha. No Linux, a mesma ficha mostrava só a última resolução; o código-fonte também foi corrigido. |
 | Feedback & Diagnóstico tinha os botões "Importar feedback de amigos" e "Consultar banco importado", fora do uso atual. | Botões removidos. |
 
 ## Novo no Benchmark
