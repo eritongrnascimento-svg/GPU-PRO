@@ -17,7 +17,7 @@ public sealed partial class MainWindow:Window {
  readonly TextBlock gpuIdentity=new(){FontSize=14,VerticalAlignment=VerticalAlignment.Center,Text="Aguardando inventário de dispositivos"};
  Grid? coresGrid;JsonElement snapshot;bool polling,benchmark;int current;Window? hud;TextBlock? hudText;
  TextBox csv=new(){PlaceholderText="CSV ativo com frametime (ms) ou fps",MinWidth=320};
- Native.Frames frames;DesktopAcrylicController? acrylic;SystemBackdropConfiguration? backdrop;readonly nint hwnd;
+ Native.Frames frames;readonly FrameFeed frameFeed=new();int fpsPid;string fpsLabel="";DesktopAcrylicController? acrylic;SystemBackdropConfiguration? backdrop;readonly nint hwnd;
  ComboBox benchMode=new();NumberBox seconds=new(){Value=3,Minimum=1,Maximum=30,SmallChange=1,Width=120};CheckBox multi=new(){Content="Todos os processadores lógicos",IsChecked=true};
  TextBlock benchResult=new(){Text="Selecione um teste. Nenhuma carga é iniciada automaticamente.",TextWrapping=TextWrapping.Wrap};
  readonly NumberBox cpuMs=new(){Header="Tempo CPU por quadro (ms)",Value=16.7,Minimum=.01,Maximum=10000,Width=230};
@@ -42,7 +42,7 @@ public sealed partial class MainWindow:Window {
   nav.IsPaneToggleButtonVisible=false;nav.PaneTitle="GPU-PRO";
   foreach(var item in new[]{(0,"GPU · Monitor e especificações"),(1,"CPU · Monitor e cálculos"),(6,"Configurações 3D & Filtros"),(2,"GamerMonitor & Overlay"),(7,"Monitores & Telas"),(8,"Overclock · Manual"),(9,"Benchmark"),(5,"Feedback & Diagnóstico"),(10,"Notificações & Logs"),(4,"Atualizações"),(12,"Sobre")})nav.MenuItems.Add(new NavigationViewItem{Content=item.Item2,Tag=item.Item1,FontSize=12});
   var workspace=new Grid();workspace.RowDefinitions.Add(new(){Height=GridLength.Auto});workspace.RowDefinitions.Add(new(){Height=new GridLength(1,GridUnitType.Star)});var deviceBar=new Grid{Margin=new Thickness(24,14,24,0),ColumnSpacing=16};deviceBar.ColumnDefinitions.Add(new(){Width=new GridLength(1,GridUnitType.Star)});deviceBar.ColumnDefinitions.Add(new(){Width=GridLength.Auto});deviceBar.Children.Add(gpuChoice);gpuChoice.SelectionChanged+=async(s,e)=>{if(gpuChoice.SelectedItem is GpuChoice choice){if(Native.gpp_select_gpu(choice.Id)!=0){Record("GPU não está mais disponível: "+choice.Name,true);return;}Record("GPU selecionada: "+choice.Name);gpuHistory.Clear();selectedReport=null;specs=default;videoCodecs=null;await Poll();if(specGrid!=null)await LoadSpecs();}};var notificationsButton=Button("Notificações",()=>SelectPage(10));Grid.SetColumn(notificationsButton,1);deviceBar.Children.Add(notificationsButton);workspace.Children.Add(deviceBar);pageScroll=new ScrollViewer{Content=body,HorizontalScrollBarVisibility=ScrollBarVisibility.Disabled};Grid.SetRow(pageScroll,1);workspace.Children.Add(pageScroll);nav.Content=workspace;nav.SelectionChanged+=async(s,e)=>{if(e.SelectedItem is not NavigationViewItem item)return;int tag=(int)item.Tag;if(tag==current&&body.Children.Count>0)return;if(tag==8&&!await ConfirmOverclockTerms()){SelectPage(current);return;}current=tag;BuildPage();};
-  InitializeTray();SetAcrylic();Root.SizeChanged+=(s,e)=>ArrangeCores();Closed+=(s,e)=>{timer.Stop();StopCapture();workerCancel?.Cancel();Native.gpp_cancel_benchmark();hud?.Close();acrylic?.Dispose();};
+  InitializeTray();SetAcrylic();Root.SizeChanged+=(s,e)=>ArrangeCores();Closed+=(s,e)=>{timer.Stop();workerCancel?.Cancel();Native.gpp_cancel_benchmark();hud?.Close();acrylic?.Dispose();};
   timer.Tick+=async(s,e)=>await Poll();timer.Start();ShowPaneVerse();nav.SelectedItem=nav.MenuItems[0];_ = RefreshGpuInventory();
  }
  void SetAcrylic(){
@@ -66,6 +66,7 @@ public sealed partial class MainWindow:Window {
  // fecha o app (COMException 0x800F1000 em Microsoft.UI.Xaml.dll ao trocar de aba).
  void RecreateSharedControls(){
   csv=new TextBox{PlaceholderText=csv.PlaceholderText,Text=csv.Text,MinWidth=csv.MinWidth};
+  fpsStatus=new TextBlock{TextWrapping=TextWrapping.Wrap,FontSize=12};
   monitoredProcess=new ComboBox{Header="Jogo / aplicativo",DisplayMemberPath="Label",MinWidth=monitoredProcess.MinWidth,ItemsSource=monitoredProcess.ItemsSource,SelectedItem=monitoredProcess.SelectedItem};
   int mode=Math.Max(0,benchMode.SelectedIndex);benchMode=new ComboBox{Tag=mode};
   seconds=new NumberBox{Value=seconds.Value,Minimum=1,Maximum=30,SmallChange=1,Width=120};
@@ -103,7 +104,7 @@ public sealed partial class MainWindow:Window {
   if(current==5){BuildFeedbackActions();body.Children.Add(Section("Dados brutos do sistema",Text("Leitura completa reportada pelo sistema e pelo driver, para anexar a um relatório. Sensores sem suporte ficam ausentes."),Button("Exportar dados brutos · JSON",async()=>{try{if(snapshot.ValueKind!=JsonValueKind.Object)throw new InvalidOperationException("Aguardando a primeira leitura dos sensores.");var data=System.Text.Json.Nodes.JsonNode.Parse(snapshot.GetRawText())!;if(specs.ValueKind==JsonValueKind.Object)data["specs"]=System.Text.Json.Nodes.JsonNode.Parse(specs.GetRawText());await SaveJsonFile(data,"GPU-PRO-diagnostico");Record("Diagnóstico exportado.");}catch(Exception e){TestError(e);}})));}
   BuildOtherPages();Render();
  }
- async Task Poll(){if(polling)return;polling=true;try{snapshot=await Task.Run(Native.Snapshot);memoryWatch?.Add(snapshot);CollectStability();frames=Native.ReadFrames(csv.Text);var gpuReading=Native.Number(snapshot.GetProperty("gpu"),"usage");if(gpuReading.HasValue){gpuHistory.Add(gpuReading.Value);if(gpuHistory.Count>240)gpuHistory.RemoveAt(0);}var cpuReading=Native.Number(snapshot,"cpuUsage");if(cpuReading.HasValue){cpuHistory.Add(cpuReading.Value);if(cpuHistory.Count>240)cpuHistory.RemoveAt(0);}Render();status.Text=Native.Text(snapshot.GetProperty("gpu"),"name")+" · "+Native.Text(snapshot,"cpuName")+" · "+DateTime.Now.ToLongTimeString();}catch(Exception e){Record("Falha de leitura dos sensores: "+e.Message,true);}finally{polling=false;}}
+ async Task Poll(){if(polling)return;polling=true;try{snapshot=await Task.Run(Native.Snapshot);memoryWatch?.Add(snapshot);CollectStability();ReadGameFrames();UpdateFpsStatus();var gpuReading=Native.Number(snapshot.GetProperty("gpu"),"usage");if(gpuReading.HasValue){gpuHistory.Add(gpuReading.Value);if(gpuHistory.Count>240)gpuHistory.RemoveAt(0);}var cpuReading=Native.Number(snapshot,"cpuUsage");if(cpuReading.HasValue){cpuHistory.Add(cpuReading.Value);if(cpuHistory.Count>240)cpuHistory.RemoveAt(0);}Render();status.Text=Native.Text(snapshot.GetProperty("gpu"),"name")+" · "+Native.Text(snapshot,"cpuName")+" · "+DateTime.Now.ToLongTimeString();}catch(Exception e){Record("Falha de leitura dos sensores: "+e.Message,true);}finally{polling=false;}}
  void Set(string key,string text){if(values.TryGetValue(key,out var t))t.Text=text;if(metricCards.TryGetValue(key,out var c)&&text!="N/D")c.Reading(0,key,theme);}
  void Reading(string key,JsonElement source,string? sourceKey=null){if(metricCards.TryGetValue(key,out var c))c.Reading(Native.Number(source,sourceKey??key),key,theme);}
  string Metric(JsonElement e,string key,string suffix="",double divisor=1){var n=Native.Number(e,key);return n.HasValue?(n.Value/divisor).ToString("0.0")+suffix:"N/D";}
@@ -120,6 +121,18 @@ public sealed partial class MainWindow:Window {
  void ArrangeCores(){if(coresGrid==null)return;int cols=Math.Max(1,(int)Math.Max(180,Root.ActualWidth-320)/195);coresGrid.ColumnDefinitions.Clear();coresGrid.RowDefinitions.Clear();for(int i=0;i<cols;i++)coresGrid.ColumnDefinitions.Add(new(){Width=new GridLength(1,GridUnitType.Star)});for(int i=0;i<coreCards.Count;i++){if(i%cols==0)coresGrid.RowDefinitions.Add(new(){Height=GridLength.Auto});Grid.SetColumn(coreCards[i],i%cols);Grid.SetRow(coreCards[i],i/cols);}}
  async Task RunBench(){if(benchmark||worker!=null)return;benchmark=true;try{Record("Teste CPU "+benchMode.SelectedItem+" iniciado");int mode=benchMode.SelectedIndex,threads=multi.IsChecked==true?Environment.ProcessorCount:1,ms=(int)Math.Clamp(seconds.Value,1,30)*1000;var r=await Task.Run(()=>Native.gpp_run_cpu(mode,threads,ms));if(r.Cancelled==0)benchResult.Text="Resultado: "+r.PerSecond.ToString("N0")+" operações/s · "+r.Threads+" threads · "+r.Seconds.ToString("0.0")+" s";Record("Teste CPU "+benchMode.SelectedItem+(r.Cancelled!=0?" cancelado":" concluído")+" · "+r.PerSecond.ToString("N0")+" operações/s · "+r.Threads+" threads · "+r.Seconds.ToString("0.00")+" s · checksum "+r.Checksum.ToString("G6"));}catch(Exception e){Record("Teste CPU: "+e.Message,true);}finally{benchmark=false;}}
  void UpdateBalance(){var r=Native.gpp_balance(cpuMs.Value,gpuMs.Value);balanceText.Text=r.Valid==0?"Tempos inválidos":$"Estimativa desta carga: {r.Model:0.0} FPS\nGPU limitada pela CPU: {r.GpuLoss:0.0}% · {r.GpuLost:0.0} FPS abaixo do potencial da GPU ({r.GpuPotential:0.0} FPS).\nCPU limitada pela GPU: {r.CpuLoss:0.0}% · {r.CpuLost:0.0} FPS abaixo do potencial de entrega da CPU ({r.CpuPotential:0.0} FPS).\nNão representa perda universal em jogos ou uma promessa de ganho após trocar uma peça.";}
+ // FPS: CSV escolhido manualmente tem prioridade; senão o contador próprio do GPU-PRO, com o jogo
+ // escolhido na lista ou detectado automaticamente.
+ void ReadGameFrames(){
+  Native.FeedTimes=Array.Empty<double>();fpsPid=0;fpsLabel="";
+  if(!string.IsNullOrWhiteSpace(csv.Text)){frames=Native.ReadFrames(csv.Text);if(frames.Count>0){fpsLabel=Path.GetFileName(csv.Text);return;}}
+  if(!frameFeed.Connected)frameFeed.StartSession(false);
+  int pid=monitoredProcess.SelectedItem is ProcessChoice chosen&&chosen.Pid>0?chosen.Pid:0;
+  if(pid==0){GetWindowThreadProcessId(GetForegroundWindow(),out var fg);pid=frameFeed.Pick(fg);}
+  var times=pid>0?frameFeed.Times(pid):Array.Empty<double>();
+  if(times.Length==0){frames=default;return;}
+  Native.FeedTimes=times;frames=Native.gpp_frame_stats(times,times.Length);fpsPid=pid;fpsLabel=frameFeed.Describe(pid);
+ }
  async Task PickCsv(){var picker=new global::Windows.Storage.Pickers.FileOpenPicker();WinRT.Interop.InitializeWithWindow.Initialize(picker,hwnd);picker.FileTypeFilter.Add(".csv");var file=await picker.PickSingleFileAsync();if(file!=null)csv.Text=file.Path;}
  static void Open(string url)=>System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(url){UseShellExecute=true});
 }

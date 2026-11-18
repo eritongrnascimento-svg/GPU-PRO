@@ -33,3 +33,11 @@ target_link_libraries(gpu-tuning-worker PRIVATE windows-worker-core shell32 user
 add_executable(gpu-3d-worker windows/native/driver3d_worker.cpp)
 target_compile_definitions(gpu-3d-worker PRIVATE UNICODE _UNICODE NOMINMAX)
 install(TARGETS gpu-3d-worker RUNTIME DESTINATION .)
+
+# Contador de quadros (ETW) para o FPS dos jogos, sem programas externos. CRT estático: o serviço
+# é copiado sozinho para Arquivos de Programas e não depende das DLLs da pasta do aplicativo.
+add_executable(gpupro-frames windows/native/frame_service.cpp)
+target_compile_definitions(gpupro-frames PRIVATE UNICODE _UNICODE NOMINMAX)
+set_property(TARGET gpupro-frames PROPERTY MSVC_RUNTIME_LIBRARY "MultiThreaded")
+target_link_libraries(gpupro-frames PRIVATE advapi32 shell32)
+install(TARGETS gpupro-frames RUNTIME DESTINATION .)

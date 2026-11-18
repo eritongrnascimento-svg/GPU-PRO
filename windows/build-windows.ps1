@@ -67,7 +67,7 @@ Step 'Interface WinUI 3'
 if (Test-Path $stage) { Remove-Item $stage -Recurse -Force }
 dotnet publish (Join-Path $windows 'GpuPro.WinUI\GpuPro.WinUI.csproj') -c Release -p:Platform=x64 -o $stage
 if ($LASTEXITCODE) { throw 'Falha no dotnet publish' }
-foreach ($file in 'GPU-PRO.exe', 'GPU-PRO.pri', 'App.xbf', 'MainWindow.xbf', 'gpupro-native.dll', 'gpu-bench-worker.exe', 'gpu-video-worker.exe', 'gpu-data-worker.exe', 'gpu-tuning-worker.exe', 'gpu-3d-worker.exe', 'Qt6Core.dll', 'platforms\qwindows.dll') {
+foreach ($file in 'GPU-PRO.exe', 'GPU-PRO.pri', 'App.xbf', 'MainWindow.xbf', 'gpupro-native.dll', 'gpu-bench-worker.exe', 'gpu-video-worker.exe', 'gpu-data-worker.exe', 'gpu-tuning-worker.exe', 'gpu-3d-worker.exe', 'gpupro-frames.exe', 'Qt6Core.dll', 'platforms\qwindows.dll') {
   Need (Join-Path $stage $file) "Arquivo do pacote $file"
 }
 

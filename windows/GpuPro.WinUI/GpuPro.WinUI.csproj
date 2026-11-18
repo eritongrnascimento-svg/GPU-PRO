@@ -12,7 +12,7 @@
 </PropertyGroup><ItemGroup><PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" /></ItemGroup>
 <!-- Núcleo nativo, executores de teste e Qt gerados por CMake (windows/build-windows.ps1). -->
 <ItemGroup>
-<Content Include="$(NativeBuild)gpupro-native.dll;$(NativeBuild)gpu-*-worker.exe;$(NativeBuild)Qt6*.dll" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/>
+<Content Include="$(NativeBuild)gpupro-native.dll;$(NativeBuild)gpu-*-worker.exe;$(NativeBuild)gpupro-frames.exe;$(NativeBuild)Qt6*.dll" Link="%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/>
 <Content Include="$(NativeBuild)platforms/*.dll;$(NativeBuild)imageformats/*.dll;$(NativeBuild)tls/*.dll;$(NativeBuild)networkinformation/*.dll;$(NativeBuild)generic/*.dll" Link="$([System.IO.Path]::GetFileName($([System.IO.Path]::GetDirectoryName('%(FullPath)'))))/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/>
 <Content Include="Assets/*" CopyToOutputDirectory="PreserveNewest"/>
 <Content Include="../../assets/pix-cafezinho.png;../../assets/pix-cafezinho.txt;../../assets/versiculos.txt" Link="Assets/%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest"/>

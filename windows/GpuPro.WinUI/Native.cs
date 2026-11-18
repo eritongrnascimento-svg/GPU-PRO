@@ -22,6 +22,7 @@ internal static class Native {
  internal static double? Number(JsonElement e,string key)=>e.ValueKind==JsonValueKind.Object&&e.TryGetProperty(key,out var v)&&v.TryGetDouble(out var n)&&double.IsFinite(n)?n:null;
  internal static string Text(JsonElement e,string key)=>e.ValueKind==JsonValueKind.Object&&e.TryGetProperty(key,out var v)?v.ToString():"N/D";
  internal static readonly FrameCsvReader reader=new();
- internal static double[] LastTimes=>reader.Samples;
+ internal static double[] FeedTimes=Array.Empty<double>();
+ internal static double[] LastTimes=>FeedTimes.Length>0?FeedTimes:reader.Samples;
  internal static Frames ReadFrames(string path)=>reader.Read(path);
 }

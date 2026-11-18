@@ -31,7 +31,7 @@ public sealed partial class MainWindow {
   new("Memória","ramUsed","RAM usada"),new("Memória","ramPct","RAM %"),new("Memória","ramTotal","RAM total"),new("Memória","commit","Memória confirmada"),new("Memória","gpuShared","Compartilhada com a GPU"),
   new("Disco","diskRead","Leitura"),new("Disco","diskWrite","Escrita"),new("Disco","diskActive","Tempo ativo"),new("Disco","diskTemp","Temperatura")};
  ComboBox monitoredProcess=new(){Header="Jogo / aplicativo",DisplayMemberPath="Label",MinWidth=280};
- HistoryPlot? hudPlot;Process? capture;
+ HistoryPlot? hudPlot;TextBlock fpsStatus=new(){TextWrapping=TextWrapping.Wrap,FontSize=12};
  [DllImport("user32.dll")]static extern nint GetForegroundWindow();
  [DllImport("user32.dll")]static extern uint GetWindowThreadProcessId(nint window,out uint pid);
  record ProcessChoice(int Pid,string Label);
@@ -58,10 +58,13 @@ public sealed partial class MainWindow {
   var graph=new CheckBox{Content="Gráfico de frametime",IsChecked=c.Graph};graph.Click+=(s,e)=>{c.Graph=graph.IsChecked==true;c.Save();PositionHud();};
   csv.MinWidth=260;monitoredProcess.MinWidth=240;
   body.Children.Add(Tighten(Section("FPS do jogo",
-   Row(monitoredProcess,Button("Atualizar processos",RefreshProcesses),Button("Capturar FPS · PresentMon",async()=>await CaptureFrames()),Button("Parar captura",StopCapture)),
-   Row(csv,Button("Selecionar CSV",async()=>await PickCsv())),
+   fpsStatus,
+   FpsActions(),
+   Row(monitoredProcess,Button("Atualizar lista",RefreshProcesses)),
+   Row(csv,Button("Selecionar CSV",async()=>await PickCsv()),Button("Limpar CSV",()=>csv.Text="")),
    Choices("FPS",graph),
-   Text("Sem fonte de quadros (PresentMon ou CSV com frametime/fps), FPS fica N/D. 1% low após 100 amostras; janela de até 240.",11))));
+   Text("Contador próprio do GPU-PRO: lê do Windows cada quadro apresentado em DirectX 9–12, Vulkan e OpenGL, sem programas externos e sem tocar no jogo. Automático = jogo em primeiro plano; fora dele, o último jogo detectado. Um CSV escolhido tem prioridade. 1% low após 100 quadros; janela de 240.",11))));
+  UpdateFpsStatus();
   var disks=new List<DiskChoice>{new("all","Todos os discos")};if(snapshot.ValueKind==JsonValueKind.Object&&snapshot.TryGetProperty("disks",out var list))foreach(var d in list.EnumerateArray())disks.Add(new(Native.Text(d,"index"),"Disco "+Native.Text(d,"index")+" · "+Native.Text(d,"volumes")+" · "+Native.Text(d,"model")));
   var disk=new ComboBox{Header="Disco exibido",ItemsSource=disks,DisplayMemberPath="Label",MinWidth=280,SelectedIndex=Math.Max(0,disks.FindIndex(d=>d.Id==c.Disk))};disk.SelectionChanged+=(s,e)=>{if(disk.SelectedItem is DiskChoice d){c.Disk=d.Id;c.Save();}};
   var groups=new Grid{ColumnSpacing=12,RowSpacing=12};groups.ColumnDefinitions.Add(new(){Width=new GridLength(1,GridUnitType.Star)});groups.ColumnDefinitions.Add(new(){Width=new GridLength(1,GridUnitType.Star)});groups.RowDefinitions.Add(new(){Height=GridLength.Auto});groups.RowDefinitions.Add(new(){Height=GridLength.Auto});
@@ -77,9 +80,36 @@ public sealed partial class MainWindow {
   foreach(var e in extra)grid.Children.Add(e);
   return grid;
  }
- void RefreshProcesses(){var values=new List<ProcessChoice>();foreach(var process in Process.GetProcesses()){using(process)try{if(process.Id!=Environment.ProcessId&&process.MainWindowHandle!=0)values.Add(new(process.Id,process.ProcessName+" · PID "+process.Id));}catch{}}monitoredProcess.ItemsSource=values.OrderBy(p=>p.Label).ToList();}
- async Task CaptureFrames(){try{if(capture!=null&&!capture.HasExited)throw new InvalidOperationException("Uma captura já está ativa. Pare-a antes de iniciar outra.");var selected=monitoredProcess.SelectedItem as ProcessChoice??throw new InvalidOperationException("Selecione o jogo em execução.");var executable=FindTool("PresentMon.exe")??throw new IOException("PresentMon Console não encontrado. Use Instalar dependências na aba Atualizações.");Directory.CreateDirectory(Path.Combine(dataRoot,"frametimes"));var path=Path.Combine(dataRoot,"frametimes",Guid.NewGuid()+".csv");var start=new ProcessStartInfo(executable){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};foreach(var arg in new[]{"--process_id",selected.Pid.ToString(),"--output_file",path,"--no_console_stats","--v1_metrics","--session_name","GPU-PRO-"+Environment.ProcessId,"--terminate_on_proc_exit","--timed","3600","--terminate_after_timed"})start.ArgumentList.Add(arg);capture=Process.Start(start)??throw new IOException("PresentMon não iniciou.");csv.Text=path;var running=capture;var output=running.StandardOutput.ReadToEndAsync();var error=running.StandardError.ReadToEndAsync();Record("Captura de FPS iniciada para PID "+selected.Pid);await running.WaitForExitAsync();var message=await error;_ = await output;if(running.ExitCode!=0)TestError(new IOException("PresentMon não confirmou a captura: "+message+". Verifique as permissões de coleta de desempenho do Windows."));}catch(Exception e){TestError(e);}}
- void StopCapture(){if(capture==null)return;try{if(!capture.HasExited)capture.Kill(true);}catch{}capture.Dispose();capture=null;Record("Captura de FPS encerrada.");}
+ void RefreshProcesses(){
+  var values=new List<ProcessChoice>{new(0,"Automático · jogo detectado")};var seen=new HashSet<int>();
+  foreach(var a in frameFeed.Active()){values.Add(new(a.Pid,$"{a.Name} · {a.Fps:0} FPS · PID {a.Pid}"));seen.Add(a.Pid);}
+  var windows=new List<ProcessChoice>();foreach(var process in Process.GetProcesses()){using(process)try{if(process.Id!=Environment.ProcessId&&process.MainWindowHandle!=0&&!seen.Contains(process.Id))windows.Add(new(process.Id,process.ProcessName+" · PID "+process.Id));}catch{}}
+  values.AddRange(windows.OrderBy(p=>p.Label));var previous=(monitoredProcess.SelectedItem as ProcessChoice)?.Pid??0;
+  monitoredProcess.ItemsSource=values;monitoredProcess.SelectedItem=values.FirstOrDefault(v=>v.Pid==previous)??values[0];
+ }
+ UIElement FpsActions(){
+  var row=new StackPanel{Orientation=Orientation.Horizontal,Spacing=10};
+  if(!FrameFeed.ServiceInstalled())row.Children.Add(Button("Ativar FPS automático · uma vez",async()=>await InstallFrameService()));
+  else row.Children.Add(Button("Reinstalar contador",async()=>await InstallFrameService()));
+  if(!FrameFeed.ServiceInstalled()&&!frameFeed.Connected)row.Children.Add(Button("Só nesta sessão",()=>{try{frameFeed.StartSession(true);Record("Contador de FPS iniciado para esta sessão.");}catch(Exception e){TestError(e);}}));
+  if(FrameFeed.ServiceInstalled())row.Children.Add(Button("Remover contador",async()=>{try{int code=await FrameFeed.RunElevated("--uninstall");Record(code==0?"Contador de FPS removido do Windows.":"Remoção do contador terminou com código "+code+".");BuildPage();}catch(Exception e){TestError(e);}}));
+  return row;
+ }
+ async Task InstallFrameService(){
+  try{
+   var dialog=new ContentDialog{XamlRoot=Root.XamlRoot,Title="Ativar FPS automático",Content=Text("O Windows só libera a leitura de quadros dos jogos para administradores. O GPU-PRO instala uma vez o serviço \"GPU-PRO · Contador de quadros\" em Arquivos de Programas; depois disso o FPS aparece sozinho, sem novas confirmações.\n\nO serviço só lê eventos de apresentação do Windows enquanto o GPU-PRO está aberto; não altera jogos, drivers nem configurações. Pode ser removido aqui a qualquer momento.",13),PrimaryButtonText="Continuar",CloseButtonText="Cancelar",DefaultButton=ContentDialogButton.Primary};
+   if(await dialog.ShowAsync()!=ContentDialogResult.Primary)return;
+   int code=await FrameFeed.RunElevated("--install");
+   Record(code==0?"FPS automático ativado: serviço GPU-PRO · Contador de quadros instalado.":"O serviço do contador não foi instalado (código "+code+").",true);BuildPage();
+  }catch(System.ComponentModel.Win32Exception){Record("Ativação do FPS automático cancelada na confirmação do Windows.");}catch(Exception e){TestError(e);}
+ }
+ void UpdateFpsStatus(){
+  string text;
+  if(!string.IsNullOrWhiteSpace(csv.Text)&&fpsPid==0&&frames.Count>0)text="FPS lido do CSV "+fpsLabel+".";
+  else if(frameFeed.Connected)text="Contador de FPS ativo"+(FrameFeed.ServiceInstalled()?" (serviço do Windows)":" (nesta sessão)")+" · "+(fpsPid>0?"jogo: "+fpsLabel+$" · {frames.Current:0} FPS":"aguardando um jogo apresentar quadros.");
+  else text="Contador de FPS inativo. O Windows só libera a leitura dos quadros para administradores: ative uma vez abaixo"+(FrameFeed.ServiceInstalled()?" (o serviço está instalado mas não respondeu; use Reinstalar contador).":" ou use só nesta sessão.");
+  fpsStatus.Text=text;
+ }
  // ---- Conteúdo do HUD ----
  static string N(double? v,string fmt,string unit)=>v.HasValue?v.Value.ToString(fmt)+unit:"N/D";
  const double GiB=1073741824;
@@ -148,7 +178,7 @@ public sealed partial class MainWindow {
   var header=new StackPanel{Spacing=0,Margin=new Thickness(0,0,0,6)};
   if(c.Fields.Contains("gpuName"))header.Children.Add(new TextBlock{Text=Native.Text(snapshot.ValueKind==JsonValueKind.Object?snapshot.GetProperty("gpu"):default,"name"),FontSize=c.Font,FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold,Foreground=new SolidColorBrush(HudTitle),TextTrimming=TextTrimming.CharacterEllipsis});
   if(c.Fields.Contains("cpuName"))header.Children.Add(new TextBlock{Text=Native.Text(snapshot,"cpuName"),FontSize=c.Font*.85,Foreground=dim,TextTrimming=TextTrimming.CharacterEllipsis});
-  if(monitoredProcess.SelectedItem is ProcessChoice tracked)header.Children.Add(new TextBlock{Text=tracked.Label,FontSize=c.Font*.8,Foreground=dim,TextTrimming=TextTrimming.CharacterEllipsis});
+  if(fpsLabel.Length>0)header.Children.Add(new TextBlock{Text=fpsLabel,FontSize=c.Font*.8,Foreground=dim,TextTrimming=TextTrimming.CharacterEllipsis});
   hudBody.RowDefinitions.Add(new(){Height=GridLength.Auto});hudBody.Children.Add(header);
   if(items.Count==0)items.Add(("HUD","nenhuma leitura selecionada"));
   if(c.Layout=="compact"){
@@ -171,7 +201,7 @@ public sealed partial class MainWindow {
   x=Math.Clamp(x,area.X,area.X+Math.Max(0,area.Width-w));y=Math.Clamp(y,area.Y,area.Y+Math.Max(0,area.Height-h));var handle=WinRT.Interop.WindowNative.GetWindowHandle(hud);
   if(c.Mode=="desktop"){if(hud.AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter p)p.IsAlwaysOnTop=false;hud.AppWindow.Show(false);SetWindowPos(handle,(nint)1,x,y,w,h,0x10);return;}
   if(hud.AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter top)top.IsAlwaysOnTop=true;
-  bool visible=true;if(c.OnlyGame&&monitoredProcess.SelectedItem is ProcessChoice target){GetWindowThreadProcessId(GetForegroundWindow(),out var pid);visible=pid==target.Pid;}
+  bool visible=true;if(c.OnlyGame&&fpsPid>0){GetWindowThreadProcessId(GetForegroundWindow(),out var pid);visible=pid==fpsPid;}
   if(visible){hud.AppWindow.Show(false);SetWindowPos(handle,(nint)(-1),x,y,w,h,0x10);}else hud.AppWindow.Hide();
  }
 }
