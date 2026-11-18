@@ -8,6 +8,8 @@ packages={}
 for binary in (appdir/'usr').rglob('*'):
  if not binary.is_file() or binary.is_symlink():continue
  if '.so' not in binary.name:continue
+ # Código próprio do GPU-PRO (camada de FPS), não é biblioteca de terceiros.
+ if binary.name=='libgpupro_fps.so':continue
  matches=subprocess.run(['ldconfig','-p'],capture_output=True,text=True,check=True).stdout.splitlines()
  candidates=[line.split('=>',1)[1].strip() for line in matches if '=>' in line and line.strip().split()[0]==binary.name]
  # Qt plugins are not registered with ldconfig.
