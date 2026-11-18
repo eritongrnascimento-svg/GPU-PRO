@@ -10,8 +10,8 @@ Sequência fixa: cenas 3D (Vulkan, 1920×1080, 30 s), memória e computação da
 - **Memória da GPU:** média geométrica, em GB/s, de leitura, escrita e cópia na VRAM por shader, envio CPU → GPU e retorno GPU → CPU pelo PCIe (`vkCmdCopyBuffer` entre memória visível pela CPU e VRAM) e cópia direta na VRAM; × 10. 32 MiB por medição, 8 repetições cronometradas pela GPU; o envio é validado na volta.
 - **Computação da GPU:** média geométrica de GFLOPS (FP32, FP64) e GIOPS (inteiros de 32 e 64 bits) suportados.
 - **Codecs de vídeo (`codec-suite-v0.3`):** H.264, HEVC e AV1 por hardware, codificação e decodificação em 1280×720, 1920×1080, 2560×1440 e 3840×2160, 360 quadros cada; média geométrica dos megapixels por segundo × 10. Um codec não suportado na primeira resolução não é repetido nas demais.
-- **Codecs de imagem:** JPEG (qualidade 90), PNG e WebP (quando o Qt oferece) pelo processador, codificação e decodificação nas mesmas quatro resoluções, ao menos 1,2 s por item; média geométrica dos megapixels por segundo × 10.
-- **Processador:** inteiros, FP64 e primos do núcleo compartilhado, 5 s cada em todas as threads; média geométrica das operações por segundo ÷ 100 000.
+- **Codecs de imagem:** JPEG (qualidade 90), PNG e WebP (quando o Qt oferece) pelo processador, codificação e decodificação nas mesmas quatro resoluções, ao menos 1,2 s por item; média geométrica dos megapixels por segundo × 100.
+- **Processador:** inteiros, FP64 e primos do núcleo compartilhado, 5 s cada em todas as threads; média geométrica das operações por segundo ÷ 10 000.
 
 As escalas são próprias do GPU-PRO; não equivalem a pontos de outros benchmarks. Compare a mesma versão de método.
 

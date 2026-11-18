@@ -184,7 +184,7 @@ void CodecSuite::finish() {
   };
   int videoPassed, videoFailed, imagePassed, imageFailed;
   const double video = geomean(results, videoPassed, videoFailed), images = geomean(imageResults, imagePassed, imageFailed);
-  const qint64 videoPoints = qRound64(video * 10), imagePoints = qRound64(images * 10);
+  const qint64 videoPoints = qRound64(video * 10), imagePoints = qRound64(images * 100);
   QStringList mask;
   for (auto v : results) {
     auto r = v.toObject();
@@ -195,7 +195,7 @@ void CodecSuite::finish() {
                 {"method", "codec-suite-v0.3"},
                 {"methodText", "Vídeo: H.264, HEVC e AV1 por hardware (FFmpeg), codificação e decodificação separadas em 1280×720, 1920×1080, "
                                "2560×1440 e 3840×2160, 360 quadros cada. Imagem: JPEG, PNG e WebP (se disponível) pelo processador nas mesmas "
-                               "resoluções. Pontuação = média dos megapixels processados por segundo × 10 (vídeo e imagem somados)."},
+                               "resoluções. Pontuação de vídeo = média dos megapixels por segundo × 10; de imagem, × 100."},
                 {"valid", any && videoFailed == 0 && imageFailed == 0 && !cancelling},
                 {"partial", (doVideo && videoPassed < jobs.size()) || !doImages || !doVideo},
                 {"cancelled", cancelling.load()},

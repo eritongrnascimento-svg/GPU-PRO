@@ -149,7 +149,7 @@ void MainWindow::finishSuite() {
       log += std::log(v.toObject()["operationsPerSecond"].toDouble());
       ++count;
     }
-  const qint64 cpuPoints = count ? qRound64(std::exp(log / count) / 100000) : 0;
+  const qint64 cpuPoints = count ? qRound64(std::exp(log / count) / 10000) : 0;
   const auto graphics = suiteParts["graphics"].toObject(), compute = suiteParts["compute"].toObject(), codecs = suiteParts["video"].toObject();
   const QJsonArray categories{
       QJsonObject{{"name", "GPU · 3D"}, {"points", qRound64(graphics["points"].toDouble())}, {"detail", QString("%1 FPS médio").arg(graphics["fpsAvg"].toDouble(), 0, 'f', 0)}},
@@ -171,7 +171,7 @@ void MainWindow::finishSuite() {
                     {"cpuResults", suiteCpu},
                     {"methodText", "Sequência fixa: cenas 3D (Vulkan, 1920×1080, 30 s), memória e computação da GPU, codecs de vídeo "
                                    "(4 resoluções) e de imagem, e processador (3 cargas de 5 s; pontuação = média das operações por "
-                                   "segundo ÷ 100 000). A pontuação total é a soma das categorias."}};
+                                   "segundo ÷ 10 000). A pontuação total é a soma das categorias."}};
   QStringList parts;
   for (auto v : categories) parts << v.toObject()["name"].toString() + " " + Points(v.toObject()["points"]);
   this->log("Teste completo concluído · " + gpus.value(selected).name + " · " + Points(total) + " pontos · " + parts.join(" · "));

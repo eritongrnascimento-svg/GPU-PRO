@@ -15,8 +15,8 @@ public sealed partial class MainWindow {
  static JsonObject CpuSuite(CancellationToken cancel){
   var rows=new JsonArray();double log=0;int count=0;var names=new[]{"Mistura de inteiros","Cálculo FP64 (raiz e seno)","Contagem de primos"};
   for(int mode=0;mode<3;mode++){cancel.ThrowIfCancellationRequested();var r=Native.gpp_run_cpu(mode,Environment.ProcessorCount,5000);if(r.Cancelled!=0)throw new OperationCanceledException();rows.Add(new JsonObject{["metric"]=names[mode],["value"]=r.PerSecond,["unit"]="op/s",["threads"]=r.Threads});if(r.PerSecond>0){log+=Math.Log(r.PerSecond);count++;}}
-  long points=count>0?(long)Math.Round(Math.Exp(log/count)/100000):0;
-  return new JsonObject{["kind"]="cpu",["valid"]=count==3,["points"]=points,["cpuResults"]=rows,["methodText"]="Três cargas do processador (inteiros, ponto flutuante FP64 e primos), 5 s cada, em todas as threads. Pontuação = média das operações por segundo ÷ 100 000."};
+  long points=count>0?(long)Math.Round(Math.Exp(log/count)/10000):0;
+  return new JsonObject{["kind"]="cpu",["valid"]=count==3,["points"]=points,["cpuResults"]=rows,["methodText"]="Três cargas do processador (inteiros, ponto flutuante FP64 e primos), 5 s cada, em todas as threads. Pontuação = média das operações por segundo ÷ 10 000."};
  }
 
  async Task RunSuite(){
