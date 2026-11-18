@@ -1,4 +1,4 @@
-# GPU-PRO — 0.8.0
+# GPU-PRO — 0.8.1
 
 [![Versões anteriores](https://img.shields.io/badge/Downloads-Vers%C3%B5es_anteriores-blue?style=for-the-badge)](https://github.com/eritongrnascimento-svg/GPU-PRO/blob/main/docs/VERSOES-ANTERIORES.md)
 
@@ -38,11 +38,21 @@ Prévia offline, sem inicializar a GPU:
 
 Escolha o formato adequado ao seu sistema na [última release](https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest). Os pacotes oficiais usam Linux x86_64 e base Ubuntu 24.04; o AppImage exige glibc 2.39 ou posterior. TAR/RUN e DEB utilizam bibliotecas do sistema. Se houver incompatibilidade de ABI, Qt ou glibc, compile com `build.sh`. O projeto não distribui drivers NVIDIA/AMD/Intel, e bibliotecas de um fabricante não devem ser copiadas para sistemas de outro.
 
-**Windows 10/11 x64:** baixe `GPU-PRO-0.8.0-windows-x64-setup.exe` (instalador por usuário, sem administrador) ou o portátil `GPU-PRO-0.8.0-windows-x64.zip` na mesma release. Detalhes em [Windows](docs/WINDOWS.md).
+**Windows 10/11 x64:** baixe `GPU-PRO-0.8.1-windows-x64-setup.exe` (instalador por usuário; a opção de FPS automático pede administrador uma vez) ou o portátil `GPU-PRO-0.8.1-windows-x64.zip` na mesma release. Detalhes em [Windows](docs/WINDOWS.md).
 
-## Novidades da versão 0.8.0
+## Novidades da versão 0.8.1 (correção)
 
-Tudo o que mudou depois da 0.7.0. Notas completas em [RELEASE-0.8.0](docs/RELEASE-0.8.0.md) e no [CHANGELOG](CHANGELOG.md).
+- **FPS dos jogos sem programas externos.** Windows: o GPU-PRO conta os quadros pelo próprio Windows (DirectX 9–12, Vulkan e OpenGL), sem PresentMon; basta ativar uma vez o FPS automático. Linux: camada Vulkan própria para jogos nativos e pelo Proton, sem MangoHud; OpenGL pelo lançador `gpu-pro-fps %command%`. O jogo é detectado sozinho.
+- **Teste completo** no Benchmark: todos os testes em sequência com pontuação total e por categoria; cada teste continua disponível sozinho.
+- **Resultados mais claros:** 3D com pontuação e FPS mínimo, médio e máximo; memória com banda, cópia e transferências CPU ↔ GPU; codecs de vídeo em quatro resoluções e de imagem, com pontuação.
+- **Logs:** cada trecho encontrado na busca abre o registro completo.
+- **Feedback:** removidos os botões de importar feedback de amigos e consultar banco importado.
+
+Detalhes em [RELEASE-0.8.1](docs/RELEASE-0.8.1.md).
+
+## Histórico: novidades da versão 0.8.0
+
+Mudanças depois da 0.7.0. Notas completas em [RELEASE-0.8.0](docs/RELEASE-0.8.0.md) e no [CHANGELOG](CHANGELOG.md).
 
 - **Primeira versão para Windows** (WinUI 3 + núcleo C++ compartilhado): instalador e ZIP portátil, mesmas abas do Linux.
 - **Design unificado:** Linux redesenhado para ficar igual ao Windows, respeitando as funções de cada sistema; nome GPU-PRO e ícone na barra de título; janela sempre centralizada.
@@ -126,7 +136,6 @@ O teste 3D dura **30 ou 60 segundos**, mais 2 s de aquecimento, e exibe a cena a
 3. Abra **Feedback & Diagnóstico → Gerar feedback**.
 4. Revise o JSON mostrado e salve o arquivo.
 5. Se desejar contribuir com a validação, envie o arquivo manualmente pelo canal de colaboração acordado com o projeto.
-6. Para consultar arquivos recebidos de outros participantes, use **Importar feedback de amigos**; esse é o nome atual do botão na interface.
 
 O feedback inclui resultados, versão do método, configurações, identificação técnica da GPU, driver, VBIOS e telemetria dos testes. Exclui UUID/serial, hostname, usuário, nomes de processos, caminhos de jogos, argumentos e logs brutos. A exportação é limitada a 16 MiB / 2000 registros recentes e informa quando precisa truncar. Os registros antigos permanecem no banco.
 

@@ -50,7 +50,7 @@ QWidget *MainWindow::aboutPage() {
   auto *l = qobject_cast<QVBoxLayout *>(root->layout());
   auto *project = new QGroupBox("Sobre o projeto");
   auto *pl = new QVBoxLayout(project);
-  pl->addWidget(paragraph("GPU-PRO 0.8.0 · Linux", 18));
+  pl->addWidget(paragraph("GPU-PRO 0.8.1 · Linux", 18));
   pl->addWidget(paragraph("Monitoramento, testes, overlay e ajustes de GPU para Linux e Windows, com núcleo C++ compartilhado. "
                           "Leituras vêm do driver e do sistema: o que não é exposto aparece como N/D, sem estimativas inventadas. "
                           "Projeto independente, sem coleta de dados nem upload automático."));

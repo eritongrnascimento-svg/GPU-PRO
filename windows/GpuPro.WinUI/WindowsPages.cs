@@ -14,7 +14,7 @@ public sealed partial class MainWindow {
  readonly List<string> operations=new();
  static readonly string logFolder=Path.Combine(dataRoot,"logs");
  static string LogFile=>Path.Combine(logFolder,"GPU-PRO-"+DateTime.Now.ToString("yyyy-MM-dd")+".log");
- string? lastRecord;int centralTab;TextBlock? logView;TextBlock? logCount;string logSearch="",logCategory="Todas";
+ string? lastRecord;int centralTab;TextBlock? logView;TextBlock? logCount;StackPanel? logMatches;string logSearch="",logCategory="Todas";
  static readonly string[] logCategories={"Todas","Testes","Gargalo","Overclock","HUD & FPS","Sistema & GPU","Perfis","Dependências","Avisos e erros"};
  // Categoria deduzida do texto, para o filtro do Log de operações.
  static string LogCategory(string text,bool notify){
@@ -27,7 +27,30 @@ public sealed partial class MainWindow {
   return "Sistema & GPU";
  }
  IEnumerable<string> FilteredLog()=>operations.Where(l=>(logCategory=="Todas"||l.Contains("["+logCategory+"]"))&&(logSearch.Length==0||l.Contains(logSearch,StringComparison.CurrentCultureIgnoreCase)));
- void RefreshLogView(){if(logView==null)return;var rows=FilteredLog().ToList();logView.Text=rows.Count==0?(operations.Count==0?"Nenhuma operação registrada nesta sessão.":"Nenhum registro corresponde ao filtro."):string.Join('\n',rows);if(logCount!=null)logCount.Text=rows.Count+" de "+operations.Count+" registros";}
+ void RefreshLogView(){if(logView==null)return;var rows=FilteredLog().ToList();logView.Text=rows.Count==0?(operations.Count==0?"Nenhuma operação registrada nesta sessão.":"Nenhum registro corresponde ao filtro."):string.Join('\n',rows);if(logCount!=null)logCount.Text=rows.Count+" de "+operations.Count+" registros";RefreshMatches(rows);}
+ // Busca: cada trecho encontrado ganha um botão que abre o registro completo com as linhas ao redor.
+ void RefreshMatches(List<string> rows){
+  if(logMatches==null)return;logMatches.Children.Clear();
+  bool show=logSearch.Length>0&&rows.Count>0;logMatches.Visibility=show?Visibility.Visible:Visibility.Collapsed;if(logMatches.Parent is UIElement host)host.Visibility=logMatches.Visibility;if(!show)return;
+  logMatches.Children.Add(new TextBlock{Text=$"Trechos com “{logSearch}”: {rows.Count}"+(rows.Count>30?" · mostrando os 30 mais recentes":""),FontSize=13,Foreground=new SolidColorBrush(theme),FontWeight=global::Microsoft.UI.Text.FontWeights.SemiBold});
+  foreach(var line in Enumerable.Reverse(rows).Take(30)){
+   var row=new Grid{ColumnSpacing=12};row.ColumnDefinitions.Add(new(){Width=new GridLength(1,GridUnitType.Star)});row.ColumnDefinitions.Add(new(){Width=GridLength.Auto});
+   var preview=new TextBlock{Text=LogPreview(line),FontSize=12,FontFamily=new FontFamily("Consolas"),TextTrimming=TextTrimming.CharacterEllipsis,VerticalAlignment=VerticalAlignment.Center};
+   var open=Button("Abrir trecho",async()=>await OpenLogExcerpt(line));Grid.SetColumn(open,1);row.Children.Add(preview);row.Children.Add(open);logMatches.Children.Add(row);
+  }
+ }
+ string LogPreview(string line){int at=line.IndexOf(logSearch,StringComparison.CurrentCultureIgnoreCase);string time=line.Length>19?line[..19]:line;if(at<0)return line;int start=Math.Max(22,at-50);int length=Math.Min(170,line.Length-start);return time+" · "+(start>22?"…":"")+line.Substring(start,length)+(start+length<line.Length?"…":"");}
+ // Registros com JSON (resultados de teste) aparecem formatados.
+ static string Readable(string line){int at=line.IndexOf(" registro: {",StringComparison.Ordinal);if(at<0)return line;try{var node=System.Text.Json.Nodes.JsonNode.Parse(line[(at+11)..]);return line[..at]+" registro:"+Environment.NewLine+node!.ToJsonString(new System.Text.Json.JsonSerializerOptions{WriteIndented=true,Encoder=System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping});}catch{return line;}}
+ async Task OpenLogExcerpt(string line){
+  int index=operations.IndexOf(line);var panel=new StackPanel{Spacing=6};
+  TextBlock Line(string text,double opacity)=>new(){Text=text,FontSize=12,FontFamily=new FontFamily("Consolas"),TextWrapping=TextWrapping.Wrap,IsTextSelectionEnabled=true,Opacity=opacity};
+  if(index>0)foreach(var before in operations.Skip(Math.Max(0,index-3)).Take(Math.Min(3,index)))panel.Children.Add(Line(before,.55));
+  panel.Children.Add(new Border{Child=Line(Readable(line),1),Padding=new Thickness(10),BorderBrush=new SolidColorBrush(theme),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(6),Background=Brush(200,24,24,30)});
+  if(index>=0)foreach(var after in operations.Skip(index+1).Take(3))panel.Children.Add(Line(after,.55));
+  var dialog=new ContentDialog{XamlRoot=Root.XamlRoot,Title="Trecho do log",Content=new ScrollViewer{Content=panel,MaxHeight=520},PrimaryButtonText="Copiar trecho",CloseButtonText="Fechar",DefaultButton=ContentDialogButton.Close};
+  if(await dialog.ShowAsync()==ContentDialogResult.Primary){var data=new global::Windows.ApplicationModel.DataTransfer.DataPackage();data.SetText(Readable(line));global::Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(data);}
+ }
  TextBox profileName=new(){Header="Nome do perfil",Text="Meu jogo"};
  TextBox profileExe=new(){Header="Executável do jogo"};
  TextBox profileArgs=new(){Header="Argumentos"};
@@ -55,6 +78,7 @@ public sealed partial class MainWindow {
   var category=new ComboBox{Header="Categoria",ItemsSource=logCategories,SelectedItem=logCategory,MinWidth=200};category.SelectionChanged+=(s,e)=>{logCategory=category.SelectedItem as string??"Todas";RefreshLogView();};
   logCount=new TextBlock{VerticalAlignment=VerticalAlignment.Bottom,Margin=new Thickness(0,0,0,6),FontSize=12};
   var filters=new StackPanel{Orientation=Orientation.Horizontal,Spacing=12};filters.Children.Add(search);filters.Children.Add(category);filters.Children.Add(logCount);logBody.Children.Add(filters);
+  logMatches=new StackPanel{Spacing=6,Visibility=Visibility.Collapsed};logBody.Children.Add(new Border{Child=logMatches,Visibility=Visibility.Collapsed,Padding=new Thickness(12),BorderBrush=Brush(255,41,41,45),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(8)});
   logView=new TextBlock{IsTextSelectionEnabled=true,TextWrapping=TextWrapping.Wrap,FontSize=12,FontFamily=new FontFamily("Consolas"),Margin=new Thickness(14)};logBody.Children.Add(new Border{Child=new ScrollViewer{Content=logView,MaxHeight=560,MinHeight=320},Background=Brush(190,12,12,16),BorderBrush=Brush(255,41,41,45),BorderThickness=new Thickness(1),CornerRadius=new CornerRadius(8)});
   RefreshLogView();tabs.Items.Add(new PivotItem{Header="Logs de operações ("+operations.Count+")",Content=logBody});
   tabs.SelectedIndex=centralTab;tabs.SelectionChanged+=(s,e)=>centralTab=tabs.SelectedIndex;body.Children.Add(tabs);

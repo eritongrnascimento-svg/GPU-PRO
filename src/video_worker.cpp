@@ -4,11 +4,12 @@
 int main(int argc, char **argv) {
   QCoreApplication app(argc, argv);
   QCoreApplication::setApplicationName("gpu-video-worker");
-  QCoreApplication::setApplicationVersion("0.2.0");
+  QCoreApplication::setApplicationVersion("0.3.0");
   QCommandLineParser p;
   p.addHelpOption();
   p.addOption({"pci", "GPU PCI", "id"});
   p.addOption({"output", "JSON de resultado", "path"});
+  p.addOption({"parts", "video, images ou video,images", "lista", "video,images"});
   p.process(app);
   GpuBackend backend;
   Gpu gpu;
@@ -50,6 +51,7 @@ int main(int argc, char **argv) {
     app.exit(r["valid"].toBool() ? 0 : 1);
   });
   monitor.start();
-  QTimer::singleShot(0, &app, [&] { suite.start(gpu); });
+  const auto parts = p.value("parts").split(',');
+  QTimer::singleShot(0, &app, [&] { suite.start(gpu, parts.contains("video"), parts.contains("images")); });
   return app.exec();
 }

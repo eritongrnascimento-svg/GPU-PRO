@@ -1,22 +1,34 @@
 # GPU-PRO para Windows
 
-Versão 0.8.0 · Windows 10 1809 ou mais novo, x64. A interface é WinUI 3. Os testes e leituras
+Versão 0.8.1 · Windows 10 1809 ou mais novo, x64. A interface é WinUI 3. Os testes e leituras
 usam o mesmo núcleo C++ da versão Linux.
 
 ## Instalação
 
-**Instalador (recomendado):** execute `GPU-PRO-0.8.0-windows-x64-setup.exe`. Ele instala para o
+**Instalador (recomendado):** execute `GPU-PRO-0.8.1-windows-x64-setup.exe`. Ele instala para o
 usuário atual, sem precisar de administrador; na primeira tela também é possível instalar para
 todos os usuários. O instalador cria atalhos no menu Iniciar (e, se você quiser, na área de
 trabalho) e registra o GPU-PRO em Aplicativos instalados, por onde ele pode ser desinstalado.
 
-**Portátil:** extraia `GPU-PRO-0.8.0-windows-x64.zip` em uma pasta sua e abra `GPU-PRO.exe`.
+**Portátil:** extraia `GPU-PRO-0.8.1-windows-x64.zip` em uma pasta sua e abra `GPU-PRO.exe`.
 
-Nas duas formas não há serviço em segundo plano. .NET, Windows App SDK, Qt (só para os
-executores de teste) e o runtime C++ do Visual Studio já vêm junto. Driver da GPU e Vulkan vêm do
-fabricante.
-FFmpeg (testes de vídeo) e PresentMon (FPS dos jogos) podem ser instalados em **Atualizações ›
-Instalar dependências** (winget).
+.NET, Windows App SDK, Qt (só para os executores de teste) e o runtime C++ do Visual Studio já
+vêm junto. Driver da GPU e Vulkan vêm do fabricante. FFmpeg (testes de vídeo) pode ser instalado em
+**Atualizações › Instalar dependências** (winget).
+
+## FPS dos jogos
+
+O GPU-PRO conta os quadros sozinho, sem PresentMon: lê do próprio Windows (ETW) cada quadro
+apresentado em DirectX 9–12, Vulkan e OpenGL, sem tocar no jogo, e detecta o jogo automaticamente
+(primeiro plano; fora dele, o último jogo detectado). O Windows só libera essa leitura a
+administradores, então o contador `gpupro-frames.exe` roda como o serviço
+**GPU-PRO · Contador de quadros**, instalado uma vez — pela opção do instalador ou pelo botão
+**Ativar FPS automático** em GamerMonitor & Overlay. O serviço fica em
+`%ProgramFiles%\GPU-PRO\FrameService` (pasta que só administradores alteram), só lê eventos enquanto
+o GPU-PRO está aberto, não aceita comandos e pode ser removido pelo botão **Remover contador** ou ao
+desinstalar. Sem o serviço, **Só nesta sessão** abre o contador com uma confirmação do Windows; se o
+GPU-PRO já roda como administrador, o contador abre junto sem perguntar. Um CSV de frametime
+escolhido manualmente continua tendo prioridade.
 
 Configurações, histórico de testes e logs ficam em `%LOCALAPPDATA%\GPU-PRO` e são mantidos ao
 desinstalar.

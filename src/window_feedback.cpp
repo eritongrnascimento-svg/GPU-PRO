@@ -13,50 +13,8 @@ QWidget *MainWindow::feedbackPage() {
   explain->setWordWrap(true);
   l->addWidget(explain);
   auto *exportButton = new QPushButton("Gerar feedback · revisar e salvar JSON");
-  auto *importButton = new QPushButton("Importar feedback de amigos");
-  auto *references = new QPushButton("Consultar banco importado · não verificado");
-  l->addWidget(references);
-  connect(references, &QPushButton::clicked, this, [this] {
-    QDialog dialog(this);
-    dialog.resize(1150, 650);
-    dialog.setWindowTitle("Referências importadas — não verificadas");
-    auto *layout = new QVBoxLayout(&dialog);
-    auto *info = new QLabel("Compare grupos com o mesmo método, API, resolução e cobertura. Estes "
-                            "arquivos não são perfis homologados e não serão aplicados à GPU.");
-    info->setWordWrap(true);
-    layout->addWidget(info);
-    auto rows = repository->references();
-    auto *table = new QTableWidget(rows.size(), 7);
-    table->setHorizontalHeaderLabels(
-        {"GPU", "Driver", "Categoria", "Método", "API / resolução", "Score / estado", "Cobertura"});
-    table->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    table->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    layout->addWidget(table, 1);
-    int index = 0;
-    for (auto v : rows) {
-      auto r = v.toObject();
-      auto gpu = r["gpu"].toObject();
-      QStringList values = {gpu["name"].toString(),
-                            gpu["driverVersion"].toString(),
-                            r["kind"].toString(),
-                            r["method"].toString(),
-                            r["api"].toString() + " " +
-                                (r.contains("width") ? QString::number(r["width"].toInt()) + "×" +
-                                                           QString::number(r["height"].toInt())
-                                                     : ""),
-                            r.contains("score")
-                                ? QString::number(r["score"].toDouble(), 'f', 2)
-                                : (r["valid"].toBool() ? "concluído" : "incompleto"),
-                            r["coverage"].toString()};
-      for (int col = 0; col < values.size(); ++col)
-        table->setItem(index, col, new QTableWidgetItem(values[col]));
-      ++index;
-    }
-    dialog.exec();
-  });
   auto *diagnose = new QPushButton("Verificar dependências e sensores");
   l->addWidget(exportButton);
-  l->addWidget(importButton);
   l->addWidget(diagnose);
   auto *description =
       new QLabel("Dados importados são referências não verificadas. O aplicativo não aplica "
@@ -67,7 +25,6 @@ QWidget *MainWindow::feedbackPage() {
   l->addWidget(description);
   l->addStretch();
   connect(exportButton, &QPushButton::clicked, this, &MainWindow::generateFeedback);
-  connect(importButton, &QPushButton::clicked, this, &MainWindow::importFeedback);
   connect(diagnose, &QPushButton::clicked, this, [this] {
     QStringList lines;
     for (QString tool : {"gpu-bench-worker", "ffmpeg", "vainfo", "vulkaninfo", "glxinfo",
@@ -96,7 +53,6 @@ QWidget *MainWindow::feedbackPage() {
   });
   if (offline) {
     exportButton->setEnabled(false);
-    importButton->setEnabled(false);
   }
   return root;
 }

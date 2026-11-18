@@ -82,12 +82,17 @@ void CodecRunner::run(QStringList args, QString phase) {
     elapsed.start();
   process.start("ffmpeg", args);
 }
-void CodecRunner::start(const Gpu &g, QString c, QString m) {
+void CodecRunner::start(const Gpu &g, QString c, QString m, int w, int h) {
   if (busy())
     return;
   gpu = g;
   codec = c;
   mode = m;
+  width = w;
+  height = h;
+  // Mídia de origem menor nas resoluções altas (o arquivo YUV de 4K tem 12 MB por quadro); a medição
+  // repete a mesma mídia até completar 360 quadros.
+  prepared = w * h > 2560 * 1440 ? 30 : w * h > 1920 * 1080 ? 60 : 120;
   cancelled = false;
   active = true;
   if (!QStringList{"h264", "hevc", "av1"}.contains(c) ||
@@ -122,9 +127,10 @@ void CodecRunner::start(const Gpu &g, QString c, QString m) {
     fail("Falha ao criar diretório temporário");
     return;
   }
-  emit progress(0, "Preparando 120 quadros 1080p; preparação não pontuada");
-  QStringList args = {"-f",        "lavfi", "-i",       "testsrc2=size=1920x1080:rate=60",
-                      "-frames:v", "120",   "-pix_fmt", "yuv420p"};
+  const QString size = QString("%1x%2").arg(width).arg(height);
+  emit progress(0, QString("Preparando %1 quadros %2; preparação não pontuada").arg(prepared).arg(size));
+  QStringList args = {"-f",        "lavfi", "-i",       "testsrc2=size=" + size + ":rate=60",
+                      "-frames:v", QString::number(prepared),   "-pix_fmt", "yuv420p"};
   if (mode == "encode")
     args << "-f" << "rawvideo" << temp->filePath("source.yuv");
   else {
@@ -144,6 +150,8 @@ void CodecRunner::start(const Gpu &g, QString c, QString m) {
   }
   run(args, "prepare");
 }
+// Taxa proporcional aos pixels: 12 Mb/s em 1080p.
+QString CodecRunner::Bitrate() const { return QString("%1M").arg(qMax(4, qRound(12.0 * width * height / (1920.0 * 1080)))); }
 void CodecRunner::measured() {
   if (!active)
     return;
@@ -177,17 +185,17 @@ void CodecRunner::measured() {
   args << "-init_hw_device" << hw + "=bench:" + device << "-filter_hw_device"
        << "bench";
   if (mode == "encode") {
-    args << "-stream_loop" << "2" << "-f" << "rawvideo" << "-pixel_format"
-         << "yuv420p" << "-video_size" << "1920x1080" << "-framerate" << "60"
+    args << "-stream_loop" << QString::number(360 / prepared - 1) << "-f" << "rawvideo" << "-pixel_format"
+         << "yuv420p" << "-video_size" << QString("%1x%2").arg(width).arg(height) << "-framerate" << "60"
          << "-i" << temp->filePath("source.yuv") << "-vf"
          << "format=nv12,hwupload" << "-frames:v" << "360" << "-c:v"
-         << codec + encoderSuffix << "-b:v" << "12M"
+         << codec + encoderSuffix << "-b:v" << Bitrate()
          << temp->filePath("encoded.mkv");
   } else {
     // Hardware output frames are mandatory; a software fallback cannot satisfy
     // this pipeline.
     args << "-hwaccel" << hw << "-hwaccel_device" << "bench"
-         << "-hwaccel_output_format" << hw << "-stream_loop" << "2" << "-i"
+         << "-hwaccel_output_format" << hw << "-stream_loop" << QString::number(360 / prepared - 1) << "-i"
          << temp->filePath("source.mkv") << "-vf" << "hwdownload,format=nv12" << "-frames:v"
          << "360" << "-an"
          << "-f" << "null" << "-";
@@ -222,8 +230,11 @@ void CodecRunner::finished(int code, QProcess::ExitStatus status) {
                 {"frames", frames},
                 {"seconds", seconds},
                 {"fps", frames / seconds},
-                {"resolution", "1920x1080"},
-                {"bitrate", mode == "encode" ? "12M" : "fixture CPU"},
+                {"resolution", QString("%1x%2").arg(width).arg(height)},
+                {"width", width},
+                {"height", height},
+                {"mpixPerSecond", frames / seconds * width * height / 1e6},
+                {"bitrate", mode == "encode" ? Bitrate() : "fixture CPU"},
                 {"method", "codec-pipeline-v0.2"},
                 {"ffmpegVersion", ffmpegVersion},
                 {"arguments", QJsonArray::fromStringList(runArgs)},

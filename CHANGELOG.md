@@ -1,5 +1,12 @@
 # Alterações
 
+## 0.8.1 — 17/11/2026 (correção · Linux e Windows)
+
+- FPS dos jogos sem programas externos. Windows: contador próprio por eventos do Windows (DirectX 9–12, Vulkan e OpenGL), serviço "GPU-PRO · Contador de quadros" instalado uma vez; PresentMon removido das dependências. Linux: camada Vulkan própria (Vulkan nativo e Proton/DXVK/VKD3D) ativada uma vez e lançador `gpu-pro-fps` para OpenGL; sem MangoHud. Jogo detectado automaticamente; CSV manual continua com prioridade.
+- Benchmark: aba Teste completo (sequência com pontuação total e por categoria); 3D com método resumido, pontuação e FPS mínimo/médio/máximo; memória com transferências CPU ↔ GPU e pontuações de memória e computação; codecs de vídeo em 720p, 1080p, 1440p e 4K e teste de imagens JPEG/PNG/WebP, com pontuação.
+- Notificações & Logs: botão Abrir trecho para cada resultado da busca, com o registro completo e as linhas ao redor.
+- Feedback & Diagnóstico: removidos Importar feedback de amigos e Consultar banco importado.
+
 ## 0.8.0 (Linux) — 17/11/2026
 
 Design igual ao da versão Windows, respeitando as funções do Linux.

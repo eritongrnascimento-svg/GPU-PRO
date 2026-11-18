@@ -11,6 +11,7 @@
 #include <QOpenGLFramebufferObject>
 #include <QOpenGLFunctions_3_3_Core>
 #include <QOpenGLShaderProgram>
+#include <algorithm>
 #include <array>
 #include <cmath>
 #include <cstdio>
@@ -689,7 +690,7 @@ QJsonObject VKGraphics::compute(const Gpu &gpu, GpuBackend &backend) {
           {"temp", sample["temp"]}, {"power", sample["power"]}, {"clock", sample["clock"]}});
       output(
           "PROGRESS",
-          {{"progress", (index * 9 + repeat + 1) * 100 / 63}, {"scene", index}, {"gpuMeanMs", ms}});
+          {{"progress", (index * 9 + repeat + 1) * 90 / 63}, {"scene", index}, {"gpuMeanMs", ms}});
     }
     begin();
     VkBufferCopy copy{0, 0, 64};
@@ -760,14 +761,101 @@ QJsonObject VKGraphics::compute(const Gpu &gpu, GpuBackend &backend) {
     vkDestroyShaderModule(dev, module, nullptr);
     module = VK_NULL_HANDLE;
   }
+  // Transferências: CPU→GPU (envio), GPU→CPU (retorno) e cópia direta na VRAM (vkCmdCopyBuffer),
+  // 32 MiB por vez, tempo medido pelos carimbos de tempo da própria GPU.
+  {
+    VkBuffer staging{};
+    VkDeviceMemory stagingMemory{};
+    auto release = qScopeGuard([&] {
+      vkDeviceWaitIdle(dev);
+      if (staging) vkDestroyBuffer(dev, staging, nullptr);
+      if (stagingMemory) vkFreeMemory(dev, stagingMemory, nullptr);
+    });
+    VkBufferCreateInfo bi{VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO};
+    bi.size = bytes;
+    bi.usage = VK_BUFFER_USAGE_TRANSFER_SRC_BIT | VK_BUFFER_USAGE_TRANSFER_DST_BIT;
+    vkCheck(vkCreateBuffer(dev, &bi, nullptr, &staging), "transfer buffer");
+    VkMemoryRequirements requirements{};
+    vkGetBufferMemoryRequirements(dev, staging, &requirements);
+    VkMemoryAllocateInfo ai{VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO};
+    ai.allocationSize = requirements.size;
+    ai.memoryTypeIndex = memoryType(requirements.memoryTypeBits, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    vkCheck(vkAllocateMemory(dev, &ai, nullptr, &stagingMemory), "transfer memory");
+    vkCheck(vkBindBufferMemory(dev, staging, stagingMemory, 0), "bind transfer buffer");
+    void *mapped = nullptr;
+    vkCheck(vkMapMemory(dev, stagingMemory, 0, bytes, 0, &mapped), "map transfer buffer");
+    std::fill_n(static_cast<uint32_t *>(mapped), bytes / 4, 0xA5A5A5A5u);
+    vkUnmapMemory(dev, stagingMemory);
+    struct Transfer { QString key, name; VkBuffer from, to; };
+    const Transfer transfers[] = {{"upload", "Envio CPU → GPU (PCIe)", staging, buffers[0]},
+                                  {"download", "Retorno GPU → CPU (PCIe)", buffers[1], staging},
+                                  {"gpucopy", "Cópia na VRAM (vkCmdCopyBuffer)", buffers[0], buffers[1]}};
+    for (int t = 0; t < 3; ++t) {
+      QList<double> times;
+      for (int repeat = 0; repeat < 9; ++repeat) {
+        begin();
+        vkCmdResetQueryPool(cmd, queries, 0, 2);
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, queries, 0);
+        VkBufferCopy region{0, 0, bytes};
+        vkCmdCopyBuffer(cmd, transfers[t].from, transfers[t].to, 1, &region);
+        vkCmdWriteTimestamp(cmd, VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, queries, 1);
+        submit();
+        uint64_t stamps[2];
+        vkCheck(vkGetQueryPoolResults(dev, queries, 0, 2, sizeof stamps, stamps, sizeof(uint64_t), VK_QUERY_RESULT_64_BIT), "transfer timestamps");
+        uint64_t mask = bits == 64 ? ~uint64_t(0) : (uint64_t(1) << bits) - 1;
+        double ms = ((stamps[1] - stamps[0]) & mask) * period / 1e6;
+        if (ms <= 0) throw std::runtime_error("Timestamp de transferência inválido");
+        if (repeat) times << ms;
+        output("PROGRESS", {{"progress", 90 + (t * 9 + repeat + 1) * 10 / 27}, {"scene", 7 + t}, {"gpuMeanMs", ms}});
+      }
+      auto timing = summarize(times);
+      double ms = 1000 / timing.mean;
+      rows.append(QJsonObject{{"metric", transfers[t].name}, {"key", transfers[t].key}, {"status", "passed"}, {"unit", "GB/s"},
+                              {"value", double(bytes) / (ms * 1e6)}, {"gpuMeanMs", ms}, {"frames", 8}});
+    }
+    // Validação: o envio deve ter levado o padrão da CPU para a VRAM.
+    begin();
+    VkBufferCopy check{0, 0, 64};
+    vkCmdCopyBuffer(cmd, buffers[0], buffers[2], 1, &check);
+    VkMemoryBarrier host{VK_STRUCTURE_TYPE_MEMORY_BARRIER};
+    host.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+    host.dstAccessMask = VK_ACCESS_HOST_READ_BIT;
+    vkCmdPipelineBarrier(cmd, VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_HOST_BIT, 0, 1, &host, 0, nullptr, 0, nullptr);
+    submit();
+    void *readback = nullptr;
+    vkCheck(vkMapMemory(dev, memories[2], 0, 64, 0, &readback), "transfer validation");
+    uint32_t first = 0;
+    memcpy(&first, readback, 4);
+    vkUnmapMemory(dev, memories[2]);
+    if (first != 0xA5A5A5A5u) throw std::runtime_error("Validação da transferência CPU → GPU falhou");
+  }
+  // Pontuações simplificadas: memória = média geométrica das larguras de banda (GB/s) × 10;
+  // computação = média geométrica de GFLOPS/GIOPS suportados.
+  double memoryLog = 0, computeLog = 0;
+  int memoryCount = 0, computeCount = 0;
+  for (const auto &v : rows) {
+    const auto row = v.toObject();
+    if (row["status"].toString() != "passed" || !(row["value"].toDouble() > 0)) continue;
+    if (row["unit"].toString() == "GB/s") { memoryLog += std::log(row["value"].toDouble()); ++memoryCount; }
+    else { computeLog += std::log(row["value"].toDouble()); ++computeCount; }
+  }
+  const qint64 memoryPoints = memoryCount ? qRound64(std::exp(memoryLog / memoryCount) * 10) : 0;
+  const qint64 computePoints = computeCount ? qRound64(std::exp(computeLog / computeCount)) : 0;
   return {{"valid", passed > 0},
           {"kind", "compute"},
+          {"memoryPoints", memoryPoints},
+          {"computePoints", computePoints},
+          {"points", memoryPoints + computePoints},
+          {"methodText", "Memória: leitura, escrita e cópia por shader na VRAM, envio CPU → GPU e retorno GPU → CPU pelo PCIe e cópia "
+                         "direta na VRAM, 32 MiB por medição, 8 repetições cronometradas pela própria GPU. Pontuação de memória = média "
+                         "das larguras de banda (GB/s) × 10. Computação: FMA FP32/FP64 e inteiros 32/64 bits; pontuação = média de "
+                         "GFLOPS/GIOPS."},
           {"api", "Vulkan"},
           {"method", "compute-micro-v1"},
           {"computeResults", rows},
           {"telemetry", telemetry},
           {"supported", passed},
-          {"attempted", 7},
+          {"attempted", 10},
           {"deviceVerified", verification},
           {"timestamp", QDateTime::currentDateTimeUtc().toString(Qt::ISODateWithMs)}};
 }
@@ -833,6 +921,10 @@ int main(int argc, char **argv) {
     lastOutput.start();
     std::array<QList<double>, 3> gpuMs, wallMs, cpuMs;
     QJsonArray samples;
+    // FPS por segundo de medição (tempo real de cada quadro): mínimo, médio e máximo.
+    QList<double> fpsPerSecond;
+    double bucketMs = 0, measuredMs = 0;
+    int bucketFrames = 0, measuredFrames = 0;
     QElapsedTimer frameTime;
     double warmup = 2;
     while (all.nsecsElapsed() / 1e9 < warmup + duration) {
@@ -849,6 +941,15 @@ int main(int argc, char **argv) {
         gpuMs[scene] << ms;
         wallMs[scene] << wall;
         cpuMs[scene] << cpu;
+        bucketMs += wall;
+        measuredMs += wall;
+        ++bucketFrames;
+        ++measuredFrames;
+        if (bucketMs >= 1000) {
+          fpsPerSecond << bucketFrames * 1000.0 / bucketMs;
+          bucketMs = 0;
+          bucketFrames = 0;
+        }
       }
       if (live && lastPreview.elapsed() >= 66) {
         live->frame(float(std::fmod(qMax(0., t - warmup), duration / 3)), qMax(0, scene));
@@ -902,8 +1003,22 @@ int main(int argc, char **argv) {
                                 {"score", mpix},
                                 {"frames", gs.frames}});
     }
+    if (fpsPerSecond.isEmpty() && measuredMs > 0) fpsPerSecond << measuredFrames * 1000.0 / measuredMs;
+    const double fpsAvg = measuredMs > 0 ? measuredFrames * 1000.0 / measuredMs : 0;
+    const double geomean = std::cbrt(product);
+    QList<double> allWall;
+    for (const auto &list : wallMs) allWall += list;
+    const auto overall = summarize(allWall);
     result = {{"valid", true},
               {"kind", "graphics"},
+              {"fpsMin", *std::min_element(fpsPerSecond.begin(), fpsPerSecond.end())},
+              {"fpsAvg", fpsAvg},
+              {"fpsMax", *std::max_element(fpsPerSecond.begin(), fpsPerSecond.end())},
+              {"onePercentLow", overall.low},
+              {"points", qRound64(geomean * 10)},
+              {"methodText", QString("3 cenas 3D procedurais (cidade neon com sombras e reflexos) em %1×%2 via %3, %4 s de medição após 2 s de "
+                                     "aquecimento. FPS mínimo e máximo por segundo de teste. Pontuação = média dos megapixels desenhados por "
+                                     "segundo nas 3 cenas × 10.").arg(width).arg(height).arg(p.value("api")).arg(duration)},
               {"api", p.value("api")},
               {"method", "neon-throughput-v0.3"},
               {"shaderVersion", "neon-city-2"},
@@ -914,7 +1029,7 @@ int main(int argc, char **argv) {
               {"cpuIterations", iterations},
               {"sceneResults", scenes},
               {"samples", samples},
-              {"score", std::cbrt(product)},
+              {"score", geomean},
               {"scoreUnit", "MPix-s-geomean"},
               {"frames", total},
               {"deviceVerified", graphics->verification},

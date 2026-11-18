@@ -1,9 +1,9 @@
 ; Instalador do GPU-PRO para Windows (Inno Setup 6).
 ; Gerado por windows/build-windows.ps1 a partir da pasta portátil em dist/.
-; ISCC /DAppVersion=0.8.0 /DSourceDir=<pasta portátil> /DOutputDir=<dist> GPU-PRO.iss
+; ISCC /DAppVersion=0.8.1 /DSourceDir=<pasta portátil> /DOutputDir=<dist> GPU-PRO.iss
 
 #ifndef AppVersion
-  #define AppVersion "0.8.0"
+  #define AppVersion "0.8.1"
 #endif
 #ifndef SourceDir
   #define SourceDir "..\..\dist\GPU-PRO-" + AppVersion + "-windows-x64"
@@ -75,4 +75,4 @@ begin
   Result := RegKeyExists(HKLM64, 'SYSTEM\CurrentControlSet\Services\GPUPROFrames');
 end;
 
-; Configurações, histórico e logs em %LOCALAPPDATA%\GPU-PRO são do usuário e permanecem após desinstalar.
+// Configurações, histórico e logs em %LOCALAPPDATA%\GPU-PRO são do usuário e permanecem após desinstalar.

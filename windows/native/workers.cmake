@@ -20,7 +20,7 @@ add_dependencies(gpu-bench-worker shaders)
 qt_add_resources(gpu-bench-worker worker-shaders PREFIX /shaders BASE ${CMAKE_CURRENT_BINARY_DIR} FILES ${CMAKE_CURRENT_BINARY_DIR}/city.vert.spv ${CMAKE_CURRENT_BINARY_DIR}/city.frag.spv ${COMPUTE_SPV})
 qt_add_resources(gpu-bench-worker worker-source PREFIX /source BASE ${CMAKE_CURRENT_SOURCE_DIR}/shaders FILES shaders/city.frag)
 add_executable(gpu-video-worker src/video_worker.cpp src/codec.cpp src/codec_suite.cpp)
-target_link_libraries(gpu-video-worker PRIVATE windows-worker-core)
+target_link_libraries(gpu-video-worker PRIVATE windows-worker-core Qt6::Gui)
 install(TARGETS gpu-bench-worker gpu-video-worker gpupro-native RUNTIME DESTINATION .)
 
 add_executable(gpu-data-worker windows/native/data_worker.cpp)

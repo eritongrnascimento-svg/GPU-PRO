@@ -92,7 +92,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   resize(1240, 900);
   setWindowIcon(Branding::windowIcon(QColor("#76b900")));
   setMinimumSize(980, 700);
-  setWindowTitle("GPU-PRO · 0.8.0");
+  setWindowTitle("GPU-PRO · 0.8.1");
   if (!offline)
     overlayConfig = OverlayConfig::fromJson(
         QJsonDocument::fromJson(readText(configRoot() + "/overlay.json").toUtf8()).object());
@@ -194,6 +194,26 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   filters->addWidget(logCategory);
   filters->addWidget(logCount);
   ll->addLayout(filters);
+  // Busca: lista dos trechos encontrados, cada um abre o registro completo com as linhas ao redor.
+  logMatchesBox = new QWidget;
+  auto *matchesLayout = new QVBoxLayout(logMatchesBox);
+  matchesLayout->setContentsMargins(0, 0, 0, 0);
+  logMatchesTitle = new QLabel;
+  matchesLayout->addWidget(logMatchesTitle);
+  auto *matchesRow = new QHBoxLayout;
+  logMatches = new QListWidget;
+  logMatches->setMaximumHeight(170);
+  logMatches->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+  matchesRow->addWidget(logMatches, 1);
+  auto *openExcerpt = new QPushButton("Abrir trecho");
+  matchesRow->addWidget(openExcerpt, 0, Qt::AlignTop);
+  matchesLayout->addLayout(matchesRow);
+  logMatchesBox->hide();
+  ll->addWidget(logMatchesBox);
+  connect(openExcerpt, &QPushButton::clicked, this, [this] {
+    if (auto *item = logMatches->currentItem() ? logMatches->currentItem() : logMatches->item(0)) openLogExcerpt(item->data(Qt::UserRole).toString());
+  });
+  connect(logMatches, &QListWidget::itemDoubleClicked, this, [this](QListWidgetItem *item) { openLogExcerpt(item->data(Qt::UserRole).toString()); });
   ll->addWidget(new QLabel("Todas as operações desta sessão. Cópia diária em " + configRoot() + "/logs."));
   ll->addWidget(logs, 1);
   connect(logSearch, &QLineEdit::textChanged, this, [this] { refreshLogView(); });
@@ -511,6 +531,36 @@ QString MainWindow::logCategoryFor(const QString &text, bool notify) {
   if (text.contains("pacote", Qt::CaseInsensitive) || text.contains("dependênc", Qt::CaseInsensitive) || text.contains("driver", Qt::CaseInsensitive)) return "Dependências";
   return "Sistema & GPU";
 }
+void MainWindow::openLogExcerpt(const QString &line) {
+  const int index = logLines.indexOf(line);
+  // Registros com JSON (resultados de teste) aparecem formatados.
+  QString readable = line;
+  if (const int at = line.indexOf(" registro: {"); at >= 0) {
+    const auto doc = QJsonDocument::fromJson(line.mid(at + 11).toUtf8());
+    if (!doc.isNull()) readable = line.left(at) + " registro:\n" + QString::fromUtf8(doc.toJson(QJsonDocument::Indented));
+  }
+  QStringList before, after;
+  for (int i = qMax(0, index - 3); index >= 0 && i < index; ++i) before << logLines[i];
+  for (int i = index + 1; index >= 0 && i < qMin(int(logLines.size()), index + 4); ++i) after << logLines[i];
+  QDialog dialog(this);
+  dialog.setWindowTitle("Trecho do log");
+  dialog.resize(1000, 620);
+  auto *layout = new QVBoxLayout(&dialog);
+  auto *view = new QTextEdit;
+  view->setReadOnly(true);
+  view->setFont(QFontDatabase::systemFont(QFontDatabase::FixedFont));
+  QString html = "<div style='color:#8a8a8a'>" + before.join("<br>").toHtmlEscaped().replace("&lt;br&gt;", "<br>") + "</div>";
+  html += "<pre style='border:1px solid " + QColor(gpus.value(selected).accent()).name() + ";padding:8px;white-space:pre-wrap'>" + readable.toHtmlEscaped() + "</pre>";
+  html += "<div style='color:#8a8a8a'>" + after.join("<br>").toHtmlEscaped().replace("&lt;br&gt;", "<br>") + "</div>";
+  view->setHtml(html);
+  layout->addWidget(view, 1);
+  auto *buttons = new QDialogButtonBox(QDialogButtonBox::Close);
+  auto *copy = buttons->addButton("Copiar trecho", QDialogButtonBox::ActionRole);
+  connect(copy, &QPushButton::clicked, &dialog, [readable] { QGuiApplication::clipboard()->setText(readable); });
+  connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+  layout->addWidget(buttons);
+  dialog.exec();
+}
 void MainWindow::refreshLogView() {
   if (!logs) return;
   const QString search = logSearch ? logSearch->text().trimmed() : QString();
@@ -525,6 +575,24 @@ void MainWindow::refreshLogView() {
                                     : rows.join('\n'));
   logs->moveCursor(QTextCursor::End);
   if (logCount) logCount->setText(QString("%1 de %2 registros").arg(rows.size()).arg(logLines.size()));
+  if (logMatches) {
+    logMatches->clear();
+    const bool show = !search.isEmpty() && !rows.isEmpty();
+    logMatchesBox->setVisible(show);
+    if (show) {
+      logMatchesTitle->setText(QString("Trechos com “%1”: %2%3 · selecione e clique em Abrir trecho (ou duplo clique)")
+                                   .arg(search).arg(rows.size()).arg(rows.size() > 30 ? " · os 30 mais recentes" : ""));
+      for (int i = rows.size() - 1, shown = 0; i >= 0 && shown < 30; --i, ++shown) {
+        const QString &line = rows[i];
+        const int at = line.indexOf(search, 0, Qt::CaseInsensitive);
+        const int start = qMax(22, at - 50);
+        QString preview = line.left(19) + " · " + (start > 22 ? "…" : "") + line.mid(start, 170) + (start + 170 < line.size() ? "…" : "");
+        auto *item = new QListWidgetItem(preview);
+        item->setData(Qt::UserRole, line);
+        logMatches->addItem(item);
+      }
+    }
+  }
   if (centralTabs) centralTabs->setTabText(1, QString("Logs de operações (%1)").arg(logLines.size()));
 }
 static void recordLine(QStringList &lines, const QString &text, bool notify) {
@@ -1548,7 +1616,7 @@ bool MainWindow::checkInterface() {
   for (auto file : {":/assets/gpu-pro.png", ":/LICENSE", ":/NOTICE", ":/docs/licenses/LGPL-3.0.txt", ":/docs/licenses/GPL-3.0.txt", ":/docs/AVISO-DE-RESPONSABILIDADE.md"})
     if (!QFileInfo::exists(file)) return false;
   // 12 páginas (índices preservados) e 11 botões: Notificações e Logs são uma aba só, como no Windows.
-  if (!offline || pages->count() != 12 || navigation.size() != 11 || gpuTabs->count() != 2 || benchmarkTabs->count() != 4 || !centralTabs || centralTabs->count() != 2) return false;
+  if (!offline || pages->count() != 12 || navigation.size() != 11 || gpuTabs->count() != 2 || benchmarkTabs->count() != 5 || !centralTabs || centralTabs->count() != 2) return false;
   resize(980, 700); pages->setCurrentIndex(2); QApplication::processEvents();
   auto *scroll = qobject_cast<QScrollArea *>(pages->currentWidget());
   if (!scroll || scroll->verticalScrollBar()->maximum() <= 0) return false;
@@ -1575,7 +1643,7 @@ void MainWindow::benchmarkCheck(QString path) {
   connect(ready, &QTimer::timeout, this, [this, ready, tries] {
     if (++*tries > 40) { ready->stop(); QCoreApplication::exit(6); return; }
     if (gpus.isEmpty()) return;
-    ready->stop(); ready->deleteLater(); pages->setCurrentIndex(5); benchmarkTabs->setCurrentIndex(0);
+    ready->stop(); ready->deleteLater(); pages->setCurrentIndex(5); benchmarkTabs->setCurrentIndex(1);
     startGraphics("graphics", "Vulkan", 1280, 720, 6);
   }); ready->start();
 }

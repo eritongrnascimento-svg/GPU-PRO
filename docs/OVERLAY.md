@@ -10,31 +10,21 @@ Marque **Uso CPU** e **Temperatura CPU** na lista de métricas. O uso é global,
 
 Temperaturas são lidas de sensores CPU reconhecidos em hwmon, como coretemp, k10temp e zenpower, com fallback para zonas térmicas identificadas como CPU/pacote/SoC. Tdie e pacote têm preferência; quando há canais equivalentes, é exibido o maior valor válido. A origem permanece na telemetria local. Se o kernel não expuser um canal reconhecido, aparece N/D. Não é estimada a temperatura da CPU a partir da GPU.
 
-## FPS atual, 1% low, média e máxima
+## FPS do jogo (contador do GPU-PRO)
 
-Selecione **FPS atual (CSV)**, **1% low (amostras CSV)**, **FPS médio (CSV)** e **FPS máximo (CSV)**. A seleção controla as linhas de FPS do GamerMonitor e os campos do HUD. A fonte é o CSV ativo escolhido abaixo, mesmo quando a linha no HUD está desligada. Não é necessário exibir o HUD para acompanhar os valores no painel.
+Desde a 0.8.1 o FPS vem do contador próprio do GPU-PRO, sem MangoHud nem PresentMon:
 
-As estatísticas usam as últimas 240 amostras válidas. FPS atual = 1000 / último frametime em ms; média = 1000 × quantidade / soma dos frametimes; máxima = 1000 / menor frametime. O 1% low usa a média dos tempos do 1% mais lento, arredondando a quantidade para cima; só aparece após 100 amostras. Logs por intervalo, como MangoHud log_interval=100, geram **estatísticas das amostras**, não um 1% low por quadro nem resultados de toda a sessão. Para dados por quadro, o produtor precisa gravar cada quadro.
+- **Linux:** clique uma vez em **Ativar FPS automático** (GamerMonitor & Overlay). A camada Vulkan do GPU-PRO (`VK_LAYER_GPUPRO_fps`) passa a contar os quadros de jogos Vulkan nativos e de todos os jogos pelo Proton (DirectX 9–11 via DXVK, DirectX 12 via VKD3D-Proton). O manifesto fica em `~/.local/share/vulkan/implicit_layer.d/gpu-pro-fps.json`; a camada só registra o instante de cada `vkQueuePresentKHR` e envia os tempos ao GPU-PRO por um socket local. Jogos já abertos passam a contar quando forem reiniciados. Para desativar, use o mesmo botão ou `DISABLE_GPUPRO_FPS=1` em um jogo.
+- **OpenGL nativo (Linux):** nas opções de inicialização do Steam, use `gpu-pro-fps %command%`. O lançador também ativa a camada Vulkan para aquele jogo, mesmo sem o FPS automático.
+- **Windows:** veja [Windows](WINDOWS.md#fps-dos-jogos).
 
-O GamerMonitor também exibe o gráfico em ms. Sem fonte válida ou depois de aproximadamente 3 s sem novidades, FPS fica N/D e o gráfico aguarda dados. Trocar a fonte, truncar o arquivo ou receber outro cabeçalho limpa a série anterior. Nenhum FPS é inferido da utilização da GPU ou do ritmo de atualização da interface.
+Sem processo escolhido, o jogo é detectado sozinho; compositores, gravação de tela, navegadores e sobreposições são ignorados. O HUD mostra o nome do jogo e a API.
 
-## Linha de frametime
+As estatísticas usam os últimos 240 quadros. FPS atual = 1000 / último frametime em ms; média = 1000 × quantidade / soma dos frametimes; máxima = 1000 / menor frametime. O 1% low usa a média dos tempos do 1% mais lento e só aparece após 100 quadros. Sem quadros novos por cerca de 3 s, o FPS fica N/D. Nenhum FPS é inferido do uso da GPU.
 
-A linha representa tempos de quadros em milissegundos. Ative **Linha de frametime** e use **Selecionar CSV** para indicar o arquivo que o jogo está gravando. O leitor reconhece uma coluna chamada `frametime`, aceita somente valores finitos e positivos e acompanha novas linhas completas. Mantém até 240 amostras; não substitui frametime por uso de CPU/GPU ou intervalo de atualização do HUD.
+### CSV opcional
 
-Uma fonte opcional é o log do [MangoHud](https://github.com/flightlessmango/MangoHud#fps-logging). Exemplo de opções no arquivo de configuração do MangoHud, usando uma pasta existente e gravável:
-
-```ini
-output_folder=/caminho/para/logs
-log_interval=100
-autostart_log=1
-```
-
-Execute o jogo com MangoHud, localize o CSV criado para essa execução e selecione-o no GPU-PRO. O atalho padrão Shift+F2 também pode iniciar/parar o logging, conforme a configuração do MangoHud. Um novo arquivo de outra execução deve ser selecionado novamente. O GPU-PRO não ativa logging ou uploads no MangoHud e não modifica arquivos de configuração de terceiros.
-
-Sem arquivo, cabeçalho compatível ou amostras novas, o gráfico mostra **aguardando CSV ativo**. Após aproximadamente três segundos sem dados novos, a linha é limpa. Logs antigos não são apresentados como dados atuais. A frequência real depende do produtor do CSV e não equivale necessariamente a uma amostra por quadro.
-
-CPU, GPU e configuração ao vivo não exigem MangoHud. Somente essa fonte opcional de frametime usa o log externo. FSR/DLSS/geração de quadros continuam dependendo dos jogos e integrações correspondentes.
+Um CSV de frametime em gravação (coluna `frametime` em ms, ou `fps`) escolhido em **Selecionar CSV** tem prioridade sobre o contador — útil para logs do MangoHud ou de outras ferramentas. Logs por intervalo geram estatísticas das amostras, não por quadro.
 
 ## Tema e gravação
 

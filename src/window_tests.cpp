@@ -121,10 +121,9 @@ QWidget *MainWindow::benchmarks() {
   p.cancel = action("Cancelar", controls);
   p.cancel->setEnabled(false);
   l->insertLayout(1, controls);
-  l->addWidget(text("Renderização offscreen na resolução física escolhida, mesmo em monitor menor. "
-                    "Pontos = média geométrica do throughput das três cenas (MPix/s). Compare "
-                    "mesma API, resolução e método; não equivale a FPS de jogos comerciais. "
-                    "Interrompe em GPU ≥78 °C ou hotspot ≥95 °C."));
+  l->addWidget(text("Três cenas 3D procedurais com aquecimento de 2 segundos, na resolução escolhida (renderização fora da tela). "
+                    "Mostra a pontuação 3D e o FPS mínimo, médio e máximo. Compare a mesma API, resolução e método; não equivale "
+                    "ao FPS de jogos comerciais. Interrompe em GPU ≥78 °C ou hotspot ≥95 °C."));
   connect(p.start, &QPushButton::clicked, this, &MainWindow::runBenchmark);
   connect(p.cancel, &QPushButton::clicked, this, [this] {
     if (trialActive) {
@@ -138,18 +137,18 @@ QWidget *MainWindow::benchmarks() {
   if (offline)
     p.start->setEnabled(false);
   auto *tabs = benchmarkTabs = new QTabWidget;
+  tabs->addTab(scrollPage(suitePage()), "Teste completo");
   tabs->addTab(scrollPage(p.root), "Cenas 3D / jogos");
   auto compute = makeTestPanel("Computação GPU · memória e operações", "compute");
   auto *cl = qobject_cast<QVBoxLayout *>(compute.root->layout());
   auto *actions = new QHBoxLayout;
-  compute.start = action("Medir memória, FP32/64 e inteiros", actions);
+  compute.start = action("Medir memória e computação", actions);
   compute.cancel = action("Cancelar", actions);
   compute.cancel->setEnabled(false);
   cl->insertLayout(1, actions);
   cl->addWidget(text(
-      "Vulkan compute: 32 MiB por buffer, redução para leitura, escrita, cópia e quatro "
-      "acumuladores FMA. Valores são throughput efetivo deste kernel; não são pico teórico. "
-      "FP64/inteiros 64 dependem de features. AES, SHA e fractais não são medidos nesta versão."));
+      "Memória da GPU: leitura, escrita e cópia na VRAM e transferências CPU ↔ GPU pelo PCIe. Computação: FP32, FP64 e "
+      "inteiros de 32/64 bits. Cada parte tem a própria pontuação. Valores efetivos destes kernels Vulkan, não pico teórico."));
   connect(compute.start, &QPushButton::clicked, this, [this] {
     if (!testActive && !offline)
       startGraphics("compute", "Vulkan", 1280, 720, 3);
@@ -158,29 +157,35 @@ QWidget *MainWindow::benchmarks() {
   if (offline)
     compute.start->setEnabled(false);
   panels["compute"] = compute;
-  tabs->addTab(scrollPage(compute.root), "Memória / FLOPS / inteiros");
-  tabs->addTab(scrollPage(videoPage()), "Encoder / Decoder");
+  tabs->addTab(scrollPage(compute.root), "Memória e computação");
+  tabs->addTab(scrollPage(videoPage()), "Codecs · vídeo e imagem");
   tabs->addTab(scrollPage(bottleneckPage()), "Gargalo");
   return tabs;
 }
 QWidget *MainWindow::videoPage() {
-  auto p = makeTestPanel("Encoder + Decoder · suíte sequencial", "video");
+  auto p = makeTestPanel("Codecs · vídeo e imagem", "video");
   auto *l = qobject_cast<QVBoxLayout *>(p.root->layout());
   auto *actions = new QHBoxLayout;
-  p.start = action("Testar H.264 → H.265 → AV1", actions);
+  codecVideo = new QCheckBox("Vídeo · H.264, HEVC e AV1 (FFmpeg)");
+  codecVideo->setChecked(true);
+  codecImages = new QCheckBox("Imagem · JPEG, PNG e WebP");
+  codecImages->setChecked(true);
+  actions->addWidget(codecVideo);
+  actions->addWidget(codecImages);
+  p.start = action("Iniciar teste de codecs", actions);
   p.cancel = action("Cancelar suíte", actions);
   p.cancel->setEnabled(false);
   l->insertLayout(1, actions);
-  l->addWidget(text("Seis etapas: encode + decode de cada codec, em 1080p/8-bit. Preparação fora "
-                    "da medição. Sem fallback CPU na fase medida. Codecs incompatíveis são "
-                    "identificados; falhas de execução invalidam a pontuação consolidada. Compare "
-                    "somente a mesma cobertura de codecs e o mesmo método."));
+  l->addWidget(text("Codificação e decodificação de vídeo por hardware em 720p, 1080p, 1440p e 4K (360 quadros cada, sem "
+                    "processador na fase medida) e de imagens JPEG, PNG e WebP pelo processador nas mesmas resoluções. Mostra "
+                    "velocidade (FPS e megapixels por segundo) e as pontuações de vídeo e de imagem. Vídeo requer FFmpeg."));
   connect(p.start, &QPushButton::clicked, this, [this] {
     if (testActive || offline || selected >= gpus.size())
       return;
     activeKind = "video";
     setTesting(true);
-    codecSuite.start(gpus[selected]);
+    const bool video = codecVideo->isChecked(), images = codecImages->isChecked() || !video;
+    codecSuite.start(gpus[selected], video, images);
   });
   connect(p.cancel, &QPushButton::clicked, &codecSuite, &CodecSuite::cancel);
   panels["video"] = p;
@@ -431,6 +436,7 @@ void MainWindow::finishTest(QJsonObject r) {
     notify(r["valid"].toBool() ? "Teste concluído e salvo" : "Teste incompleto registrado");
   refreshHistories();
   refreshFeedback();
+  if (suiteActive && kind != "suite") QTimer::singleShot(0, this, [this, r] { continueSuite(r); });
   if (!benchmarkCheckFile.isEmpty()) {
     auto checked = r; checked["liveFramesReceived"] = liveFrameCount;
     bool ok = r["valid"].toBool() && liveFrameCount >= 10;
@@ -451,7 +457,10 @@ void MainWindow::presentRecord(QString kind, const QJsonObject &r) {
     return;
   }
   panel.progress->setValue(r["valid"].toBool() ? 100 : 0);
-  if (!r["valid"].toBool())
+  const QStringList summary = resultSummary(kind, r);
+  if (!summary.isEmpty())
+    lines = summary;
+  else if (!r["valid"].toBool())
     lines << "Sem pontuação válida · " + r["error"].toString("teste incompleto");
   else if (kind == "bottleneck") {
     if (r.contains("lines")) {
@@ -473,7 +482,7 @@ void MainWindow::presentRecord(QString kind, const QJsonObject &r) {
     lines << QString("%1 pontos · MPix/s geométrico%2")
                  .arg(r["score"].toDouble(), 0, 'f', 1)
                  .arg(r["partial"].toBool() ? " · cobertura parcial" : "");
-  for (auto v : r["codecResults"].toArray()) {
+  for (auto v : summary.isEmpty() ? r["codecResults"].toArray() : QJsonArray{}) {
     auto c = v.toObject();
     lines << QString("%1 %2: %3%4")
                  .arg(codecLabel(c["codec"].toString()), modeLabel(c["mode"].toString()),
@@ -481,14 +490,14 @@ void MainWindow::presentRecord(QString kind, const QJsonObject &r) {
                       c["valid"].toBool() ? QString(" · %1 FPS").arg(c["fps"].toDouble(), 0, 'f', 1)
                                           : "");
   }
-  for (auto v : r["computeResults"].toArray()) {
+  for (auto v : summary.isEmpty() ? r["computeResults"].toArray() : QJsonArray{}) {
     auto c = v.toObject();
     lines << c["metric"].toString() + ": " +
                  (c["status"].toString() == "passed"
                       ? QString::number(c["value"].toDouble(), 'f', 2) + " " + c["unit"].toString()
                       : "não suportado");
   }
-  if (kind == "graphics" && r["valid"].toBool())
+  if (kind == "graphics" && r["valid"].toBool() && summary.isEmpty())
     lines << QString("%1 · %2 × %3 · GPU média %4 ms")
                  .arg(r["api"].toString())
                  .arg(r["width"].toInt())
@@ -561,11 +570,26 @@ QImage MainWindow::renderReport(QString kind, const QJsonObject &r) {
   p.setRenderHint(QPainter::Antialiasing);
   p.setPen(QColor(gpus.value(selected).accent()));
   p.setFont(QFont("Sans", 25, QFont::Bold));
-  p.drawText(45, 65, "GPU-PRO · " + (kind == "graphics" ? QString("Cenas 3D / jogos") : kind == "compute" ? QString("Memória / FLOPS / inteiros") : kind == "video" ? QString("Encoder / Decoder") : kind == "bottleneck" ? QString("Gargalo") : kind));
+  p.drawText(45, 65, "GPU-PRO · " + (kind == "suite" ? QString("Teste completo") : kind == "graphics" ? QString("Cenas 3D / jogos") : kind == "compute" ? QString("Memória e computação") : kind == "video" ? QString("Codecs · vídeo e imagem") : kind == "bottleneck" ? QString("Gargalo") : kind));
   p.setPen(Qt::white);
   p.setFont(QFont("Sans", 14));
   p.drawText(45, 110, r["gpu"].toObject()["name"].toString());
   p.drawText(45, 145, r["timestamp"].toString() + " · " + r["method"].toString());
+  if (const QStringList summary = resultSummary(kind, r); !summary.isEmpty()) {
+    p.setFont(QFont("Sans", 30, QFont::Bold));
+    p.setPen(QColor(gpus.value(selected).accent()));
+    p.drawText(45, 215, summary.first());
+    p.setPen(Qt::white);
+    p.setFont(QFont("Sans", 13));
+    int y = 250;
+    for (int i = 1; i < summary.size() && y < 960; ++i) {
+      const QRect box(45, y, 1510, 1000 - y);
+      const QRect used = p.boundingRect(box, Qt::TextWordWrap, summary[i]);
+      p.drawText(box, Qt::TextWordWrap, summary[i]);
+      y += used.height() + 8;
+    }
+    return image;
+  }
   p.drawText(
       45, 185,
       r["valid"].toBool()

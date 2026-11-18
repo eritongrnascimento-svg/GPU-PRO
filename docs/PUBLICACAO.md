@@ -31,17 +31,17 @@ sh tools/package.sh build dist
 bash tools/build-distribution.sh build dist
 ```
 
-Para a versão 0.8.0, os arquivos Linux são:
+Para a versão 0.8.1, os arquivos Linux são:
 
-- `GPU-PRO-0.8.0-linux-x86_64.tar.gz`
-- `GPU-PRO-0.8.0-source.tar.gz`
-- `GPU-PRO-0.8.0-linux-x86_64.run`
-- `GPU-PRO-0.8.0-x86_64.AppImage`
-- `gpu-pro_0.8.0_ubuntu24.04_amd64.deb`
-- `GPU-PRO-0.8.0-dependency-sources.tar.gz` e `GPU-PRO-0.8.0-dependencies.json`
+- `GPU-PRO-0.8.1-linux-x86_64.tar.gz`
+- `GPU-PRO-0.8.1-source.tar.gz`
+- `GPU-PRO-0.8.1-linux-x86_64.run`
+- `GPU-PRO-0.8.1-x86_64.AppImage`
+- `gpu-pro_0.8.1_ubuntu24.04_amd64.deb`
+- `GPU-PRO-0.8.1-dependency-sources.tar.gz` e `GPU-PRO-0.8.1-dependencies.json`
 - `SHA256SUMS.txt`
 
-A versão Windows é gerada em Windows por `windows/build-windows.ps1` (Visual Studio 2022, Qt 6 MSVC, .NET 8 e Inno Setup 6) e produz `GPU-PRO-0.8.0-windows-x64-setup.exe`, `GPU-PRO-0.8.0-windows-x64.zip` e `SHA256SUMS-windows-0.8.0.txt`, anexados à mesma release depois da publicação Linux pelo workflow. Consulte [Windows](WINDOWS.md).
+A versão Windows é gerada em Windows por `windows/build-windows.ps1` (Visual Studio 2022, Qt 6 MSVC, .NET 8 e Inno Setup 6) e produz `GPU-PRO-0.8.1-windows-x64-setup.exe`, `GPU-PRO-0.8.1-windows-x64.zip` e `SHA256SUMS-windows-0.8.1.txt`, anexados à mesma release depois da publicação Linux pelo workflow. Consulte [Windows](WINDOWS.md).
 
 O TAR contém uma pasta `GPU-PRO/`. A versão do CMake, da aplicação, dos diagnósticos, de `release.json`, do changelog e da tag deve coincidir. Mudanças na carga de benchmark exigem atualizar o identificador do método para preservar comparabilidade. O empacotamento falha se não conseguir obter as fontes correspondentes das bibliotecas incluídas no AppImage.
 

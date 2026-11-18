@@ -7,7 +7,7 @@
 <EnableMsixTooling>true</EnableMsixTooling>
 <SelfContained>true</SelfContained><Nullable>enable</Nullable><ImplicitUsings>enable</ImplicitUsings>
 <ApplicationManifest>app.manifest</ApplicationManifest><ApplicationIcon>Assets/gpu-pro.ico</ApplicationIcon>
-<AssemblyName>GPU-PRO</AssemblyName><Version>0.8.0</Version><Product>GPU-PRO</Product><Company>GPU-PRO</Company><Copyright>Ériton do Nascimento</Copyright>
+<AssemblyName>GPU-PRO</AssemblyName><Version>0.8.1</Version><Product>GPU-PRO</Product><Company>GPU-PRO</Company><Copyright>Ériton do Nascimento</Copyright>
 <NativeBuild>$(MSBuildThisFileDirectory)../build-workers/Release/</NativeBuild>
 </PropertyGroup><ItemGroup><PackageReference Include="Microsoft.WindowsAppSDK" Version="2.4.0" /></ItemGroup>
 <!-- Núcleo nativo, executores de teste e Qt gerados por CMake (windows/build-windows.ps1). -->
