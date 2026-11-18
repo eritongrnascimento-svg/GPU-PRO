@@ -40,7 +40,9 @@ Escolha o formato adequado ao seu sistema na [última release](https://github.co
 
 **Windows 10/11 x64:** baixe `GPU-PRO-0.8.1-windows-x64-setup.exe` (instalador por usuário; a opção de FPS automático pede administrador uma vez) ou o portátil `GPU-PRO-0.8.1-windows-x64.zip` na mesma release. Detalhes em [Windows](docs/WINDOWS.md).
 
-## Novidades da versão 0.8.1 (correção)
+## Patch 0.8.1 · o que foi corrigido
+
+Patch de correção da 0.8.0 para Linux e Windows: instale por cima, sem perder configurações nem histórico.
 
 - **FPS dos jogos sem programas externos.** Windows: o GPU-PRO conta os quadros pelo próprio Windows (DirectX 9–12, Vulkan e OpenGL), sem PresentMon; basta ativar uma vez o FPS automático. Linux: camada Vulkan própria para jogos nativos e pelo Proton, sem MangoHud; OpenGL pelo lançador `gpu-pro-fps %command%`. O jogo é detectado sozinho.
 - **Teste completo** no Benchmark: todos os testes em sequência com pontuação total e por categoria; cada teste continua disponível sozinho.
@@ -48,7 +50,7 @@ Escolha o formato adequado ao seu sistema na [última release](https://github.co
 - **Logs:** cada trecho encontrado na busca abre o registro completo.
 - **Feedback:** removidos os botões de importar feedback de amigos e consultar banco importado.
 
-Detalhes em [RELEASE-0.8.1](docs/RELEASE-0.8.1.md).
+Tabela completa do que o patch corrige em [RELEASE-0.8.1](docs/RELEASE-0.8.1.md).
 
 ## Histórico: novidades da versão 0.8.0
 

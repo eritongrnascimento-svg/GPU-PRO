@@ -1,6 +1,9 @@
 # Alterações
 
-## 0.8.1 — 17/11/2026 (correção · Linux e Windows)
+## 0.8.1 — 18/11/2026 · patch de correção (Linux e Windows)
+
+Corrige o FPS dos jogos no HUD da 0.8.0 e torna os resultados do Benchmark mais claros. Detalhes em `docs/RELEASE-0.8.1.md`.
+
 
 - FPS dos jogos sem programas externos. Windows: contador próprio por eventos do Windows (DirectX 9–12, Vulkan e OpenGL), serviço "GPU-PRO · Contador de quadros" instalado uma vez; PresentMon removido das dependências. Linux: camada Vulkan própria (Vulkan nativo e Proton/DXVK/VKD3D) ativada uma vez e lançador `gpu-pro-fps` para OpenGL; sem MangoHud. Jogo detectado automaticamente; CSV manual continua com prioridade.
 - Benchmark: aba Teste completo (sequência com pontuação total e por categoria); 3D com método resumido, pontuação e FPS mínimo/médio/máximo; memória com transferências CPU ↔ GPU e pontuações de memória e computação; codecs de vídeo em 720p, 1080p, 1440p e 4K e teste de imagens JPEG/PNG/WebP, com pontuação.
