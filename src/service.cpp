@@ -49,15 +49,28 @@ void TelemetryService::publish() {
       cpuTime.invalidate();
     }
   }
+  // FPS: CSV escolhido tem prioridade; senão a camada do GPU-PRO (processo escolhido ou automático).
+  bool fromCsv=false;
   if(!config.frametimeLog.isEmpty()) {
     const auto incoming=frameLog.poll(config.frametimeLog);
-    if(frameLog.resetDetected) {frameTimes={};lastFrame.invalidate();}
+    if(frameLog.resetDetected) {csvTimes={};lastFrame.invalidate();}
     const qint64 age=QFileInfo(config.frametimeLog).lastModified().msecsTo(QDateTime::currentDateTime());
     if(!incoming.isEmpty() && age>=0 && age<=3000) {
-      for(auto v:incoming) {frameTimes.append(v);if(frameTimes.size()>240)frameTimes.removeFirst();}
+      for(auto v:incoming) {csvTimes.append(v);if(csvTimes.size()>240)csvTimes.removeFirst();}
       lastFrame.restart();
     }
-    if(!lastFrame.isValid() || lastFrame.elapsed()>3000) frameTimes={};
+    if(!lastFrame.isValid() || lastFrame.elapsed()>3000) csvTimes={};
+    fromCsv=!csvTimes.isEmpty();
+  }
+  frameFeed.poll();
+  current["fpsListening"]=frameFeed.listening();
+  current["fpsLayer"]=FpsLayer::active();
+  if(fromCsv) {frameTimes=csvTimes;current["fpsSource"]=QFileInfo(config.frametimeLog).fileName()+" · CSV";current["fpsPid"]=0;}
+  else {
+    const int target=pid>0?pid:frameFeed.pick();
+    frameTimes=target>0?frameFeed.times(target):QJsonArray{};
+    current["fpsSource"]=frameTimes.isEmpty()?QString():frameFeed.describe(target);
+    current["fpsPid"]=frameTimes.isEmpty()?0:target;
   }
   for(auto key:{"fps","fpsLow","fpsAvg","fpsMax"}) current.remove(key);
   const auto fps=frameMetrics(frameTimes);

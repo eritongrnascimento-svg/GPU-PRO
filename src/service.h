@@ -2,6 +2,7 @@
 #include "gpu.h"
 #include "cpu_telemetry.h"
 #include "frame_log.h"
+#include "frame_feed.h"
 #include <QtNetwork>
 Q_DECLARE_METATYPE(Gpu)
 Q_DECLARE_METATYPE(QList<Gpu>)
@@ -17,7 +18,8 @@ class TelemetryService : public QObject {
   QJsonObject current;
   CpuTelemetry cpu;
   FrameLog frameLog;
-  QJsonArray frameTimes;
+  FrameFeed frameFeed;
+  QJsonArray frameTimes, csvTimes;
   QElapsedTimer lastFrame;
   int tick = 0;
   quint64 lastCpu = 0;
@@ -41,7 +43,7 @@ public slots:
   }
   void overlay(QJsonObject c) {
     auto next=OverlayConfig::fromJson(c);
-    if(next.frametimeLog!=config.frametimeLog) {frameTimes={};lastFrame.invalidate();frameLog.reset();}
+    if(next.frametimeLog!=config.frametimeLog) {frameTimes={};csvTimes={};lastFrame.invalidate();frameLog.reset();}
     config=next;
     publish();
   }
@@ -50,7 +52,7 @@ public slots:
     token = t;
   }
   void process(int p) {
-    if(pid!=p) {frameTimes={};lastFrame.invalidate();frameLog.reset();}
+    if(pid!=p) {frameTimes={};csvTimes={};lastFrame.invalidate();frameLog.reset();}
     pid = p;
     lastCpu = 0;
     cpuTime.invalidate();

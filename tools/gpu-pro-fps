@@ -1,0 +1,15 @@
+#!/bin/sh
+# gpu-pro-fps — abre um jogo com o contador de quadros do GPU-PRO, sem MangoHud.
+# Necessário só para jogos OpenGL nativos ou quando o FPS automático (camada Vulkan) não está ativo.
+# Steam: Propriedades › Opções de inicialização:  gpu-pro-fps %command%
+here=$(dirname "$(readlink -f "$0")")
+for lib in "$here/libgpupro_fps.so" "$here/../lib/gpu-pro/libgpupro_fps.so" "/usr/lib/gpu-pro/libgpupro_fps.so" \
+           "${XDG_DATA_HOME:-$HOME/.local/share}/gpu-pro/vulkan/libgpupro_fps.so"; do
+  [ -f "$lib" ] && break
+done
+if [ ! -f "$lib" ]; then echo "gpu-pro-fps: libgpupro_fps.so não encontrada" >&2; exec "$@"; fi
+# OpenGL: ganchos em glXSwapBuffers/eglSwapBuffers. Vulkan: a mesma biblioteca como camada.
+export LD_PRELOAD="$lib${LD_PRELOAD:+:$LD_PRELOAD}"
+manifest_dir=$(dirname "$lib")
+[ -f "$manifest_dir/gpu-pro-fps.json" ] && export VK_ADD_IMPLICIT_LAYER_PATH="$manifest_dir${VK_ADD_IMPLICIT_LAYER_PATH:+:$VK_ADD_IMPLICIT_LAYER_PATH}"
+exec "$@"

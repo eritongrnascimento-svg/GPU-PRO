@@ -70,6 +70,9 @@ private:
   QComboBox *processSelect;
   HistoryPlot *gameFramePlot = nullptr;
   QLabel *processInfo;
+  QLabel *fpsInfo = nullptr;
+  QPushButton *fpsLayerButton = nullptr;
+  void refreshFpsLayerButton();
   OverlayConfig overlayConfig;
   QProcess hud;
   QByteArray hudOutput;

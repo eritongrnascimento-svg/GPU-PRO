@@ -1,4 +1,5 @@
 #include "window.h"
+#include "frame_feed.h"
 #include "stability_chart.h"
 #include "branding.h"
 #include "driver_packages.h"
@@ -669,6 +670,13 @@ void MainWindow::updateSnapshot(QJsonObject o) {
   for (auto it = metricCards.begin(); it != metricCards.end(); ++it)
     it.value()->setReading(o, it.key(), QColor(gpus.value(selected).accent()));
   refreshSpecs();
+  if (fpsInfo) {
+    const QString source = o["fpsSource"].toString();
+    fpsInfo->setText(!source.isEmpty() ? "FPS: " + source + (o.contains("fps") ? QString(" · %1 FPS").arg(o["fps"].toDouble(), 0, 'f', 0) : QString())
+                     : !o["fpsListening"].toBool() ? "FPS: receptor indisponível (outra cópia do GPU-PRO aberta?)"
+                     : o["fpsLayer"].toBool()       ? "FPS: aguardando um jogo Vulkan/Proton apresentar quadros"
+                                                    : "FPS: ative o FPS automático ou use gpu-pro-fps %command%");
+  }
   processInfo->setText(o["processAlive"].toBool()
                            ? QString("%1 · PID %2 · CPU %3% · RAM %4 MiB")
                                  .arg(o["processName"].toString())
@@ -994,6 +1002,12 @@ void MainWindow::launchProfile() {
                  "criar outro PID")
              .arg(pid));
 }
+void MainWindow::refreshFpsLayerButton() {
+  if (!fpsLayerButton) return;
+  const bool system = !FpsLayer::systemManifest().isEmpty(), user = QFileInfo::exists(FpsLayer::userManifest());
+  fpsLayerButton->setText(system ? "FPS automático ativo (pacote)" : user ? "Desativar FPS automático" : "Ativar FPS automático");
+  fpsLayerButton->setEnabled(!system && (user || !FpsLayer::libraryNextToApp().isEmpty()));
+}
 QWidget *MainWindow::monitor() {
   auto *p = page("GamerMonitor & Overlay Nativo");
   auto *l = qobject_cast<QVBoxLayout *>(p->layout());
@@ -1007,6 +1021,33 @@ QWidget *MainWindow::monitor() {
   l->addLayout(bar);
   processInfo = label("Nenhum processo acompanhado");
   l->addWidget(processInfo);
+  // FPS sem MangoHud: camada Vulkan do GPU-PRO (Vulkan nativo e Proton/DXVK/VKD3D) e, para OpenGL,
+  // o lançador gpu-pro-fps. Sem PID escolhido, o jogo é detectado automaticamente.
+  auto *fpsBar = new QHBoxLayout;
+  fpsInfo = label("FPS: aguardando um jogo");
+  fpsInfo->setWordWrap(true);
+  fpsBar->addWidget(fpsInfo, 1);
+  fpsLayerButton = button("Ativar FPS automático", fpsBar);
+  l->addLayout(fpsBar);
+  l->addWidget(label("Contador próprio do GPU-PRO: conta cada quadro apresentado em Vulkan, inclusive DirectX 9–12 pelo Proton (DXVK/VKD3D), "
+                     "sem MangoHud e sem alterar o jogo. Ativar instala a camada para o seu usuário; jogos já abertos passam a contar ao reiniciar. "
+                     "OpenGL nativo: no Steam use as opções de inicialização  gpu-pro-fps %command%. Sem PID escolhido, o jogo é detectado sozinho."));
+  connect(fpsLayerButton, &QPushButton::clicked, this, [this] {
+    QString error;
+    if (!FpsLayer::systemManifest().isEmpty()) {
+      notify("FPS automático", "A camada do GPU-PRO já foi instalada pelo pacote do sistema.");
+    } else if (QFileInfo::exists(FpsLayer::userManifest())) {
+      if (FpsLayer::removeForUser(error)) notify("FPS automático desativado", "Camada removida de " + FpsLayer::userManifest());
+      else notify("Falha ao desativar o FPS automático", error);
+    } else if (FpsLayer::installForUser(error)) {
+      notify("FPS automático ativado", "Camada Vulkan instalada em " + FpsLayer::userManifest() + ". Abra ou reinicie o jogo.");
+    } else {
+      notify("Falha ao ativar o FPS automático", error);
+    }
+    FpsLayer::refresh();
+  refreshFpsLayerButton();
+  });
+  refreshFpsLayerButton();
   connect(refresh, &QPushButton::clicked, this, &MainWindow::refreshProcesses);
   connect(track, &QPushButton::clicked, this, [this] {
     if (!offline)
@@ -1109,10 +1150,10 @@ QWidget *MainWindow::monitor() {
   choices->addLayout(colors);
   choices->addLayout(fieldGrid);
   form->addLayout(choices, 6, 0, 1, 4);
-  hudFrametime = new QCheckBox("Linha de frametime (ms, fonte CSV real)");
+  hudFrametime = new QCheckBox("Linha de frametime (ms)");
   hudFrametime->setChecked(overlayConfig.frametimeGraph);
   hudLogFile = new QLineEdit(overlayConfig.frametimeLog);
-  hudLogFile->setPlaceholderText("FPS e frametime: CSV ativo do jogo, com coluna frametime (ms)");
+  hudLogFile->setPlaceholderText("Opcional: CSV ativo com coluna frametime (ms) — tem prioridade sobre o contador");
   auto *browseLog = new QPushButton("Selecionar CSV");
   form->addWidget(hudFrametime,7,0,1,4);
   form->addWidget(hudLogFile,8,0,1,3);
@@ -1121,11 +1162,11 @@ QWidget *MainWindow::monitor() {
     auto path=QFileDialog::getOpenFileName(this,"Log de frametime do jogo",QDir::homePath(),"CSV (*.csv)");
     if(!path.isEmpty())hudLogFile->setText(path);
   });
-  form->addWidget(label("Mudanças são aplicadas em tempo real. Os campos FPS selecionados aparecem no painel e no HUD. FPS/frametime: selecione um CSV em gravação. Média, máximo e 1% low usam até 240 amostras; low exige 100. Logs por intervalo não equivalem a dados por quadro. Sem fonte ativa, N/D."),9,0,1,4);
+  form->addWidget(label("Mudanças são aplicadas em tempo real. Os campos FPS selecionados aparecem no painel e no HUD. FPS/frametime: contador do GPU-PRO ou, se escolhido, um CSV em gravação. Média, máximo e 1% low usam até 240 amostras; low exige 100. Logs por intervalo não equivalem a dados por quadro. Sem fonte ativa, N/D."),9,0,1,4);
   auto *apply = new QPushButton("Aplicar formato e posição");
   form->addWidget(apply, 10, 0, 1, 4);
   l->addWidget(config);
-  gameFramePlot=new HistoryPlot; gameFramePlot->caption="Frametime do jogo (ms) · últimas 240 amostras CSV";
+  gameFramePlot=new HistoryPlot; gameFramePlot->caption="Frametime do jogo (ms) · últimos 240 quadros";
   gameFramePlot->setMinimumHeight(150); l->addWidget(gameFramePlot);
   l->addWidget(label("X/Y são margens para cantos e deslocamentos para o centro. O HUD não "
                      "captura cliques. Alt+Q alterna sua visibilidade (X11). X11/XWayland é "

@@ -22,6 +22,12 @@ for executable in linux-gpu-control gpu-bench-worker gpu-video-worker gpu-diagno
  [ -x "$build_dir/$executable" ] || { printf 'Executável ausente: %s\n' "$executable" >&2; exit 2; }
  cp "$build_dir/$executable" "$stage/GPU-PRO/bin/"
 done
+for extra in libgpupro_fps.so gpu-pro-fps.json gpu-pro-fps; do
+ [ -f "$build_dir/$extra" ] || { printf 'Arquivo ausente: %s
+' "$extra" >&2; exit 2; }
+ cp "$build_dir/$extra" "$stage/GPU-PRO/bin/"
+done
+chmod 755 "$stage/GPU-PRO/bin/gpu-pro-fps"
 chmod 755 "$stage/GPU-PRO/run.sh" "$stage/GPU-PRO/build.sh" "$stage/GPU-PRO/tools/package.sh"
 tar -czf "$output_dir/GPU-PRO-$version-linux-x86_64.tar.gz" -C "$stage" GPU-PRO
 (cd "$output_dir" && sha256sum "GPU-PRO-$version-linux-x86_64.tar.gz" "GPU-PRO-$version-source.tar.gz" > SHA256SUMS.txt)
