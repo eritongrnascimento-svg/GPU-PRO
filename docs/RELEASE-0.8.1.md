@@ -41,3 +41,19 @@ Patch da versão 0.8.0 para Linux e Windows, publicado em 18/11/2026. Corrige o 
 - As pontuações são escalas próprias do GPU-PRO e não equivalem a pontos de outros benchmarks; compare a mesma versão de método.
 
 Leia o [aviso de responsabilidade](AVISO-DE-RESPONSABILIDADE.md) antes de qualquer ajuste manual.
+
+## Patch HUD · Linux
+
+O GPU-PRO 0.8.1 ativa a captura de FPS Vulkan na primeira abertura e registra a camada própria para o usuário. AppImage, DEB, RUN e a versão portátil usam uma cópia persistente da biblioteca para que o Vulkan e o Steam Runtime possam encontrá-la. Abra o GPU-PRO antes do jogo ou reinicie o jogo se ele já estiver aberto. Desativar o FPS automático no painel mantém a preferência nas próximas aberturas. A versão dos pacotes continua 0.8.1.
+
+## Patch de compatibilidade Linux · Fedora 45
+
+O patch mantém a versão 0.8.1 e acrescenta compatibilidade com Fedora 45 x86_64.
+A identificação das GPUs e a consulta de capacidades Vulkan usam o carregador
+Vulkan diretamente. Telemetria, benchmarks e HUD permanecem disponíveis.
+
+Use o RPM nativo no Fedora 45 e o DEB no Ubuntu 24.04. Para testar conversão
+a partir do DEB atualizado, gere um RPM com `alien --to-rpm --keep-version` via
+`fakeroot`, ou use o AlianDeb. A instalação segue as dependências disponíveis
+na distribuição de destino. O AppImage continua incluindo as bibliotecas
+distribuídas com a versão Linux e requer glibc 2.39 ou posterior.

@@ -1,11 +1,11 @@
-# GPU-PRO — 0.8.1
+# GPU-PRO — 1.0.0
 
 [![Versões anteriores](https://img.shields.io/badge/Downloads-Vers%C3%B5es_anteriores-blue?style=for-the-badge)](https://github.com/eritongrnascimento-svg/GPU-PRO/blob/main/docs/VERSOES-ANTERIORES.md)
 
 Veja os pacotes antigos organizados por versão e clique diretamente no formato desejado.
 
 
-**Titular: Ériton do Nascimento** · [Instalação](docs/INSTALACAO.md) · [Contribuir](CONTRIBUTING.md) · [Licença source available](LICENSE)
+**Titular: Ériton do Nascimento** · [Instalação](docs/INSTALACAO.md) · [Contribuir](CONTRIBUTING.md) · [GPLv3](LICENSE)
 
 > **Aviso de riscos e responsabilidade:** ajustes de clocks e cargas intensivas podem causar travamentos, perda de dados e danos ao equipamento. Você é responsável pelas alterações que decidir realizar. O software é fornecido sem garantia, nos limites da legislação aplicável; direitos obrigatórios permanecem preservados. Leia o [aviso completo](docs/AVISO-DE-RESPONSABILIDADE.md). O acesso ao Overclock exige aceite explícito em cada sessão.
 
@@ -19,7 +19,7 @@ Desenvolvo o GPU-PRO para oferecer monitoramento e ferramentas de teste MultiGPU
 
 **Não incorporamos nem vinculamos bibliotecas de terceiros exclusivamente GPL ao código original do GPU-PRO.** A manutenção utiliza programas externos fornecidos pela distribuição, como `pacman`, `apt-get`, `dnf`, `pactl` e `bubblewrap`, conforme o backend disponível. Esses programas são executados como processos independentes, pelos seus comandos nativos; não copiamos seu código nem vinculamos a biblioteca `libalpm` ao aplicativo.
 
-O código original mantém a licença [GPU-PRO Source Available License](LICENSE). Isso não significa ausência de dependências livres: Qt é utilizado sob LGPL, outras bibliotecas e runtimes possuem termos próprios, e ferramentas externas podem ter licença GPL. Esses componentes preservam seus direitos e obrigações; as restrições do GPU-PRO não se estendem a eles. O AppImage inclui bibliotecas identificadas no manifesto e nas fontes correspondentes da release. Consulte [NOTICE](NOTICE) e [Licenças](docs/LICENCAS.md).
+O código original do GPU-PRO 1.0.0 está disponível sob a [GNU GPL versão 3](LICENSE). Consulte a [política de marcas](TRADEMARKS.md), os [avisos de terceiros](NOTICE) e as [licenças das dependências](docs/LICENCAS.md).
 
 ## Iniciar
 
@@ -38,7 +38,11 @@ Prévia offline, sem inicializar a GPU:
 
 Escolha o formato adequado ao seu sistema na [última release](https://github.com/eritongrnascimento-svg/GPU-PRO/releases/latest). Os pacotes oficiais usam Linux x86_64 e base Ubuntu 24.04; o AppImage exige glibc 2.39 ou posterior. TAR/RUN e DEB utilizam bibliotecas do sistema. Se houver incompatibilidade de ABI, Qt ou glibc, compile com `build.sh`. O projeto não distribui drivers NVIDIA/AMD/Intel, e bibliotecas de um fabricante não devem ser copiadas para sistemas de outro.
 
-**Windows 10/11 x64:** baixe `GPU-PRO-0.8.1-windows-x64-setup.exe` (instalador por usuário; a opção de FPS automático pede administrador uma vez) ou o portátil `GPU-PRO-0.8.1-windows-x64.zip` na mesma release. Detalhes em [Windows](docs/WINDOWS.md).
+**Fedora 45 x86_64:** instale o RPM nativo com `sudo dnf install ./gpu-pro-1.0.0-1.fc45.x86_64.rpm`.
+
+**Windows 10/11 x64:** consulte [Windows](docs/WINDOWS.md) para os requisitos e instruções. Os binários da 0.8.1 continuam na release correspondente.
+
+Veja as [notas da versão 1.0.0](docs/RELEASE-1.0.0.md).
 
 ## Patch 0.8.1 · o que foi corrigido
 
@@ -216,7 +220,7 @@ Essa opção usa o mesmo fluxo do botão, incluindo baseline, espera de ociosida
 
 ## Licença e publicação
 
-Código disponível sob [GPU-PRO Source Available License 1.0](LICENSE), com forks no GitHub para auditoria/contribuição e restrições de redistribuição. Não é uma licença open source da OSI. O mantenedor decide quais PRs e releases são oficiais; dependências mantêm suas próprias licenças em [NOTICE](NOTICE).
+O código original da versão 1.0.0 é licenciado sob [GPL-3.0-only](LICENSE). A [política de marcas](TRADEMARKS.md) reserva a identidade visual das distribuições oficiais.
 
 Consulte a [revisão de compatibilidade das licenças](docs/LICENCAS.md), [Instalação](docs/INSTALACAO.md), [Publicação](docs/PUBLICACAO.md), [Changelog](CHANGELOG.md) e [Segurança](SECURITY.md).
 

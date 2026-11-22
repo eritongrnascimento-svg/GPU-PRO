@@ -40,7 +40,7 @@ na interface apresenta os avisos e os textos GNU aplicáveis.
 Consulte docs/LICENCAS.md para o escopo da revisão, substituição das bibliotecas,
 acesso às fontes e condições que exigem nova análise antes de empacotar bibliotecas.
 Os textos em docs/licenses/ preservam seus direitos e avisos originais; não são
-relicenciados sob a licença source available do GPU-PRO.
+relicenciados sob a GPLv3 aplicável ao código original do GPU-PRO.
 
 Integrações de manutenção: pacman/apt-get/dnf, pactl e bubblewrap são programas
 externos da distribuição, executados por comandos nativos, não bibliotecas

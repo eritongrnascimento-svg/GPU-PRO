@@ -2,11 +2,8 @@
 
 Revisão técnica em 10/11/2026. Escopo: dependências declaradas no CMake, cabeçalhos usados, bibliotecas compartilhadas dos executáveis Linux e conteúdo do pacote. Não é parecer jurídico nem auditoria de procedência de cada linha/recurso gráfico. A licença própria não substitui análise jurídica dos termos, marcas e direitos de cada recurso original.
 
-## Conclusão
-
-Não foi identificado um conflito obrigatório entre a licença source available do código original e a arquitetura atual. Isso depende de cumprir as licenças de terceiros. O fato de uma biblioteca ser apenas uma dependência não elimina suas condições.
-
-A restrição de redistribuição do GPU-PRO não se aplica às bibliotecas de terceiros. Cada uma preserva os direitos concedidos pela sua licença, inclusive sobre modificações dessas bibliotecas. LICENSE explicita essa precedência.
+## Código original e dependências
+Desde a versão 1.0.0, o código original é GPL-3.0-only. Cada dependência conserva a própria licença. A [política de marcas](../TRADEMARKS.md) aplica-se à identidade das distribuições.
 
 ## Componentes e forma de uso
 
@@ -50,8 +47,8 @@ TAR, RUN e DEB usam as bibliotecas compartilhadas do sistema, mecanismo previsto
 
 ## Situações que criariam conflito
 
-- Copiar código GPL para o GPU-PRO ou vincular biblioteca exclusivamente GPL sem licença alternativa adequada, mantendo uma proibição de redistribuição incompatível.
-- Aplicar a proibição do código original do GPU-PRO de redistribuir às bibliotecas LGPL/BSD/MIT, ou impedir direitos de modificação/substituição assegurados por essas licenças.
+- Incorporar código com termos incompatíveis com GPL-3.0-only.
+- Impedir direitos de modificação e substituição assegurados pelas licenças das dependências.
 - Distribuir bibliotecas sem os textos/avisos/fontes e demais materiais exigidos para a forma de distribuição escolhida.
 - Aceitar contribuição com código de terceiros que o contribuinte não pode licenciar nos termos do projeto.
 
@@ -68,7 +65,7 @@ TAR, RUN e DEB usam as bibliotecas compartilhadas do sistema, mecanismo previsto
 
 ## Distribuição AppImage — desde a versão 0.4
 
-O AppImage muda o modo de distribuição: inclui bibliotecas e mantém seus avisos em `usr/share/doc/gpu-pro/thirdparty`. A release fornece `GPU-PRO-<versão>-dependency-sources.tar.gz` com fontes Ubuntu nas versões exatas mapeadas dos arquivos embarcados, mais os arquivos de copyright e licenças comuns. O build falha se não conseguir mapear uma biblioteca ou obter sua fonte correspondente. Esses componentes continuam redistribuíveis nos termos de suas próprias licenças; a restrição do código original do GPU-PRO não se aplica a eles.
+O AppImage muda o modo de distribuição: inclui bibliotecas e mantém seus avisos em `usr/share/doc/gpu-pro/thirdparty`. A release fornece `GPU-PRO-<versão>-dependency-sources.tar.gz` com fontes Ubuntu nas versões exatas mapeadas dos arquivos embarcados, mais os arquivos de copyright e licenças comuns. O build falha se não conseguir mapear uma biblioteca ou obter sua fonte correspondente. Esses componentes podem ser redistribuídos conforme suas próprias licenças.
 
 É possível extrair o AppImage com `--appimage-extract` e substituir bibliotecas compatíveis no AppDir, sem assinatura/DRM que impeça essa operação. A edição .deb não agrupa bibliotecas e usa dependências calculadas por `dpkg-shlibdeps`.
 

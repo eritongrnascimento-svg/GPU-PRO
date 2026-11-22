@@ -112,3 +112,14 @@ A simulação de drivers Arch/CachyOS requer `bubblewrap` e suporte a namespaces
 ## Ícones e painel já aberto
 
 A partir da 0.7.0, abrir novamente pelo menu solicita a janela existente. Ao migrar de uma versão anterior, encerre as cópias antigas uma vez antes de abrir a versão atual. Consulte [Ícones, bandeja e instância única](IDENTIDADE-E-INSTANCIA.md) para caches, atalhos fixados e controle da animação.
+
+## Fedora 45 x86_64
+
+O patch 0.8.1 acrescenta suporte ao Fedora 45. Instale o RPM nativo com
+`sudo dnf install ./gpu-pro-0.8.1-1.fc45.x86_64.rpm` ou abra-o no Discover.
+O DEB atualizado continua destinado ao Ubuntu 24.04 e pode ser usado como
+entrada do Alien para testar a instalação no Fedora 45. O AppImage pode ser
+executado com `--appimage-extract-and-run` em ambientes sem FUSE.
+
+Para empacotar um build nativo do Fedora, execute
+`bash tools/build-rpm.sh build dist` depois da compilação.

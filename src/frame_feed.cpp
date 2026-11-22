@@ -107,6 +107,10 @@ QString FrameFeed::describe(int pid) const {
 }
 
 namespace FpsLayer {
+namespace {
+const auto preference = QStringLiteral("overlay/automaticFps");
+}
+
 QString systemManifest() {
   for (const QString &path : {QStringLiteral("/usr/share/vulkan/implicit_layer.d/gpu-pro-fps.json"),
                               QStringLiteral("/etc/vulkan/implicit_layer.d/gpu-pro-fps.json")})
@@ -130,18 +134,21 @@ QString libraryNextToApp() {
 bool installForUser(QString &error) {
   const QString source = libraryNextToApp();
   if (source.isEmpty()) return error = "libgpupro_fps.so não encontrada junto do aplicativo.", false;
-  // Pacote DEB: usa a biblioteca do sistema (atualizada junto com o pacote). AppImage e portátil:
-  // cópia própria, porque o AppImage muda de caminho a cada execução e a pasta pode ser movida.
-  QString library = source;
+  // O caminho deve continuar válido após desmontar o AppImage e ser visível pelo Steam Runtime.
   if (!QDir().mkpath(QFileInfo(userManifest()).absolutePath())) return error = "Não foi possível criar ~/.local/share/vulkan.", false;
-  if (!source.startsWith("/usr/")) {
-    const QString dir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/gpu-pro/vulkan";
-    library = dir + "/libgpupro_fps.so";
-    if (!QDir().mkpath(dir)) return error = "Não foi possível criar " + dir + ".", false;
-    QFile::remove(library + ".new");
-    if (!QFile::copy(source, library + ".new")) return error = "Falha ao copiar a camada para " + dir + ".", false;
-    QFile::remove(library);
-    QFile::rename(library + ".new", library);
+  const QString dir = QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/gpu-pro/vulkan";
+  const QString library = dir + "/libgpupro_fps.so";
+  if (!QDir().mkpath(dir)) return error = "Não foi possível criar " + dir + ".", false;
+  QFile bundled(source);
+  if (!bundled.open(QIODevice::ReadOnly)) return error = bundled.errorString(), false;
+  const auto contents = bundled.readAll();
+  if (bundled.error() != QFileDevice::NoError || contents.isEmpty())
+    return error = "Falha ao ler a camada Vulkan do GPU-PRO em " + source + ".", false;
+  QFile installed(library);
+  if (!installed.open(QIODevice::ReadOnly) || installed.readAll() != contents) {
+    QSaveFile copy(library);
+    if (!copy.open(QIODevice::WriteOnly) || copy.write(contents) != contents.size() || !copy.commit())
+      return error = "Falha ao instalar a camada Vulkan do GPU-PRO: " + copy.errorString(), false;
   }
   const QJsonObject layer{{"name", "VK_LAYER_GPUPRO_fps"},
                           {"type", "GLOBAL"},
@@ -152,19 +159,22 @@ bool installForUser(QString &error) {
                           {"disable_environment", QJsonObject{{"DISABLE_GPUPRO_FPS", "1"}}}};
   QSaveFile file(userManifest());
   if (!file.open(QIODevice::WriteOnly)) return error = file.errorString(), false;
-  file.write(QJsonDocument(QJsonObject{{"file_format_version", "1.1.2"}, {"layer", layer}}).toJson());
-  if (!file.commit()) return error = file.errorString(), false;
+  const auto manifest = QJsonDocument(QJsonObject{{"file_format_version", "1.1.2"}, {"layer", layer}}).toJson();
+  if (file.write(manifest) != manifest.size() || !file.commit()) return error = file.errorString(), false;
+  QSettings().setValue(preference, true);
   return true;
 }
 
-// Ao abrir o app: se o FPS automático estiver ativo, atualiza a cópia da camada para esta versão.
+// Na primeira abertura, instala a camada. Nas demais, respeita a opção do usuário.
 void refresh() {
   QString error;
-  if (QFileInfo::exists(userManifest()) && !libraryNextToApp().isEmpty()) installForUser(error);
+  if (systemManifest().isEmpty() && QSettings().value(preference, true).toBool() && !installForUser(error))
+    qWarning().noquote() << "GPU-PRO: FPS automático:" << error;
 }
 
 bool removeForUser(QString &error) {
   if (QFileInfo::exists(userManifest()) && !QFile::remove(userManifest())) return error = "Não foi possível remover " + userManifest(), false;
+  QSettings().setValue(preference, false);
   QFile::remove(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/gpu-pro/vulkan/libgpupro_fps.so");
   return true;
 }

@@ -1,8 +1,8 @@
 # Contribuir com o GPU-PRO
 
-Titular e mantenedor: **Ériton do Nascimento**. O projeto usa uma licença própria de código disponível, não uma licença OSI. Leia [LICENSE](LICENSE) antes de usar ou modificar o código.
+Titular e mantenedor: **Ériton do Nascimento**. O código original da série 1.0 é licenciado sob GPL-3.0-only. Leia [LICENSE](LICENSE) antes de usar ou modificar o código.
 
-Forks no GitHub para auditoria, experimentação e contribuições são permitidos. Distribuições independentes e redistribuição de binários exigem autorização escrita. Compartilhe o link das releases oficiais.
+A GPLv3 rege os forks e a redistribuição do código e dos binários. Para a identidade de distribuições independentes, consulte a [política de marcas](TRADEMARKS.md).
 
 ## Fluxo
 

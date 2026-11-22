@@ -14,7 +14,7 @@ Temperaturas são lidas de sensores CPU reconhecidos em hwmon, como coretemp, k1
 
 Desde a 0.8.1 o FPS vem do contador próprio do GPU-PRO, sem MangoHud nem PresentMon:
 
-- **Linux:** clique uma vez em **Ativar FPS automático** (GamerMonitor & Overlay). A camada Vulkan do GPU-PRO (`VK_LAYER_GPUPRO_fps`) passa a contar os quadros de jogos Vulkan nativos e de todos os jogos pelo Proton (DirectX 9–11 via DXVK, DirectX 12 via VKD3D-Proton). O manifesto fica em `~/.local/share/vulkan/implicit_layer.d/gpu-pro-fps.json`; a camada só registra o instante de cada `vkQueuePresentKHR` e envia os tempos ao GPU-PRO por um socket local. Jogos já abertos passam a contar quando forem reiniciados. Para desativar, use o mesmo botão ou `DISABLE_GPUPRO_FPS=1` em um jogo.
+- **Linux:** a partir da **0.8.1 Patch HUD**, abra o GPU-PRO antes de iniciar o jogo. A primeira abertura já ativa o FPS automático, e a opção de desativar permanece disponível em **GamerMonitor & Overlay**. A camada Vulkan do GPU-PRO (`VK_LAYER_GPUPRO_fps`) passa a contar os quadros de jogos Vulkan nativos e de todos os jogos pelo Proton (DirectX 9–11 via DXVK, DirectX 12 via VKD3D-Proton). O manifesto fica em `~/.local/share/vulkan/implicit_layer.d/gpu-pro-fps.json`; a camada só registra o instante de cada `vkQueuePresentKHR` e envia os tempos ao GPU-PRO por um socket local. Jogos já abertos passam a contar quando forem reiniciados. Para desativar, use o mesmo botão ou `DISABLE_GPUPRO_FPS=1` em um jogo.
 - **OpenGL nativo (Linux):** nas opções de inicialização do Steam, use `gpu-pro-fps %command%`. O lançador também ativa a camada Vulkan para aquele jogo, mesmo sem o FPS automático.
 - **Windows:** veja [Windows](WINDOWS.md#fps-dos-jogos).
 

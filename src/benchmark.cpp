@@ -1,15 +1,14 @@
+#include <vulkan/vulkan.h>
 #include "benchmark.h"
 #include <QHideEvent>
-#include <QVulkanFunctions>
 #include <cmath>
 #include <stdexcept>
 namespace {
 QString pciOf(QVulkanInstance &instance, VkPhysicalDevice dev) {
-  auto *f = instance.functions();
   uint32_t n = 0;
-  f->vkEnumerateDeviceExtensionProperties(dev, nullptr, &n, nullptr);
+  vkEnumerateDeviceExtensionProperties(dev, nullptr, &n, nullptr);
   QList<VkExtensionProperties> ext(n);
-  f->vkEnumerateDeviceExtensionProperties(dev, nullptr, &n, ext.data());
+  vkEnumerateDeviceExtensionProperties(dev, nullptr, &n, ext.data());
   bool pci = false;
   for (const auto &e : ext)
     if (QByteArray(e.extensionName) == "VK_EXT_pci_bus_info")
@@ -33,9 +32,9 @@ QString pciOf(QVulkanInstance &instance, VkPhysicalDevice dev) {
 }
 QList<VkPhysicalDevice> devices(QVulkanInstance &i) {
   uint32_t n = 0;
-  i.functions()->vkEnumeratePhysicalDevices(i.vkInstance(), &n, nullptr);
+  vkEnumeratePhysicalDevices(i.vkInstance(), &n, nullptr);
   QList<VkPhysicalDevice> d(n);
-  i.functions()->vkEnumeratePhysicalDevices(i.vkInstance(), &n, d.data());
+  vkEnumeratePhysicalDevices(i.vkInstance(), &n, d.data());
   return d;
 }
 } // namespace
@@ -46,7 +45,7 @@ int vulkanDeviceIndex(QVulkanInstance &i, const Gpu &g) {
     if (pciOf(i, d[n]) == g.pci)
       return n;
     VkPhysicalDeviceProperties p{};
-    i.functions()->vkGetPhysicalDeviceProperties(d[n], &p);
+    vkGetPhysicalDeviceProperties(d[n], &p);
     bool ok = false;
     unsigned id = g.deviceId.toUInt(&ok, 16);
     unsigned vendor = g.vendor == "NVIDIA" ? 0x10de : g.vendor == "AMD" ? 0x1002 : 0x8086;
@@ -68,7 +67,7 @@ QJsonObject vulkanSpecifications(const Gpu &g) {
     return {{"Vulkan", "GPU não identificada de forma inequívoca"}};
   auto dev = d[idx];
   VkPhysicalDeviceProperties p{};
-  i.functions()->vkGetPhysicalDeviceProperties(dev, &p);
+  vkGetPhysicalDeviceProperties(dev, &p);
   QJsonObject o{
       {"Vulkan device", p.deviceName},
       {"Vulkan API", QString("%1.%2.%3")
@@ -79,14 +78,14 @@ QJsonObject vulkanSpecifications(const Gpu &g) {
       {"Vulkan maxComputeWorkGroupInvocations", int(p.limits.maxComputeWorkGroupInvocations)},
       {"Vulkan timestampPeriod ns", p.limits.timestampPeriod}};
   o["integrated"]=p.deviceType==VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU;
-  VkPhysicalDeviceMemoryProperties memory{};i.functions()->vkGetPhysicalDeviceMemoryProperties(dev,&memory);
+  VkPhysicalDeviceMemoryProperties memory{};vkGetPhysicalDeviceMemoryProperties(dev,&memory);
   quint64 hostHeap=0;
   for(uint32_t m=0;m<memory.memoryTypeCount;++m)if(memory.memoryTypes[m].propertyFlags&VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT)hostHeap=qMax(hostHeap,quint64(memory.memoryHeaps[memory.memoryTypes[m].heapIndex].size));
   o["hostVisibleHeapBytes"]=double(hostHeap);
   uint32_t n = 0;
-  i.functions()->vkEnumerateDeviceExtensionProperties(dev, nullptr, &n, nullptr);
+  vkEnumerateDeviceExtensionProperties(dev, nullptr, &n, nullptr);
   QList<VkExtensionProperties> ext(n);
-  i.functions()->vkEnumerateDeviceExtensionProperties(dev, nullptr, &n, ext.data());
+  vkEnumerateDeviceExtensionProperties(dev, nullptr, &n, ext.data());
   QStringList names;
   for (const auto &e : ext)
     names << e.extensionName;

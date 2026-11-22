@@ -1,5 +1,10 @@
 # Alterações
 
+## 1.0.0 — 22/11/2026
+
+- Compatibilidade com Fedora 45 e RPM nativo x86_64.
+- Código original sob a GNU GPL versão 3 e política de marcas independente.
+
 ## 0.8.1 — 18/11/2026 · patch de correção (Linux e Windows)
 
 Corrige o FPS dos jogos no HUD da 0.8.0 e torna os resultados do Benchmark mais claros. Detalhes em `docs/RELEASE-0.8.1.md`.

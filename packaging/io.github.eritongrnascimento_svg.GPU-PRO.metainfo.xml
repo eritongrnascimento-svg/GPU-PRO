@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.eritongrnascimento_svg.GPU-PRO</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-only</project_license>
+  <name>GPU-PRO</name>
+  <summary>Monitoramento, benchmarks e sobreposição para múltiplas GPUs</summary>
+  <description>
+    <p>Monitore GPUs NVIDIA, AMD e Intel no Linux e acompanhe o uso da GPU,
+    temperaturas e resultados de benchmarks em uma única interface.</p>
+  </description>
+  <launchable type="desktop-id">gpu-pro.desktop</launchable>
+  <developer id="io.github.eritongrnascimento_svg">
+    <name>Ériton do Nascimento</name>
+  </developer>
+  <url type="homepage">https://github.com/eritongrnascimento-svg/GPU-PRO</url>
+  <releases>
+    <release version="1.0.0" date="2026-11-22"/>
+    <release version="0.8.1" date="2026-11-18"/>
+  </releases>
+  <content_rating type="oars-1.1"/>
+</component>

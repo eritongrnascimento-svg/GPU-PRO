@@ -3,7 +3,7 @@
 #include <cstdio>
 int main(int argc, char **argv) {
   QCoreApplication app(argc, argv);
-  QCoreApplication::setApplicationVersion("0.8.1");
+  QCoreApplication::setApplicationVersion("1.0.0");
   GpuBackend backend;
   QJsonArray devices;
   for (auto gpu : backend.enumerate()) {
@@ -14,7 +14,7 @@ int main(int argc, char **argv) {
                                {"renderNode", gpu.render},
                                {"metrics", metrics}});
   }
-  QJsonObject report{{"version", "0.8.1"},
+  QJsonObject report{{"version", "1.0.0"},
                      {"devices", devices},
                      {"voltageWritten", false},
                      {"powerLimitWritten", false}};

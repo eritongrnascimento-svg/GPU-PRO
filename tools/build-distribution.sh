@@ -22,10 +22,11 @@ install -m755 "$build_dir/gpu-clock-helper" "$debroot/usr/libexec/gpu-pro/"
 printf '#!/bin/sh\nexec /usr/lib/gpu-pro/bin/linux-gpu-control "$@"\n' > "$debroot/usr/bin/gpu-pro"
 chmod 755 "$debroot/usr/bin/gpu-pro"
 cp "$project_dir/packaging/gpu-pro.desktop" "$debroot/usr/share/applications/"
+install -Dm644 "$project_dir/packaging/io.github.eritongrnascimento_svg.GPU-PRO.metainfo.xml" "$debroot/usr/share/metainfo/io.github.eritongrnascimento_svg.GPU-PRO.metainfo.xml"
 cp "$project_dir/packaging/gpu-pro.svg" "$debroot/usr/share/icons/hicolor/scalable/apps/gpu-pro-transparent-v2.svg"
 mkdir -p "$debroot/usr/share/pixmaps"
 cp "$project_dir/assets/gpu-pro.png" "$debroot/usr/share/pixmaps/gpu-pro.png"
-cp -R "$project_dir/docs" "$project_dir/LICENSE" "$project_dir/NOTICE" "$project_dir/README.md" "$debroot/usr/share/doc/gpu-pro/"
+cp -R "$project_dir/docs" "$project_dir/LICENSE" "$project_dir/NOTICE" "$project_dir/TRADEMARKS.md" "$project_dir/README.md" "$debroot/usr/share/doc/gpu-pro/"
 mkdir -p "$stage/shlibs/debian"; printf 'Source: gpu-pro\nSection: utils\nPriority: optional\nMaintainer: Ériton do Nascimento <eritongrnascimento-svg@users.noreply.github.com>\nStandards-Version: 4.6.2\n\nPackage: gpu-pro\nArchitecture: amd64\nDescription: Linux MultiGPU monitor and benchmark panel\n' > "$stage/shlibs/debian/control"
 exe_args=(); for binary in "$debroot"/usr/lib/gpu-pro/bin/* "$debroot"/usr/libexec/gpu-pro/*; do case "$binary" in *.json|*/gpu-pro-fps) continue;; esac; exe_args+=("-e$binary"); done
 depends=$(cd "$stage/shlibs" && dpkg-shlibdeps -O "${exe_args[@]}" | sed -n 's/^shlibs:Depends=//p')
@@ -66,9 +67,10 @@ mkdir -p "$appdir/usr/bin" "$appdir/usr/share/applications" "$appdir/usr/share/i
 for binary in linux-gpu-control gpu-bench-worker gpu-video-worker gpu-diagnostics gpu-clock-helper gpu-system-worker gpu-cpu-worker; do install -m755 "$build_dir/$binary" "$appdir/usr/bin/"; done
 install -m644 "$build_dir/libgpupro_fps.so" "$build_dir/gpu-pro-fps.json" "$appdir/usr/bin/"; install -m755 "$build_dir/gpu-pro-fps" "$appdir/usr/bin/"
 cp "$project_dir/packaging/gpu-pro.desktop" "$appdir/usr/share/applications/"
+install -Dm644 "$project_dir/packaging/io.github.eritongrnascimento_svg.GPU-PRO.metainfo.xml" "$appdir/usr/share/metainfo/io.github.eritongrnascimento_svg.GPU-PRO.metainfo.xml"
 sed -i 's/^Exec=gpu-pro$/Exec=linux-gpu-control/' "$appdir/usr/share/applications/gpu-pro.desktop"
 cp "$project_dir/packaging/gpu-pro.svg" "$appdir/usr/share/icons/hicolor/scalable/apps/gpu-pro-transparent-v2.svg"
-cp -R "$project_dir/docs" "$project_dir/LICENSE" "$project_dir/NOTICE" "$project_dir/README.md" "$appdir/usr/share/doc/gpu-pro/"
+cp -R "$project_dir/docs" "$project_dir/LICENSE" "$project_dir/NOTICE" "$project_dir/TRADEMARKS.md" "$project_dir/README.md" "$appdir/usr/share/doc/gpu-pro/"
 export APPIMAGE_EXTRACT_AND_RUN=1 QMAKE=/usr/bin/qmake6 EXTRA_PLATFORM_PLUGINS=libqoffscreen.so
 export PATH="$stage/tools:$PATH"
 args=(); for binary in "$appdir"/usr/bin/*; do case "$binary" in *.so|*.json|*/gpu-pro-fps) continue;; esac; args+=(--executable "$binary"); done

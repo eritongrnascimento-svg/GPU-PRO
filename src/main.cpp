@@ -1,5 +1,6 @@
 #include "window.h"
 #include "branding.h"
+#include "frame_feed.h"
 #include "single_instance.h"
 #include <cstring>
 #include <cstdio>
@@ -33,7 +34,7 @@ int main(int argc, char **argv) {
   QCoreApplication::setOrganizationName("LinuxGPUControl");
   QCoreApplication::setApplicationName("LinuxGPUControl");
   QGuiApplication::setDesktopFileName("gpu-pro");
-  QCoreApplication::setApplicationVersion("0.8.1");
+  QCoreApplication::setApplicationVersion("1.0.0");
   QCommandLineParser parser;
   parser.setApplicationDescription(
       "GPU-PRO — painel MultiGPU Linux");
@@ -112,6 +113,7 @@ int main(int argc, char **argv) {
     }
     if(result==SingleInstance::Failed){QMessageBox::warning(nullptr,"GPU-PRO",instance->error());return 9;}
   }
+  if (!preview) FpsLayer::refresh();
   MainWindow window(preview);
   if(instance) {
     QObject::connect(instance.get(),&SingleInstance::activationRequested,&window,[&window] {QMetaObject::invokeMethod(&window,"activateExistingInstance",Qt::QueuedConnection);});

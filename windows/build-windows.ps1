@@ -77,7 +77,7 @@ $vs = & $vswhere -latest -products * -requires Microsoft.VisualStudio.Component.
 $crt = Get-ChildItem (Join-Path $vs 'VC\Redist\MSVC\*\x64\Microsoft.VC14*.CRT') -Directory | Sort-Object FullName | Select-Object -Last 1
 Need $crt 'Runtime C++ do Visual Studio (Microsoft.VC14x.CRT)'
 Copy-Item (Join-Path $crt.FullName '*.dll') $stage
-Copy-Item (Join-Path $repo 'LICENSE'), (Join-Path $repo 'NOTICE') $stage
+Copy-Item (Join-Path $repo 'LICENSE'), (Join-Path $repo 'NOTICE'), (Join-Path $repo 'TRADEMARKS.md') $stage
 Copy-Item (Join-Path $repo 'docs\licenses') (Join-Path $stage 'licenses') -Recurse
 Copy-Item (Join-Path $repo 'docs\WINDOWS.md') (Join-Path $stage 'LEIA-ME-WINDOWS.md')
 

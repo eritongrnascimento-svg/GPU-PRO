@@ -92,7 +92,7 @@ MainWindow::MainWindow(bool preview) : offline(preview), codecSuite(this) {
   resize(1240, 900);
   setWindowIcon(Branding::windowIcon(QColor("#76b900")));
   setMinimumSize(980, 700);
-  setWindowTitle("GPU-PRO · 0.8.1");
+  setWindowTitle("GPU-PRO · 1.0.0");
   if (!offline)
     overlayConfig = OverlayConfig::fromJson(
         QJsonDocument::fromJson(readText(configRoot() + "/overlay.json").toUtf8()).object());
@@ -1098,7 +1098,7 @@ QWidget *MainWindow::monitor() {
   fpsLayerButton = button("Ativar FPS automático", fpsBar);
   l->addLayout(fpsBar);
   l->addWidget(label("Contador próprio do GPU-PRO: conta cada quadro apresentado em Vulkan, inclusive DirectX 9–12 pelo Proton (DXVK/VKD3D), "
-                     "sem MangoHud e sem alterar o jogo. Ativar instala a camada para o seu usuário; jogos já abertos passam a contar ao reiniciar. "
+                     "sem MangoHud e sem alterar o jogo. A camada é ativada por padrão na primeira abertura; jogos já abertos passam a contar ao reiniciar. "
                      "OpenGL nativo: no Steam use as opções de inicialização  gpu-pro-fps %command%. Sem PID escolhido, o jogo é detectado sozinho."));
   connect(fpsLayerButton, &QPushButton::clicked, this, [this] {
     QString error;
@@ -1112,8 +1112,7 @@ QWidget *MainWindow::monitor() {
     } else {
       notify("Falha ao ativar o FPS automático", error);
     }
-    FpsLayer::refresh();
-  refreshFpsLayerButton();
+    refreshFpsLayerButton();
   });
   refreshFpsLayerButton();
   connect(refresh, &QPushButton::clicked, this, &MainWindow::refreshProcesses);

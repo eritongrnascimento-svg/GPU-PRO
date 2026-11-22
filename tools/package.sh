@@ -10,7 +10,7 @@ version=$(sed -n 's/.*"version": "\([0-9.]*\)".*/\1/p' "$project_dir/release.jso
 stage=$(mktemp -d)
 trap 'rm -rf "$stage"' EXIT HUP INT TERM
 mkdir -p "$stage/GPU-PRO/bin"
-for file in README.md LICENSE NOTICE CONTRIBUTING.md CHANGELOG.md SECURITY.md CMakeLists.txt .gitignore release.json run.sh build.sh; do
+for file in README.md LICENSE NOTICE TRADEMARKS.md CONTRIBUTING.md CHANGELOG.md SECURITY.md CMakeLists.txt .gitignore release.json run.sh build.sh; do
  cp "$project_dir/$file" "$stage/GPU-PRO/"
 done
 for directory in src core windows shaders assets docs examples tools packaging .github; do

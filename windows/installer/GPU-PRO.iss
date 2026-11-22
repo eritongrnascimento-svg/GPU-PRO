@@ -1,9 +1,9 @@
 ; Instalador do GPU-PRO para Windows (Inno Setup 6).
 ; Gerado por windows/build-windows.ps1 a partir da pasta portátil em dist/.
-; ISCC /DAppVersion=0.8.1 /DSourceDir=<pasta portátil> /DOutputDir=<dist> GPU-PRO.iss
+; ISCC /DAppVersion=1.0.0 /DSourceDir=<pasta portátil> /DOutputDir=<dist> GPU-PRO.iss
 
 #ifndef AppVersion
-  #define AppVersion "0.8.1"
+  #define AppVersion "1.0.0"
 #endif
 #ifndef SourceDir
   #define SourceDir "..\..\dist\GPU-PRO-" + AppVersion + "-windows-x64"

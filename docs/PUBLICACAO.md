@@ -4,7 +4,7 @@ Publico o GPU-PRO no repositório público **eritongrnascimento-svg/GPU-PRO**, s
 
 ## Revisão e segurança
 
-- LICENSE e CONTRIBUTING.md definem código disponível, forks de auditoria/contribuição e restrições de redistribuição. A licença própria não é MIT/GPL/Apache nem aprovada pela OSI; sua adequação jurídica exige análise especializada.
+- LICENSE contém a GPLv3. TRADEMARKS.md documenta o uso do nome, do logotipo e da identidade da distribuição oficial.
 - NOTICE, docs/licenses/ e [LICENCAS.md](LICENCAS.md) acompanham a revisão de dependências e bibliotecas empacotadas. Recursos e marcas exigem direitos de uso próprios; o projeto não anuncia homologação NVIDIA/AMD/Intel.
 - Fontes, scripts, configurações e documentação ficam em `main`. Diretórios `build/`, bancos, logs, credenciais e resultados brutos não pertencem ao histórico público; `bin/` também é excluído do Git. Os binários oficiais ficam nas releases.
 - Revisão de PRs, proteção de branch e relatos privados de vulnerabilidades são medidas previstas para a manutenção, conforme as opções disponíveis na conta. Esta página não afirma que todas essas configurações estejam ativadas. A aprovação de contribuições e publicação oficial cabem ao mantenedor.

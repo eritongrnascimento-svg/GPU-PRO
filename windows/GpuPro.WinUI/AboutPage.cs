@@ -24,7 +24,7 @@ public sealed partial class MainWindow {
  }
  void BuildAboutPage(){
   var about=new StackPanel{Spacing=8};
-  about.Children.Add(Text("GPU-PRO 0.8.1 · Windows",18));
+  about.Children.Add(Text("GPU-PRO 1.0.0 · Windows",18));
   about.Children.Add(Text("Monitoramento, testes, overlay e ajustes de GPU para Linux e Windows, com núcleo C++ compartilhado. Leituras vêm do driver e do sistema: o que não é exposto aparece como N/D, sem estimativas inventadas. Projeto independente, sem coleta de dados nem upload automático."));
   about.Children.Add(Text("Desenvolvido por Ériton do Nascimento · licença no arquivo LICENSE que acompanha o aplicativo.",12));
   var links=new StackPanel{Orientation=Orientation.Horizontal,Spacing=12};
